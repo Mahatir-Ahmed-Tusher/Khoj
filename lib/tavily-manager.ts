@@ -16,7 +16,7 @@ class TavilyManager {
     this.initializeClients()
   }
 
-  private initializeClients() {
+  private initializeClients(): void {
     // Primary key
     if (process.env.TAVILY_API_KEY) {
       this.clients.push({
@@ -65,7 +65,7 @@ class TavilyManager {
     return this.clients[0] || null
   }
 
-  private resetMonthlyUsage() {
+  private resetMonthlyUsage(): void {
     const now = new Date()
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     
@@ -77,7 +77,7 @@ class TavilyManager {
     })
   }
 
-  async search(query: string, options: any = {}) {
+  async search(query: string, options: any = {}): Promise<any> {
     const client = this.getNextAvailableClient()
     
     if (!client) {
@@ -111,7 +111,7 @@ class TavilyManager {
     }
   }
 
-  async crawl(url: string, options: any = {}) {
+  async crawl(url: string, options: any = {}): Promise<any> {
     const client = this.getNextAvailableClient()
     
     if (!client) {
@@ -141,7 +141,17 @@ class TavilyManager {
     }
   }
 
-  getStatus() {
+  getStatus(): {
+    totalKeys: number
+    activeKeys: number
+    currentKeyIndex: number
+    keyStatus: Array<{
+      index: number
+      isActive: boolean
+      monthlyUsage: number
+      lastUsed: Date
+    }>
+  } {
     return {
       totalKeys: this.clients.length,
       activeKeys: this.clients.filter(c => c.isActive).length,
