@@ -2,7 +2,7 @@
 
 ### Khoj — AI‑Powered Bengali Fact‑Checking Platform
 
-An open-source, AI-assisted platform for verifying claims in Bengali. Built with Next.js 14, TypeScript, and modern AI/search APIs. Crafted for speed, clarity, and credible sourcing — perfect for hackathons and beyond.
+An open-source, AI-assisted platform for verifying claims in Bengali. Built with Next.js 14, TypeScript, and modern AI/search APIs. Crafted for speed, clarity, and credible sourcing.
 
 ---
 
@@ -53,6 +53,8 @@ An open-source, AI-assisted platform for verifying claims in Bengali. Built with
   - Reverse image search (Google Lens via SerpAPI). Returns visual matches and analysis.
 - **POST** `/api/text-check`
   - `type: "ai-detection" | "plagiarism"` — Winston AI powered, with AI fallback.
+- **GET** `/api/tavily-status`
+  - Monitor the status of all Tavily API keys and their monthly usage.
 
 All endpoints return JSON. See source files in `app/api/*/route.ts` for request/response shapes.
 
@@ -75,7 +77,25 @@ All endpoints return JSON. See source files in `app/api/*/route.ts` for request/
 Copy `.env.example` to `.env.local` and fill in your keys.
 
 ```env
-TAVILY_API_KEY=your_tavily_api_key_here
+# Tavily API Keys (multiple keys for automatic fallback when monthly limits are reached)
+TAVILY_API_KEY=your_primary_tavily_api_key_here
+TAVILY_API_KEY_2=your_second_tavily_api_key_here
+TAVILY_API_KEY_3=your_third_tavily_api_key_here
+TAVILY_API_KEY_4=your_fourth_tavily_api_key_here
+TAVILY_API_KEY_5=your_fifth_tavily_api_key_here
+TAVILY_API_KEY_6=your_sixth_tavily_api_key_here
+TAVILY_API_KEY_7=your_seventh_tavily_api_key_here
+TAVILY_API_KEY_8=your_eighth_tavily_api_key_here
+TAVILY_API_KEY_9=your_ninth_tavily_api_key_here
+TAVILY_API_KEY_10=your_tenth_tavily_api_key_here
+TAVILY_API_KEY_11=your_eleventh_tavily_api_key_here
+TAVILY_API_KEY_12=your_twelfth_tavily_api_key_here
+TAVILY_API_KEY_13=your_thirteenth_tavily_api_key_here
+TAVILY_API_KEY_14=your_fourteenth_tavily_api_key_here
+TAVILY_API_KEY_15=your_fifteenth_tavily_api_key_here
+TAVILY_API_KEY_16=your_sixteenth_tavily_api_key_here
+# Total: 16 API keys for maximum capacity
+
 OPENROUTER_API_KEY=your_openrouter_api_key_here
 GEMINI_API_KEY=your_gemini_api_key_here
 GROQ_API_KEY=your_groq_api_key_here
@@ -87,6 +107,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 SERPAPI_KEY=your_serpapi_key_here          # For /api/source-search (Google Lens)
 WINSTON_TOKEN=your_winston_token_here      # For /api/text-check (AI/Plagiarism)
 ```
+
+**Note:** The system automatically uses multiple Tavily API keys as fallbacks. When one key hits its monthly limit (100 searches), it automatically switches to the next available key. With 16 API keys, you get up to 1,600 searches per month.
 
 ---
 

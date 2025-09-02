@@ -244,6 +244,13 @@ export default function DomainFirstFactChecker() {
                         alt={article.title}
                         className="w-full h-full object-cover"
                       />
+                      {/* Title Overlay with Shadow - Mobile Only */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent md:hidden"></div>
+                      <div className="absolute bottom-0 left-0 right-0 p-3 md:hidden">
+                        <h4 className="text-white font-bold text-sm leading-tight drop-shadow-lg font-solaiman-lipi line-clamp-2">
+                          {article.title}
+                        </h4>
+                      </div>
                       <div className="absolute top-2 left-2">
                         <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
                           article.verdict === 'true' ? 'bg-green-100 text-green-800' :
@@ -261,7 +268,7 @@ export default function DomainFirstFactChecker() {
                     </div>
                     
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2 text-sm font-solaiman-lipi line-clamp-2">
+                      <h4 className="font-semibold text-gray-900 mb-2 text-sm font-solaiman-lipi line-clamp-2 hidden md:block">
                         <a 
                           href={`/factchecks/${article.slug}`}
                           className="hover:text-blue-600 transition-colors"

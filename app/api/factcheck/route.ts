@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { tavily } from '@tavily/core'
+import { tavilyManager } from '@/lib/tavily-manager'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { Groq } from 'groq-sdk'
 import { PRIORITY_SITES } from '@/lib/utils'
@@ -133,8 +133,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Query is required' }, { status: 400 })
     }
 
-    // Initialize Tavily client with environment API key
-    const client = tavily({ apiKey: process.env.TAVILY_API_KEY })
+
 
     // Step 1: Search within Bangladeshi news sites for current information
     const bangladeshiNewsSites = [
@@ -154,7 +153,7 @@ export async function POST(request: NextRequest) {
 
     // Step 1: Search within Bangladeshi news sites for Bengali content
     try {
-      const bangladeshiResults = await client.search(query, {
+      const bangladeshiResults = await tavilyManager.search(query, {
         sites: bangladeshiNewsSites,
         max_results: 8,
         search_depth: "advanced"
@@ -173,7 +172,7 @@ export async function POST(request: NextRequest) {
     if (!hasBengaliSources || searchResults.results.length < 3) {
       try {
         console.log('🔍 Searching for English sources...')
-        const englishResults = await client.search(query, {
+        const englishResults = await tavilyManager.search(query, {
           max_results: 8,
           search_depth: "advanced",
           include_domains: [
@@ -201,7 +200,7 @@ export async function POST(request: NextRequest) {
     if (!searchResults.results || searchResults.results.length === 0) {
       try {
         console.log('🔍 Trying general search...')
-        const generalResults = await client.search(query, {
+        const generalResults = await tavilyManager.search(query, {
           max_results: 8,
           search_depth: "advanced"
         })

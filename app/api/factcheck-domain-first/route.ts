@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { tavily } from '@tavily/core'
+import { tavilyManager } from '@/lib/tavily-manager'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { Groq } from 'groq-sdk'
 import { findRelatedArticles } from '@/lib/data'
@@ -255,13 +255,11 @@ async function gatherFromAllowedSites(query: string): Promise<SearchResult[]> {
 // Fallback function using Tavily API with English sources
 async function tavilyFallback(query: string): Promise<SearchResult[]> {
   try {
-    const client = tavily({ apiKey: process.env.TAVILY_API_KEY })
-    
     // First try to find Bengali sources
     let results: any = { results: [] }
     
     try {
-      const bangladeshiResults = await client.search(query, {
+      const bangladeshiResults = await tavilyManager.search(query, {
         sites: [
           'https://www.prothomalo.com',
           'https://www.bd-pratidin.com', 
@@ -288,7 +286,7 @@ async function tavilyFallback(query: string): Promise<SearchResult[]> {
     if (!results.results || results.results.length < 3) {
       try {
         console.log('🔍 Searching for English sources in Tavily fallback...')
-        const englishResults = await client.search(query, {
+        const englishResults = await tavilyManager.search(query, {
           max_results: 8,
           search_depth: "advanced",
           include_domains: [
@@ -315,7 +313,7 @@ async function tavilyFallback(query: string): Promise<SearchResult[]> {
     if (!results.results || results.results.length === 0) {
       try {
         console.log('🔍 Trying general search in Tavily fallback...')
-        const generalResults = await client.search(query, {
+        const generalResults = await tavilyManager.search(query, {
           max_results: 8,
           search_depth: "advanced"
         })

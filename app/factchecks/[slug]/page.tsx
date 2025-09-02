@@ -52,12 +52,19 @@ export default function ArticlePage({ params }: ArticlePageProps) {
         <article className="card mb-8">
           {/* Thumbnail */}
           {article.thumbnail && (
-            <div className="relative h-64 mb-6 rounded-t-lg overflow-hidden">
+            <div className="relative mb-6 rounded-t-lg overflow-hidden">
               <img 
                 src={article.thumbnail} 
                 alt={article.title}
-                className="w-full h-full object-cover"
+                className="w-full h-auto object-contain"
               />
+              {/* Title Overlay with Shadow - Mobile Only */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent md:hidden"></div>
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:hidden">
+                <h1 className="text-white font-bold text-3xl leading-tight drop-shadow-lg">
+                  {article.title}
+                </h1>
+              </div>
             </div>
           )}
           

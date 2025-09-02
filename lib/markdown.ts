@@ -61,9 +61,9 @@ export function sanitizeHtml(html: string): string {
       const safeAttributes = attributes.match(/(src|alt|class)=["'][^"']*["']/gi) || []
       return `<img${safeAttributes.join(' ')} />`
     })
-    .replace(/<a([^>]*)>/gi, (match, attributes) => {
-      // Only allow safe anchor attributes
+    .replace(/<a([^>]*)>(.*?)<\/a>/gi, (match, attributes, content) => {
+      // Only allow safe anchor attributes and preserve content
       const safeAttributes = attributes.match(/(href|target|rel|class)=["'][^"']*["']/gi) || []
-      return `<a${safeAttributes.join(' ')}>`
+      return `<a ${safeAttributes.join(' ')}>${content}</a>`
     })
 }

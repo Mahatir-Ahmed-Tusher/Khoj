@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { tavily } from '@tavily/core'
+import { tavilyManager } from '@/lib/tavily-manager'
 import { PRIORITY_SITES } from '@/lib/utils'
 
 export async function POST(request: NextRequest) {
@@ -9,9 +9,6 @@ export async function POST(request: NextRequest) {
     if (!query) {
       return NextResponse.json({ error: 'Query is required' }, { status: 400 })
     }
-
-    // Initialize Tavily client with environment API key
-    const client = tavily({ apiKey: process.env.TAVILY_API_KEY })
 
     // Enhanced search strategy: Search within specific Bangladeshi news sites first
     const bangladeshiNewsSites = [
@@ -31,7 +28,7 @@ export async function POST(request: NextRequest) {
     // Step 1: Search within each major Bangladeshi news site individually
     for (const site of bangladeshiNewsSites) {
       try {
-        const siteResults = await client.search(query, {
+        const siteResults = await tavilyManager.search(query, {
           sites: [site],
           max_results: 5,
           search_depth: "advanced"
@@ -48,7 +45,7 @@ export async function POST(request: NextRequest) {
     // Step 2: If we don't have enough results from Bangladeshi sites, search within all priority sites
     if (allResults.length < 8) {
       try {
-        const priorityResults = await client.search(query, {
+        const priorityResults = await tavilyManager.search(query, {
           sites: PRIORITY_SITES,
           max_results: 15,
           search_depth: "advanced"
@@ -65,7 +62,7 @@ export async function POST(request: NextRequest) {
     // Step 3: If still insufficient, fall back to general web search
     if (allResults.length < 5) {
       try {
-        const generalResults = await client.search(query, {
+        const generalResults = await tavilyManager.search(query, {
           max_results: 10,
           search_depth: "advanced"
         })
