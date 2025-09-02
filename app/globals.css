@@ -35,4 +35,14 @@
   .font-solaiman-lipi {
     font-family: 'SolaimanLipi', sans-serif;
   }
+  
+  .mukti-chat-bg {
+    background-image: url('/mukti-chat-bg-desktop.png');
+  }
+  
+  @media (max-width: 768px) {
+    .mukti-chat-bg {
+      background-image: url('/mukti-chat-bg-mobile.png');
+    }
+  }
 }

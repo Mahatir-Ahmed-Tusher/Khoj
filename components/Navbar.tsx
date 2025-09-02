@@ -11,6 +11,9 @@ export default function Navbar() {
 
   const navItems = [
     { href: '/factchecks', label: 'ফ্যাক্টচেক সমূহ' },
+    { href: '/mukti-corner', label: 'মুক্তিযুদ্ধ কর্নার' },
+    { href: '/mythbusting', label: 'মিথবাস্টিং' },
+    { href: '/e-library', label: 'ই-গ্রন্থ সম্ভার' },
     { href: '/about', label: 'আমাদের সম্পর্কে' },
   ]
 

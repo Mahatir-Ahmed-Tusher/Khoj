@@ -54,6 +54,36 @@ export default function Footer() {
                 </a>
               </li>
               <li>
+                <a href="/image-check" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                  ছবি যাচাই
+                </a>
+              </li>
+              <li>
+                <a href="/text-check" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                  লেখা যাচাই
+                </a>
+              </li>
+              <li>
+                <a href="/source-search" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                  উৎস সন্ধান
+                </a>
+              </li>
+              <li>
+                <a href="/mukti-corner" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                  মুক্তিযুদ্ধ কর্নার
+                </a>
+              </li>
+              <li>
+                <a href="/mythbusting" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                  মিথবাস্টিং
+                </a>
+              </li>
+              <li>
+                <a href="/e-library" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                  ই-গ্রন্থ সম্ভার
+                </a>
+              </li>
+              <li>
                 <a href="/about" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
                   আমাদের সম্পর্কে
                 </a>

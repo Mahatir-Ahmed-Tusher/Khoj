@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SearchBar from '@/components/SearchBar'
+import FeatureWidget from '@/components/FeatureWidget'
 import Link from 'next/link'
 import { getLatestArticles } from '@/lib/data'
 
@@ -69,7 +70,7 @@ export default function HomePage() {
           <div className="mb-6">
             <h1 className="text-4xl md:text-6xl font-bold mb-3 font-solaiman-lipi">খোঁজ</h1>
             <p className="text-xl md:text-2xl text-white mb-6 font-solaiman-lipi">
-              কৃত্রিম বুদ্ধিমত্তা চালিত বাংলা ফ্যাক্টচেকিং প্ল্যাটফর্ম
+              কৃত্রিম বুদ্ধিমত্তা চালিত প্রথম বাংলা ফ্যাক্টচেকিং প্ল্যাটফর্ম
             </p>
           </div>
           
@@ -100,18 +101,30 @@ export default function HomePage() {
 
       {/* Recent Fact Checks */}
       <section className="py-6 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 font-solaiman-lipi">
-              আমাদের সাম্প্রতিক ফ্যাক্টচেক সমূহ
-            </h2>
-            <p className="text-base text-gray-600 font-solaiman-lipi">
-              সর্বশেষ যাচাইকৃত দাবি এবং তথ্য
-            </p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          {/* Widget - Fixed Position */}
+          <div className="hidden lg:block absolute -right-12 top-16 w-80">
+            <FeatureWidget />
           </div>
+          
+          {/* Mobile FAB and Modal */}
+          <div className="lg:hidden">
+            <FeatureWidget />
+          </div>
+          
+          {/* Main Content - Centered */}
+          <div className="flex flex-col items-center max-w-4xl mx-auto">
+              <div className="text-center mb-4 w-full">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2 font-solaiman-lipi">
+                  আমাদের সাম্প্রতিক ফ্যাক্টচেক সমূহ
+                </h2>
+                <p className="text-base text-gray-600 font-solaiman-lipi">
+                  সর্বশেষ যাচাইকৃত দাবি এবং তথ্য
+                </p>
+              </div>
 
           {/* Filter Buttons */}
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-4 w-full">
             <div className="flex space-x-2 bg-white rounded-lg p-1 shadow-md">
               {[
                 { value: 'all', label: 'সব', color: 'bg-gray-100 text-gray-700' },
@@ -136,7 +149,7 @@ export default function HomePage() {
           </div>
           
           {/* Hero Carousel */}
-          <div className="mb-4">
+          <div className="mb-4 w-full">
             <div className="relative">
               {/* Main Carousel Container */}
               <div className="relative h-96 overflow-hidden">
@@ -238,7 +251,7 @@ export default function HomePage() {
             </div>
           </div>
           
-          <div className="space-y-3">
+          <div className="space-y-3 w-full max-w-4xl">
             {filteredArticles.map((article) => (
               <article key={article.id} className="card hover:shadow-lg transition-shadow duration-200">
                 <div className="flex flex-col md:flex-row">
@@ -319,13 +332,14 @@ export default function HomePage() {
             ))}
           </div>
           
-          <div className="text-center mt-6">
+          <div className="text-center mt-6 w-full">
             <Link 
               href="/factchecks"
               className="btn-primary inline-flex items-center"
             >
               সব ফ্যাক্টচেক দেখুন
             </Link>
+          </div>
           </div>
         </div>
       </section>
