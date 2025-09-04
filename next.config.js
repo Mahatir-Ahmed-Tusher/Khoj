@@ -4,7 +4,16 @@ const nextConfig = {
     appDir: true,
   },
   images: {
-    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.postimg.cc',
+      },
+    ],
   },
   env: {
     TAVILY_API_KEY: process.env.TAVILY_API_KEY,

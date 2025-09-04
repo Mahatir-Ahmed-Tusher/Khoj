@@ -8,14 +8,18 @@ An open-source, AI-assisted platform for verifying claims in Bengali. Built with
 
 ### Highlights
 
-- **AI fact‑checking in Bengali**: Generates structured reports in Bengali with clear verdicts.
+- **AI fact‑checking in Bengali**: Generates structured reports in Bengali with clear verdicts and up to 10 sources.
 - **Domain‑first search strategy**: Prioritizes trusted Bangladeshi news/fact‑check sites; falls back intelligently.
 - **Mixed‑language sourcing**: Pulls from Bengali and English when local coverage is thin, but reports in Bengali.
 - **Image authenticity check**: Detects AI‑generated images via Sightengine.
 - **Reverse image search**: Google Lens via SerpAPI for visual matches and provenance hints.
 - **AI/Plagiarism text analysis**: Winston AI endpoints for AI‑detection and plagiarism signals.
-- **Beautiful, responsive UI**: Clean, mobile‑first experience with Tailwind.
+- **Beautiful, responsive UI**: Clean, mobile‑first experience with Tailwind and glowing effects.
 - **Fact‑check library**: Browse latest checks, filters, and detail pages with citations.
+- **AI Fact-Check History**: Store and manage user-generated AI fact-check reports locally.
+- **Mukti Corner & Mythbusting**: Specialized AI chat features for liberation war topics and myth debunking.
+- **Recommendation System**: Smart article recommendations on individual fact-check pages.
+- **Enhanced Markdown Rendering**: Proper formatting for AI-generated content with headings, bold text, and links.
 
 ---
 
@@ -27,6 +31,8 @@ An open-source, AI-assisted platform for verifying claims in Bengali. Built with
 - **Search**: Tavily API (priority sites + general), custom domain‑first crawler
 - **Media**: Sightengine (AI image detection), SerpAPI (Google Lens)
 - **Icons**: `lucide-react`
+- **Local Storage**: Browser-based storage for user-generated content
+- **Markdown Parsing**: Custom markdown parser with HTML sanitization
 
 ---
 
@@ -36,6 +42,7 @@ An open-source, AI-assisted platform for verifying claims in Bengali. Built with
 2. Server searches trusted Bangladeshi sources first; augments with English sources if needed.
 3. Top sources are compiled and analyzed by AI (DeepSeek → Gemini → GROQ fallback chain).
 4. A structured Bengali report is returned with verdict and reasoning. Related articles from our library are suggested.
+5. User-generated reports are stored locally for future access and management.
 
 ---
 
@@ -53,6 +60,10 @@ An open-source, AI-assisted platform for verifying claims in Bengali. Built with
   - Reverse image search (Google Lens via SerpAPI). Returns visual matches and analysis.
 - **POST** `/api/text-check`
   - `type: "ai-detection" | "plagiarism"` — Winston AI powered, with AI fallback.
+- **POST** `/api/mukti-corner`
+  - AI chat for liberation war topics and historical fact-checking.
+- **POST** `/api/mythbusting`
+  - AI-powered myth debunking and rumor analysis.
 - **GET** `/api/tavily-status`
   - Monitor the status of all Tavily API keys and their monthly usage.
 
@@ -60,15 +71,51 @@ All endpoints return JSON. See source files in `app/api/*/route.ts` for request/
 
 ---
 
-### App Pages (Selected)
+### App Pages
 
-- `/` Home with hero search and latest fact‑checks
-- `/factchecks` Listing with filters; `/factchecks/[slug]` detail pages
+- `/` Home with hero search, latest fact‑checks, and AI fact-check widget
+- `/factchecks` Listing with filters; `/factchecks/[slug]` detail pages with recommendations
+- `/factcheck-detail` AI-powered fact-checking with search bar
+- `/factcheck-view` View all user-generated AI fact-check reports
+- `/factcheck-view/[id]` View individual AI fact-check report
 - `/image-check` Image authenticity checker
 - `/text-check` Text AI‑detection and plagiarism analysis
 - `/source-search` Reverse image source search
+- `/mythbusting` AI-powered myth debunking chat
+- `/mukti-corner` Liberation war topics and historical fact-checking
 - `/domain-first-factcheck` Experimental domain‑first flow
 - `/about` Project overview
+
+---
+
+### Key Features
+
+#### **AI Fact-Check Widget**
+- Desktop: Left-side widget showing user's AI fact-check history
+- Mobile: Collapsible sidebar with toggle functionality
+- Features: View, download, and delete individual reports
+- Storage: Browser-based local storage for persistence
+
+#### **Enhanced Homepage**
+- **Glowing Text Effects**: Animated glow on main title and subtitle
+- **Double-Column Grid**: 10 most recent articles in responsive 2-column layout
+- **Article Cards**: Thumbnails, verdict badges, tags, previews, and dates
+- **Quick Access Buttons**: ছবি যাচাই, লেখা যাচাই, উৎস সন্ধান, মিথবাস্টিং
+
+#### **Recommendation System**
+- **Individual Article Pages**: Shows 5 recent articles (excluding current)
+- **Smart Filtering**: Excludes current article from recommendations
+- **Rich Metadata**: Thumbnails, titles, verdicts, and dates
+
+#### **Mukti Corner & Mythbusting**
+- **AI Chat Interface**: Specialized for liberation war topics and myth debunking
+- **Concise Summaries**: 2-3 sentence summaries instead of detailed ones
+- **Markdown Rendering**: Proper formatting for AI responses
+
+#### **Enhanced Content**
+- **New Articles**: 3 new fact-check articles (IDs 23, 24, 25) with detailed content
+- **Proper Formatting**: Hyperlinked references and structured content
+- **Rich Metadata**: Tags, thumbnails, and comprehensive analysis
 
 ---
 
@@ -156,14 +203,20 @@ FACT CHECKER/
 │  │  ├─ image-check/route.ts            # Sightengine AI image detection
 │  │  ├─ search/route.ts                 # Priority + general search
 │  │  ├─ source-search/route.ts          # Google Lens via SerpAPI
-│  │  └─ text-check/route.ts             # Winston AI + fallback
+│  │  ├─ text-check/route.ts             # Winston AI + fallback
+│  │  ├─ mukti-corner/route.ts           # Liberation war AI chat
+│  │  └─ mythbusting/route.ts            # Myth debunking AI chat
 │  ├─ about/page.tsx
 │  ├─ ai-detector/page.tsx
 │  ├─ domain-first-factcheck/page.tsx
 │  ├─ factcheck-detail/page.tsx
+│  ├─ factcheck-view/page.tsx            # All AI fact-check reports
+│  ├─ factcheck-view/[id]/page.tsx      # Individual AI fact-check report
 │  ├─ factchecks/[slug]/page.tsx
 │  ├─ factchecks/page.tsx
 │  ├─ image-check/page.tsx
+│  ├─ mukti-corner/page.tsx             # Liberation war chat interface
+│  ├─ mythbusting/page.tsx              # Myth debunking chat interface
 │  ├─ source-search/page.tsx
 │  ├─ text-check/page.tsx
 │  ├─ results/page.tsx
@@ -171,13 +224,20 @@ FACT CHECKER/
 │  ├─ globals.css
 │  └─ page.tsx                           # Home
 ├─ components/
+│  ├─ AIFactCheckWidget.tsx             # User AI fact-check history widget
 │  ├─ DomainFirstFactChecker.tsx
+│  ├─ FeatureWidget.tsx                 # Feature promotion widget
 │  ├─ Footer.tsx
+│  ├─ MuktiSidebar.tsx                  # Mukti Corner sidebar
+│  ├─ MythbustingSidebar.tsx            # Mythbusting sidebar
 │  ├─ Navbar.tsx
+│  ├─ PromotionalWidget.tsx             # Promotional features widget
+│  ├─ RecommendationWidget.tsx          # Article recommendations
 │  └─ SearchBar.tsx
 ├─ lib/
+│  ├─ ai-factcheck-utils.ts             # AI fact-check storage utilities
 │  ├─ data.ts                            # Fact‑check articles, helpers
-│  ├─ markdown.ts
+│  ├─ markdown.ts                        # Markdown parsing and HTML sanitization
 │  └─ utils.ts                           # PRIORITY_SITES, ALLOWED_SITES, helpers
 ├─ public/
 │  ├─ khoj-cover.png                     # README cover
@@ -210,6 +270,11 @@ npm run lint     # Lint
   - Image authenticity: `/image-check`
   - Reverse image search: `/source-search`
   - Text analysis: `/text-check` (`ai-detection` or `plagiarism`)
+- Test new features:
+  - AI fact-check history: Check the left widget on desktop or mobile sidebar
+  - Mukti Corner: `/mukti-corner` for liberation war topics
+  - Mythbusting: `/mythbusting` for myth debunking
+  - Article recommendations: Click on any individual fact-check article
 - Domain‑first experimental flow: `/domain-first-factcheck`
 
 ---

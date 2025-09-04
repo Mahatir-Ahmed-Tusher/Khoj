@@ -2,7 +2,7 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           {/* About Section */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-3 mb-4">
@@ -91,6 +91,28 @@ export default function Footer() {
               <li>
                 <a href="https://onneshon-bd.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
                   অন্বেষণ
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal & Support */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 font-solaiman-lipi">আইনি ও সহায়তা</h3>
+            <ul className="space-y-2">
+              <li>
+                <a href="/privacy-policy" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                  গোপনীয়তা নীতি
+                </a>
+              </li>
+              <li>
+                <a href="/terms" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                  শর্তাবলী
+                </a>
+              </li>
+              <li>
+                <a href="/faq" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                  FAQ
                 </a>
               </li>
             </ul>

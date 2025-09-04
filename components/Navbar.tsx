@@ -10,6 +10,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const navItems = [
+    { href: '/', label: 'হোম' },
     { href: '/factchecks', label: 'ফ্যাক্টচেক সমূহ' },
     { href: '/mukti-corner', label: 'মুক্তিযুদ্ধ কর্নার' },
     { href: '/mythbusting', label: 'মিথবাস্টিং' },

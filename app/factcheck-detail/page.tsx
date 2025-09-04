@@ -4,11 +4,16 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { Loader2, Download, ExternalLink, CheckCircle, XCircle, AlertCircle, HelpCircle } from 'lucide-react'
+import SearchBar from '@/components/SearchBar'
+import { Loader2, Download, ExternalLink, CheckCircle, XCircle, AlertCircle, HelpCircle, ChevronRight } from 'lucide-react'
+import { addAIFactCheck } from '@/lib/ai-factcheck-utils'
+import PromotionalWidget from '@/components/PromotionalWidget'
+import { parseMarkdown, sanitizeHtml } from '@/lib/markdown'
 
 interface FactCheckReport {
   claim: string
   report: string
+  verdict: 'true' | 'false' | 'misleading' | 'unverified'
   sources: Array<{
     id: number
     title: string
@@ -68,6 +73,11 @@ export default function FactCheckDetailPage() {
 
       const data = await response.json()
       setReport(data)
+      
+      // Store the fact-check result in AI FactCheck Widget
+      if (data.verdict) {
+        addAIFactCheck(searchQuery, data.report, data.verdict, data.sources, data.sourceInfo)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'একটি ত্রুটি ঘটেছে')
     } finally {
@@ -136,15 +146,45 @@ ${report.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            বিস্তারিত ফ্যাক্ট চেকিং রিপোর্ট
-          </h1>
-          <p className="text-lg text-gray-600">
-            "{query}" এর জন্য বিস্তারিত বিশ্লেষণ
-          </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Promotional Widget - Right Side */}
+        <div className="hidden lg:block absolute -right-12 top-16 w-80">
+          <PromotionalWidget />
         </div>
+        
+        {/* Mobile Widget */}
+        <div className="lg:hidden">
+          <PromotionalWidget />
+        </div>
+        
+        {/* Main Content */}
+        <div className="max-w-4xl mx-auto">
+          {/* Search Bar Section */}
+          <div className="mb-8">
+            <div className="text-center mb-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2 font-solaiman-lipi">
+                নতুন ফ্যাক্ট চেক করুন
+              </h1>
+              <p className="text-gray-600 font-solaiman-lipi">
+                যেকোনো দাবি বা তথ্য যাচাই করুন
+              </p>
+            </div>
+            <div className="max-w-2xl mx-auto">
+              <SearchBar 
+                placeholder="যেকোনো দাবি বা তথ্য লিখুন..."
+                className="mb-4"
+              />
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              বিস্তারিত ফ্যাক্ট চেকিং রিপোর্ট
+            </h1>
+            <p className="text-lg text-gray-600">
+              "{query}" এর জন্য বিস্তারিত বিশ্লেষণ
+            </p>
+          </div>
 
         {/* Loading State */}
         {isLoading && (
@@ -171,95 +211,107 @@ ${report.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).
 
         {/* Report */}
         {!isLoading && !error && report && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Report Header */}
-            <div className="card">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
+            <div className="card bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-primary-600">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-4">
                   {getVerdictIcon(report.report)}
-                  <h2 className="text-xl font-bold text-gray-900">
-                    ফ্যাক্ট চেকিং রিপোর্ট
-                  </h2>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      ফ্যাক্ট চেকিং রিপোর্ট
+                    </h2>
+                    <p className="text-gray-600 font-solaiman-lipi">
+                      AI চালিত বিস্তারিত বিশ্লেষণ
+                    </p>
+                  </div>
                 </div>
                 <button
                   onClick={downloadReport}
-                  className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+                  className="flex items-center space-x-2 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                  <Download className="h-4 w-4" />
-                  <span>ডাউনলোড করুন</span>
+                  <Download className="h-5 w-5" />
+                  <span className="font-medium">ডাউনলোড করুন</span>
                 </button>
               </div>
               
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">দাবি:</h3>
-                <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">দাবি:</h3>
+                <p className="text-gray-700 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                   {report.claim}
                 </p>
               </div>
 
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">তৈরির তারিখ:</h3>
-                <p className="text-gray-600">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">তৈরির তারিখ:</h3>
+                <p className="text-gray-600 bg-white px-4 py-2 rounded-lg inline-block">
                   {new Date(report.generatedAt).toLocaleString('bn-BD')}
                 </p>
               </div>
             </div>
 
             {/* Detailed Report */}
-            <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">বিস্তারিত বিশ্লেষণ:</h3>
+            <div className="card bg-white shadow-lg border border-gray-100">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6 border-b border-gray-200 pb-4">
+                বিস্তারিত বিশ্লেষণ:
+              </h3>
               <div className="prose prose-lg max-w-none">
-                <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-                  {report.report}
-                </div>
+                <div 
+                  className="text-gray-700 leading-relaxed text-base"
+                  dangerouslySetInnerHTML={{ 
+                    __html: sanitizeHtml(parseMarkdown(report.report)) 
+                  }}
+                />
               </div>
             </div>
 
             {/* Sources */}
             {report.sources.length > 0 && (
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">উৎসসমূহ:</h3>
+              <div className="card bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-600">
+                <h3 className="text-xl font-semibold text-gray-900 mb-6 border-b border-gray-200 pb-4">
+                  উৎসসমূহ:
+                </h3>
                 
                 {/* Source Info */}
                 {report.sourceInfo && (
-                  <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                    <div className="flex items-center space-x-4 text-sm">
+                  <div className="mb-6 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div className="flex items-center space-x-6 text-sm">
                       <div className="flex items-center space-x-2">
                         <span className="text-blue-700 font-medium">মোট উৎস:</span>
-                        <span className="text-blue-600">{report.sourceInfo.totalSources}টি</span>
+                        <span className="text-blue-600 bg-blue-100 px-2 py-1 rounded-full">{report.sourceInfo.totalSources}টি</span>
                       </div>
                       {report.sourceInfo.hasBengaliSources && (
                         <div className="flex items-center space-x-2">
                           <span className="text-green-700 font-medium">বাংলা উৎস:</span>
-                          <span className="text-green-600">✓ পাওয়া গেছে</span>
+                          <span className="text-green-600 bg-green-100 px-2 py-1 rounded-full">✓ পাওয়া গেছে</span>
                         </div>
                       )}
                       {report.sourceInfo.hasEnglishSources && (
                         <div className="flex items-center space-x-2">
                           <span className="text-orange-700 font-medium">ইংরেজি উৎস:</span>
-                          <span className="text-orange-600">✓ ব্যবহার করা হয়েছে</span>
+                          <span className="text-orange-600 bg-orange-100 px-2 py-1 rounded-full">✓ ব্যবহার করা হয়েছে</span>
                         </div>
                       )}
                     </div>
                     {report.sourceInfo.hasEnglishSources && (
-                      <p className="text-blue-600 text-sm mt-2">
+                      <p className="text-blue-600 text-sm mt-3 p-3 bg-blue-50 rounded-lg">
                         💡 বাংলায় পর্যাপ্ত তথ্য না থাকায় ইংরেজি উৎস থেকে তথ্য সংগ্রহ করে বাংলায় অনুবাদ করা হয়েছে।
                       </p>
                     )}
                   </div>
                 )}
                 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {report.sources.map((source) => (
-                    <div key={source.id} className="border-l-4 border-primary-600 pl-4">
+                    <div key={source.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h4 className="font-medium text-gray-900">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h4 className="font-semibold text-gray-900">
                               {source.id}. {source.title}
                             </h4>
                             {source.language && (
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                                 source.language === 'English' 
                                   ? 'bg-orange-100 text-orange-800' 
                                   : 'bg-green-100 text-green-800'
@@ -268,7 +320,7 @@ ${report.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).
                               </span>
                             )}
                           </div>
-                          <p className="text-gray-600 text-sm mb-2">
+                          <p className="text-gray-600 text-sm mb-3 leading-relaxed">
                             {source.snippet}
                           </p>
                         </div>
@@ -276,7 +328,7 @@ ${report.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).
                           href={source.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center space-x-1 ml-4"
+                          className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center space-x-2 ml-4 bg-primary-50 px-3 py-2 rounded-lg hover:bg-primary-100 transition-colors"
                         >
                           <span>উৎস দেখুন</span>
                           <ExternalLink className="h-4 w-4" />
@@ -361,6 +413,7 @@ ${report.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).
           </div>
         )}
       </div>
+    </div>
 
       <Footer />
     </div>

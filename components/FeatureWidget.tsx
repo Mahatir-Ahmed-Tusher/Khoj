@@ -66,7 +66,7 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
             background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'
           }}
         >
-          <h3 className="text-xl font-bold mb-4 font-solaiman-lipi text-center text-gray-800">
+          <h3 className="text-lg font-bold mb-4 font-solaiman-lipi text-center text-gray-800">
             আপনার সত্যান্বেষের এ যাত্রায় আরও রয়েছেঃ
           </h3>
           
@@ -87,10 +87,10 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
                       )}
                     </div>
                     <div>
-                      <h4 className="font-semibold font-solaiman-lipi text-gray-800 group-hover:text-gray-900 transition-colors">
+                      <h4 className="font-medium font-solaiman-lipi text-gray-800 group-hover:text-gray-900 transition-colors">
                         {feature.title}
                       </h4>
-                      <p className="text-sm text-gray-600 font-solaiman-lipi">
+                      <p className="text-xs text-gray-600 font-solaiman-lipi">
                         {feature.description}
                       </p>
                     </div>
@@ -124,7 +124,7 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
           />
           <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <div className="text-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900 font-solaiman-lipi">
+              <h3 className="text-lg font-bold text-gray-900 font-solaiman-lipi">
                 আপনার সত্যান্বেষের এ যাত্রায় আরও রয়েছেঃ
               </h3>
             </div>
@@ -147,10 +147,10 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
                         )}
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900 font-solaiman-lipi">
+                        <h4 className="font-medium text-gray-900 font-solaiman-lipi">
                           {feature.title}
                         </h4>
-                        <p className="text-sm text-gray-600 font-solaiman-lipi">
+                        <p className="text-xs text-gray-600 font-solaiman-lipi">
                           {feature.description}
                         </p>
                       </div>

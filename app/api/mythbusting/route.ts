@@ -297,7 +297,7 @@ export async function POST(request: NextRequest) {
 
 **Detailed Response Format (IMPORTANT - Follow this exact format):**
 VERDICT: [true/false/misleading/unverified/partially_true]
-SUMMARY: [Comprehensive summary in Bengali covering key points]
+SUMMARY: [সংক্ষিপ্ত সারাংশ বাংলায় - মূল সিদ্ধান্ত এবং গুরুত্বপূর্ণ তথ্য ২-৩ বাক্যে]
 DETAILED_ANALYSIS: [Extensive analysis in Bengali including:
 - Scientific background and context
 - Evidence from provided sources [1], [2], [3] etc.
@@ -350,7 +350,7 @@ Please provide a comprehensive mythbusting analysis following the exact format a
 function parseMythbustingResponse(response: string, query: string, evidenceSources: Array<{title: string, url: string, snippet: string}>) {
   // Default structure
   let verdict: 'true' | 'false' | 'misleading' | 'unverified' | 'partially_true' = 'unverified'
-  let summary = 'দাবিটি বিশ্লেষণ করা হয়েছে।'
+  let summary = 'প্রশ্নের উত্তর বিশ্লেষণ করা হয়েছে।'
   let detailedAnalysis = response
   let sources: string[] = []
 

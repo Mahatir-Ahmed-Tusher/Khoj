@@ -5,11 +5,12 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SearchBar from '@/components/SearchBar'
 import FeatureWidget from '@/components/FeatureWidget'
+import AIFactCheckWidget from '@/components/AIFactCheckWidget'
 import Link from 'next/link'
 import { getLatestArticles } from '@/lib/data'
 
 export default function HomePage() {
-  const allFactChecks = getLatestArticles(9)
+  const allFactChecks = getLatestArticles(10)
   const [filter, setFilter] = useState('all')
   const [filteredArticles, setFilteredArticles] = useState(allFactChecks)
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -68,8 +69,13 @@ export default function HomePage() {
         
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="mb-6">
-            <h1 className="text-4xl md:text-6xl font-bold mb-3 font-solaiman-lipi">খোঁজ</h1>
-            <p className="text-xl md:text-2xl text-white mb-6 font-solaiman-lipi">
+            <h1 className="text-3xl md:text-5xl font-bold mb-3 font-solaiman-lipi" style={{
+              textShadow: '0 0 4px rgba(255, 255, 255, 0.4), 0 0 8px rgba(255, 255, 255, 0.3)'
+            }}>খোঁজ</h1>
+            <p className="text-xl md:text-2xl text-white mb-6 font-solaiman-lipi animate-pulse" style={{
+              textShadow: '0 0 3px rgba(255, 255, 255, 0.3), 0 0 6px rgba(255, 255, 255, 0.2)',
+              animation: 'glow 2s ease-in-out infinite alternate'
+            }}>
               কৃত্রিম বুদ্ধিমত্তা চালিত প্রথম বাংলা ফ্যাক্টচেকিং প্ল্যাটফর্ম
             </p>
           </div>
@@ -84,15 +90,18 @@ export default function HomePage() {
             </p>
             
             {/* Floating Feature Buttons */}
-            <div className="flex justify-center space-x-4">
-              <Link href="/image-check" className="px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg">
+            <div className="flex justify-center space-x-2 md:space-x-4 flex-wrap">
+              <Link href="/image-check" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg">
                 <span className="text-white text-sm font-medium font-solaiman-lipi">ছবি যাচাই</span>
               </Link>
-              <Link href="/text-check" className="px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg">
+              <Link href="/text-check" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg">
                 <span className="text-white text-sm font-medium font-solaiman-lipi">লেখা যাচাই</span>
               </Link>
-              <Link href="/source-search" className="px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg">
+              <Link href="/source-search" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg">
                 <span className="text-white text-sm font-medium font-solaiman-lipi">উৎস সন্ধান</span>
+              </Link>
+              <Link href="/mythbusting" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg">
+                <span className="text-white text-sm font-medium font-solaiman-lipi">মিথবাস্টিং</span>
               </Link>
             </div>
           </div>
@@ -102,20 +111,26 @@ export default function HomePage() {
       {/* Recent Fact Checks */}
       <section className="py-6 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          {/* Widget - Fixed Position */}
+          {/* AI FactCheck Widget - Left Side */}
+          <div className="hidden lg:block absolute -left-12 top-16 w-80">
+            <AIFactCheckWidget />
+          </div>
+          
+          {/* Right Widget - Fixed Position */}
           <div className="hidden lg:block absolute -right-12 top-16 w-80">
             <FeatureWidget />
           </div>
           
-          {/* Mobile FAB and Modal */}
+          {/* Mobile Widgets */}
           <div className="lg:hidden">
+            <AIFactCheckWidget />
             <FeatureWidget />
           </div>
           
           {/* Main Content - Centered */}
           <div className="flex flex-col items-center max-w-4xl mx-auto">
               <div className="text-center mb-4 w-full">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2 font-solaiman-lipi">
+                <h2 className="text-xl font-bold text-gray-900 mb-2 font-solaiman-lipi">
                   আমাদের সাম্প্রতিক ফ্যাক্টচেক সমূহ
                 </h2>
                 <p className="text-base text-gray-600 font-solaiman-lipi">
@@ -251,81 +266,70 @@ export default function HomePage() {
             </div>
           </div>
           
-          <div className="space-y-3 w-full max-w-4xl">
+          <div className="grid grid-cols-2 gap-10 w-full max-w-6xl">
             {filteredArticles.map((article) => (
-              <article key={article.id} className="card hover:shadow-lg transition-shadow duration-200">
-                <div className="flex flex-col md:flex-row">
-                  {/* Thumbnail - Left Side */}
-                  <div className="relative h-48 md:h-32 md:w-48 mb-3 md:mb-0 rounded-t-lg md:rounded-l-lg md:rounded-t-none overflow-hidden flex-shrink-0">
-                    <img 
-                      src={article.thumbnail || '/khoj.png'} 
-                      alt={article.title}
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Title Overlay with Shadow - Mobile Only */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent md:hidden"></div>
-                    <div className="absolute bottom-0 left-0 right-0 p-3 md:hidden">
-                      <h3 className="text-white font-bold text-lg leading-tight drop-shadow-lg">
-                        {article.title}
-                      </h3>
-                    </div>
-                    <div className="absolute top-2 left-2">
-                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                        article.verdict === 'true' ? 'bg-green-100 text-green-800' :
-                        article.verdict === 'false' ? 'bg-red-100 text-red-800' :
-                        article.verdict === 'misleading' ? 'bg-yellow-100 text-yellow-800' :
-                        article.verdict === 'debunk' ? 'bg-purple-100 text-purple-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {article.verdict === 'true' ? 'সত্য' :
-                         article.verdict === 'false' ? 'মিথ্যা' :
-                         article.verdict === 'misleading' ? 'ভ্রান্তিমূলক' :
-                         article.verdict === 'debunk' ? 'খন্ডন' : 'অযাচাইকৃত'}
-                      </span>
-                    </div>
+              <article key={article.id} className="bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer rounded-xl" onClick={() => window.location.href = `/factchecks/${article.slug}`}>
+                {/* Thumbnail */}
+                <div className="relative h-32 overflow-hidden">
+                  <img 
+                    src={article.thumbnail || '/khoj.png'} 
+                    alt={article.title}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Verdict Badge - Top Right */}
+                  <div className="absolute top-1 right-1">
+                    <span className={`inline-block px-1 py-0.5 rounded text-xs font-bold text-white ${
+                      article.verdict === 'true' ? 'bg-green-600' :
+                      article.verdict === 'false' ? 'bg-red-600' :
+                      article.verdict === 'misleading' ? 'bg-yellow-600' :
+                      article.verdict === 'debunk' ? 'bg-purple-600' :
+                      'bg-gray-600'
+                    }`}>
+                      {article.verdict === 'true' ? 'TRUE' :
+                       article.verdict === 'false' ? 'FALSE' :
+                       article.verdict === 'misleading' ? 'MISLEADING' :
+                       article.verdict === 'debunk' ? 'DEBUNK' : 'UNVERIFIED'}
+                    </span>
                   </div>
+                  {/* FACT CHECK Watermark */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                    <span className="text-white text-2xl font-bold">FACT CHECK</span>
+                  </div>
+                </div>
+                
+                {/* Content */}
+                <div className="p-2">
+                  {/* Title */}
+                  <h3 className="text-sm font-semibold text-gray-900 mb-1 font-solaiman-lipi line-clamp-3 leading-tight">
+                    {article.title}
+                  </h3>
                   
-                  {/* Content - Right Side */}
-                  <div className="p-3 md:p-4 flex-1">
-                    <Link href={`/factchecks/${article.slug}`}>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2 font-solaiman-lipi hidden md:block hover:text-primary-600 cursor-pointer">
-                        {article.title}
-                      </h3>
-                    </Link>
-                    
-                    {/* Summary - Desktop Only */}
-                    <p className="text-gray-600 mb-3 line-clamp-2 md:line-clamp-3 hidden md:block">
-                      {article.summary}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-500">
-                          {new Date(article.publishedAt).toLocaleDateString('bn-BD')}
+                  {/* Tags - Desktop Only */}
+                  {article.tags && article.tags.length > 0 && (
+                    <div className="flex space-x-1 mb-2 hidden md:flex">
+                      {article.tags.slice(0, 2).map((tag, index) => (
+                        <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-solaiman-lipi">
+                          {tag}
                         </span>
-                        {/* Tags - Mobile Only */}
-                        {article.tags && article.tags.length > 0 && (
-                          <div className="flex space-x-1 md:hidden">
-                            {article.tags.slice(0, 2).map((tag, index) => (
-                              <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                                {tag}
-                              </span>
-                            ))}
-                            {article.tags.length > 2 && (
-                              <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                                +{article.tags.length - 2}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <Link 
-                        href={`/factchecks/${article.slug}`}
-                        className="text-primary-600 hover:text-primary-700 font-medium text-sm"
-                      >
-                        আরও পড়ুন →
-                      </Link>
+                      ))}
+                      {article.tags.length > 2 && (
+                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-solaiman-lipi">
+                          +{article.tags.length - 2}
+                        </span>
+                      )}
                     </div>
+                  )}
+                  
+                  {/* Preview - Desktop Only */}
+                  <p className="text-gray-600 mb-2 line-clamp-1 hidden md:block font-solaiman-lipi text-sm">
+                    {article.summary}
+                  </p>
+                  
+                  {/* Date */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 font-solaiman-lipi">
+                      {new Date(article.publishedAt).toLocaleDateString('bn-BD')}
+                    </span>
                   </div>
                 </div>
               </article>

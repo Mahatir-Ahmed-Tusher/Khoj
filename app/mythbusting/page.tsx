@@ -1,176 +1,285 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { Search, Zap, Loader2, AlertTriangle, CheckCircle, XCircle, Copy, Download } from 'lucide-react'
+import MythbustingSidebar from '@/components/MythbustingSidebar'
+import { Send, Loader2, Search, Copy, Download, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { parseMarkdown, sanitizeHtml } from '@/lib/markdown'
 
-interface MythbustingResult {
-  query: string
-  verdict: 'true' | 'false' | 'misleading' | 'unverified'
-  summary: string
-  detailedAnalysis: string
-  sources: string[]
-  evidenceSources?: Array<{
+interface ChatMessage {
+  id: string
+  text: string
+  isUser: boolean
+  timestamp: Date
+  sources?: Array<{
+    id: number
+    book_title: string
+    page: number
+    category: string
+    language: string
+    content_preview: string
+    url: string
+  }>
+  verdict?: string
+  summary?: string
+  ourSiteArticles?: Array<{
     title: string
     url: string
     snippet: string
   }>
-  timestamp: string
+}
+
+interface SearchHistory {
+  id: string
+  query: string
+  response: string
+  timestamp: Date
+  verdict?: string
+  summary?: string
+  sources?: Array<{
+    id: number
+    book_title: string
+    page: number
+    category: string
+    language: string
+    content_preview: string
+    url: string
+  }>
+  ourSiteArticles?: Array<{
+    title: string
+    url: string
+    snippet: string
+  }>
 }
 
 export default function MythbustingPage() {
-  const [query, setQuery] = useState('')
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [searchHistory, setSearchHistory] = useState<SearchHistory[]>([])
+  const [currentReport, setCurrentReport] = useState<SearchHistory | null>(null)
+  const [isClient, setIsClient] = useState(false)
+  const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [result, setResult] = useState<MythbustingResult | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true) // Default collapsed
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // Initialize messages
+  useEffect(() => {
+    setIsClient(true)
+    setMessages([])
+    loadSearchHistory()
+  }, [])
 
+  // Load search history from localStorage
+  const loadSearchHistory = () => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('mythbustingHistory')
+        if (saved) {
+          const history = JSON.parse(saved).map((item: any) => ({
+            ...item,
+            timestamp: new Date(item.timestamp)
+          }))
+          setSearchHistory(history)
+        }
+      } catch (error) {
+        console.error('Error loading search history:', error)
+      }
+    }
+  }
 
-  const handleSearch = async () => {
-    if (!query.trim() || isLoading) return
+  // Save search history to localStorage
+  const saveSearchHistory = (history: SearchHistory[]) => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('mythbustingHistory', JSON.stringify(history))
+      } catch (error) {
+        console.error('Error saving search history:', error)
+      }
+    }
+  }
 
-    console.log('Starting mythbusting search for:', query.trim())
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim() || isLoading) return
+
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      text: inputMessage,
+      isUser: true,
+      timestamp: new Date()
+    }
+
+    // Clear previous messages and set new user message
+    setMessages([userMessage])
+    setInputMessage('')
     setIsLoading(true)
-    setError(null)
-    setResult(null)
 
     try {
+      // Call mythbusting API
       const response = await fetch('/api/mythbusting', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query: query.trim() }),
+        body: JSON.stringify({ 
+          query: inputMessage
+        }),
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || 'Failed to analyze claim')
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
 
       const data = await response.json()
       
-      // Check if the response has the expected structure
-      if (!data.verdict || !data.summary || !data.detailedAnalysis) {
-        throw new Error('Invalid response format')
+      const botMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        text: data.detailedAnalysis || data.response,
+        isUser: false,
+        timestamp: new Date(),
+        sources: data.evidenceSources ? data.evidenceSources.map((source: any, index: number) => ({
+          id: index + 1,
+          book_title: source.title,
+          page: 1,
+          category: 'mythbusting',
+          language: 'English',
+          content_preview: source.snippet,
+          url: source.url
+        })) : [],
+        verdict: data.verdict,
+        summary: data.summary,
+        ourSiteArticles: data.ourSiteArticles || []
       }
+
+      // Set new messages with only current conversation
+      setMessages([userMessage, botMessage])
+
+      // Create new report and save to history
+      const newReport: SearchHistory = {
+        id: Date.now().toString(),
+        query: inputMessage,
+        response: data.detailedAnalysis || data.response,
+        timestamp: new Date(),
+        sources: data.evidenceSources ? data.evidenceSources.map((source: any, index: number) => ({
+          id: index + 1,
+          book_title: source.title,
+          page: 1,
+          category: 'mythbusting',
+          language: 'English',
+          content_preview: source.snippet,
+          url: source.url
+        })) : [],
+        verdict: data.verdict,
+        summary: data.summary,
+        ourSiteArticles: data.ourSiteArticles || []
+      }
+
+      setCurrentReport(newReport)
       
-      setResult(data)
+      // Add to search history
+      const updatedHistory = [newReport, ...searchHistory].slice(0, 50) // Keep last 50 reports
+      setSearchHistory(updatedHistory)
+      saveSearchHistory(updatedHistory)
+
     } catch (error) {
-      console.error('Mythbusting error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      setError(`দুঃখিত, আপনার দাবি বিশ্লেষণ করতে সমস্যা হচ্ছে: ${errorMessage}`)
+      console.error('Error sending message:', error)
+      
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        text: 'দুঃখিত, আপনার প্রশ্নের উত্তর দিতে সমস্যা হচ্ছে। অনুগ্রহ করে আবার চেষ্টা করুন।',
+        isUser: false,
+        timestamp: new Date()
+      }
+      setMessages([userMessage, errorMessage])
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      handleSearch()
+      handleSendMessage()
     }
   }
 
-  const copyToClipboard = async () => {
-    if (!result) return
-    
-    const textContent = `
-মিথবাস্টিং ফলাফল
-==================
-
-যাচাইকৃত দাবি: ${result.query}
-ফলাফল: ${getVerdictText(result.verdict)}
-
-সংক্ষিপ্ত ফলাফল:
-${result.summary}
-
-বিস্তারিত বিশ্লেষণ:
-${result.detailedAnalysis}
-
-${result.evidenceSources && result.evidenceSources.length > 0 ? `
-প্রমাণ উৎসসমূহ:
-${result.evidenceSources.map((source, index) => `${index + 1}. ${source.title}
-   URL: ${source.url}
-   বিবরণ: ${source.snippet}`).join('\n\n')}
-` : ''}
-
-${result.sources && result.sources.length > 0 ? `
-অতিরিক্ত উৎসসমূহ:
-${result.sources.map((source, index) => `${index + 1}. ${source}`).join('\n')}
-` : ''}
-
-যাচাইকৃত: ${new Date(result.timestamp).toLocaleString('bn-BD')}
-    `.trim()
-
+  const copyBotResponse = async (messageText: string) => {
     try {
-      await navigator.clipboard.writeText(textContent)
-      alert('ফলাফল কপি করা হয়েছে!')
+      await navigator.clipboard.writeText(messageText)
+      alert('উত্তর কপি করা হয়েছে!')
     } catch (error) {
       console.error('Copy failed:', error)
       alert('কপি করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।')
     }
   }
 
-  const downloadAsTxt = () => {
-    if (!result) return
-    
+  const downloadBotResponse = (messageText: string) => {
     const textContent = `
-মিথবাস্টিং ফলাফল
-==================
+মিথবাস্টিং - সার্চ ইঞ্জিনের উত্তর
+====================================
 
-যাচাইকৃত দাবি: ${result.query}
-ফলাফল: ${getVerdictText(result.verdict)}
+${messageText}
 
-সংক্ষিপ্ত ফলাফল:
-${result.summary}
-
-বিস্তারিত বিশ্লেষণ:
-${result.detailedAnalysis}
-
-${result.evidenceSources && result.evidenceSources.length > 0 ? `
-প্রমাণ উৎসসমূহ:
-${result.evidenceSources.map((source, index) => `${index + 1}. ${source.title}
-   URL: ${source.url}
-   বিবরণ: ${source.snippet}`).join('\n\n')}
-` : ''}
-
-${result.sources && result.sources.length > 0 ? `
-অতিরিক্ত উৎসসমূহ:
-${result.sources.map((source, index) => `${index + 1}. ${source}`).join('\n')}
-` : ''}
-
-যাচাইকৃত: ${new Date(result.timestamp).toLocaleString('bn-BD')}
+যাচাইকৃত: ${new Date().toLocaleString('bn-BD')}
     `.trim()
 
     const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `mythbusting-result-${new Date().toISOString().split('T')[0]}.txt`
+    a.download = `mythbusting-response-${new Date().toISOString().split('T')[0]}.txt`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
   }
 
-  const getVerdictIcon = (verdict: string) => {
-    switch (verdict) {
-      case 'true':
-        return <CheckCircle className="h-6 w-6 text-green-600" />
-      case 'false':
-        return <XCircle className="h-6 w-6 text-red-600" />
-      case 'misleading':
-        return <AlertTriangle className="h-6 w-6 text-yellow-600" />
-      case 'partially_true':
-        return <AlertTriangle className="h-6 w-6 text-blue-600" />
-      default:
-        return <AlertTriangle className="h-6 w-6 text-gray-600" />
+  // Load a report from history
+  const loadReportFromHistory = (report: SearchHistory) => {
+    setCurrentReport(report)
+    setMessages([
+      {
+        id: report.id + '-user',
+        text: report.query,
+        isUser: true,
+        timestamp: report.timestamp
+      },
+      {
+        id: report.id + '-bot',
+        text: report.response,
+        isUser: false,
+        timestamp: report.timestamp,
+        sources: report.sources,
+        verdict: report.verdict,
+        summary: report.summary,
+        ourSiteArticles: report.ourSiteArticles
+      }
+    ])
+  }
+
+  // Clear search history
+  const clearSearchHistory = () => {
+    setSearchHistory([])
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('mythbustingHistory')
     }
   }
 
-  const getVerdictText = (verdict: string) => {
+  // Clear current report
+  const clearCurrentReport = () => {
+    setMessages([])
+    setCurrentReport(null)
+  }
+
+  const getVerdictText = (verdict?: string) => {
     switch (verdict) {
       case 'true':
         return 'সত্য'
@@ -185,18 +294,18 @@ ${result.sources.map((source, index) => `${index + 1}. ${source}`).join('\n')}
     }
   }
 
-  const getVerdictColor = (verdict: string) => {
+  const getVerdictColor = (verdict?: string) => {
     switch (verdict) {
       case 'true':
-        return 'bg-green-100 text-green-800 border-green-200'
+        return 'bg-green-100 text-green-800'
       case 'false':
-        return 'bg-red-100 text-red-800 border-red-200'
+        return 'bg-red-100 text-red-800'
       case 'misleading':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+        return 'bg-yellow-100 text-yellow-800'
       case 'partially_true':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-blue-100 text-blue-800'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -204,246 +313,421 @@ ${result.sources.map((source, index) => `${index + 1}. ${source}`).join('\n')}
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <img 
               src="/mythbusting.png" 
               alt="মিথবাস্টিং" 
-              className="h-10 w-10 object-contain"
+              className="h-8 w-8 object-contain"
             />
-            <h1 className="text-3xl font-bold text-gray-900 font-solaiman-lipi">
+            <h1 className="text-2xl font-bold text-gray-900 font-solaiman-lipi">
               মিথবাস্টিং
             </h1>
           </div>
-          
         </div>
 
-        {/* Search Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-6">
-              
-              <p className="text-gray-600 font-solaiman-lipi">
-                যেকোনো বৈজ্ঞানিক দাবি, ভূতুড়ে ঘটনা, কুসংস্কার বা সিউডোসায়েন্স সম্পর্কে প্রশ্ন করুন
-              </p>
-            </div>
-
-            <div className="flex space-x-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="যেমন: ভূত আছে কি নাই? অ্যাস্ট্রোলজি কি সত্য?"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent font-solaiman-lipi"
-                  disabled={isLoading}
-                />
-              </div>
-              <button
-                onClick={handleSearch}
-                disabled={isLoading || !query.trim()}
-                className="bg-gray-700 text-white px-6 py-3 rounded-xl hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm font-solaiman-lipi"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  'যাচাই করুন'
-                )}
-              </button>
-            </div>
-
-            {/* Example Queries */}
-            <div className="mt-6">
-              <p className="text-sm text-gray-500 mb-3 font-solaiman-lipi">উদাহরণ:</p>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  'ভূত আছে কি নাই?',
-                  'অ্যাস্ট্রোলজি কি সত্য?',
-                  'হোমিওপ্যাথি কি কাজ করে?',
-                  'ফ্ল্যাট আর্থ থিওরি',
-                  '৫জি নেটওয়ার্ক ক্ষতিকর?'
-                ].map((example) => (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            {/* Search Engine Style Interface */}
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 mb-8">
+              <div className="max-w-3xl mx-auto">
+                {/* Sidebar Toggle Button - Only visible on mobile */}
+                <div className="flex justify-end mb-4 lg:hidden">
                   <button
-                    key={example}
-                    onClick={() => setQuery(example)}
-                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition-colors font-solaiman-lipi"
+                    onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                    className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200 font-solaiman-lipi text-sm"
+                    title={isSidebarCollapsed ? "সাইডবার খুলুন" : "সাইডবার বন্ধ করুন"}
                   >
-                    {example}
+                    {isSidebarCollapsed ? (
+                      <>
+                        <PanelLeftOpen className="h-4 w-4" />
+                        <span>সার্চ হিস্টরি দেখুন</span>
+                      </>
+                    ) : (
+                      <>
+                        <PanelLeftClose className="h-4 w-4" />
+                        <span>সাইডবার বন্ধ করুন</span>
+                      </>
+                    )}
                   </button>
-                ))}
+                </div>
+                
+                {/* Instructions */}
+                <p className="text-center text-gray-600 mb-6 font-solaiman-lipi">
+                  যেকোনো বৈজ্ঞানিক দাবি, ভূতুড়ে ঘটনা, কুসংস্কার বা সিউডোসায়েন্স সম্পর্কে প্রশ্ন করুন। কৃত্রিম বুদ্ধিমত্তা সম্পন্ন এই সার্চ ইঞ্জিন ব্যবহার করে সঠিক তথ্য খুঁজে পেতে পারেন।
+                </p>
+                
+                {/* Search Bar */}
+                <div className="flex space-x-4 mb-6">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <input
+                      type="text"
+                      value={inputMessage}
+                      onChange={(e) => setInputMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="যেমন: ভূত আছে কি নাই? অ্যাস্ট্রোলজি কি সত্য?"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent font-solaiman-lipi text-lg"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={isLoading || !inputMessage.trim()}
+                    className="bg-gray-700 text-white px-6 py-3 rounded-xl hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 flex items-center justify-center min-w-[60px]"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <Send className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Example Queries */}
+                <div className="mt-6">
+                  <p className="text-sm text-gray-500 mb-3 font-solaiman-lipi">উদাহরণ:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      'ভূত আছে কি নাই?',
+                      'অ্যাস্ট্রোলজি কি সত্য?',
+                      'হোমিওপ্যাথি কি কাজ করে?',
+                      'ফ্ল্যাট আর্থ থিওরি',
+                      '৫জি নেটওয়ার্ক ক্ষতিকর?'
+                    ].map((example) => (
+                      <button
+                        key={example}
+                        onClick={() => setInputMessage(example)}
+                        className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition-colors font-solaiman-lipi"
+                      >
+                        {example}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-            
 
-          </div>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
-            <div className="flex items-center space-x-3">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
-              <p className="text-red-800 font-solaiman-lipi">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Results */}
-        {result && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            {/* Header */}
-            <div className="bg-gray-800 text-white p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold font-solaiman-lipi">যাচাইকৃত দাবি</h3>
-                  <p className="text-gray-300 font-solaiman-lipi">{result.query}</p>
-                </div>
-                <div className="flex items-center space-x-3">
-                  {getVerdictIcon(result.verdict)}
-                  <span className="font-semibold font-solaiman-lipi">
-                    {getVerdictText(result.verdict)}
-                  </span>
-                </div>
-              </div>
-              
-              {/* Action Buttons */}
-              <div className="flex justify-end mt-4 space-x-3">
-                <button
-                  onClick={copyToClipboard}
-                  className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 font-solaiman-lipi"
-                >
-                  <Copy className="h-4 w-4" />
-                  <span>কপি করুন</span>
-                </button>
-                <button
-                  onClick={downloadAsTxt}
-                  className="flex items-center space-x-2 bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg transition-colors duration-200 font-solaiman-lipi"
-                >
-                  <Download className="h-4 w-4" />
-                  <span>ডাউনলোড করুন</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-6">
-              {/* Summary */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-3 font-solaiman-lipi">
-                  সংক্ষিপ্ত ফলাফল
-                </h4>
-                <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg border ${getVerdictColor(result.verdict)}`}>
-                  {getVerdictIcon(result.verdict)}
-                  <span className="font-medium font-solaiman-lipi">{result.summary}</span>
-                </div>
-              </div>
-
-              {/* Detailed Analysis */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-3 font-solaiman-lipi">
-                  বিস্তারিত বিশ্লেষণ
-                </h4>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-gray-800 leading-relaxed font-solaiman-lipi whitespace-pre-wrap">
-                    {result.detailedAnalysis}
-                  </p>
-                </div>
-              </div>
-
-              {/* Evidence Sources */}
-              {result.evidenceSources && result.evidenceSources.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3 font-solaiman-lipi">
-                    প্রমাণ উৎসসমূহ
-                  </h4>
-                  <div className="space-y-3">
-                    {result.evidenceSources.map((source, index) => (
-                      <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <div className="flex items-start space-x-3">
-                          <div className="w-2 h-2 bg-gray-600 rounded-full mt-2 flex-shrink-0"></div>
-                          <div className="flex-1">
-                            <a 
-                              href={source.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-gray-700 hover:text-gray-900 font-semibold font-solaiman-lipi block mb-1"
+            {/* Results Container */}
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 min-h-[600px] flex flex-col overflow-hidden">
+              {/* Report Area */}
+              <div className="flex-1 overflow-y-auto p-8">
+                {!isClient ? (
+                  <div className="flex justify-center items-center h-full">
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="h-6 w-6 animate-spin text-gray-600" />
+                      <span className="text-gray-600 font-solaiman-lipi">লোড হচ্ছে...</span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {messages.length === 0 ? (
+                      <div className="text-center text-gray-500 font-solaiman-lipi">
+                        <div className="mb-4">
+                          <Search className="h-16 w-16 mx-auto text-gray-300" />
+                        </div>
+                        <p className="text-lg">আপনার প্রশ্নের উত্তর এখানে প্রদর্শিত হবে</p>
+                        <p className="text-sm mt-2">উপরের সার্চ বক্সে আপনার প্রশ্ন লিখুন</p>
+                        {searchHistory.length > 0 && (
+                          <div className="mt-4">
+                            <p className="text-sm text-gray-400">অথবা সাইডবার থেকে আগের রিপোর্ট লোড করুন</p>
+                            <button
+                              onClick={() => setIsSidebarCollapsed(false)}
+                              className="mt-2 flex items-center space-x-2 mx-auto bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg transition-colors duration-200 font-solaiman-lipi text-sm lg:hidden"
                             >
-                              {source.title}
-                            </a>
-                            <p className="text-sm text-gray-600 font-solaiman-lipi leading-relaxed">
-                              {source.snippet}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1 font-solaiman-lipi">
-                              {source.url}
-                            </p>
+                              <PanelLeftOpen className="h-4 w-4" />
+                              <span>সার্চ হিস্টরি দেখুন</span>
+                            </button>
                           </div>
+                        )}
+                      </div>
+                    ) : (
+                      messages.map((message) => (
+                        <div key={message.id} className="mb-8">
+                          {message.isUser ? (
+                            <div className="mb-6">
+                              <h3 className="text-lg font-semibold text-gray-900 mb-2 font-solaiman-lipi">আপনার প্রশ্ন:</h3>
+                              <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-gray-500">
+                                <p className="text-gray-800 font-solaiman-lipi">{message.text}</p>
+                                <p className="text-xs text-gray-500 mt-2" suppressHydrationWarning>
+                                  {typeof window !== 'undefined' ? message.timestamp.toLocaleString('bn-BD') : message.timestamp.toISOString()}
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+                              {/* Report Header */}
+                              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 rounded-t-lg">
+                                <div className="flex justify-between items-center">
+                                  <div>
+                                    <h2 className="text-xl font-bold text-gray-900 font-solaiman-lipi">মিথবাস্টিং - প্রতিবেদন</h2>
+                                    {message.verdict && (
+                                      <div className="mt-2">
+                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getVerdictColor(message.verdict)}`}>
+                                          {getVerdictText(message.verdict)}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex space-x-2">
+                                    <button
+                                      onClick={() => copyBotResponse(message.text)}
+                                      className="flex items-center space-x-1 bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 rounded border border-gray-300 transition-colors duration-200 font-solaiman-lipi text-sm"
+                                    >
+                                      <Copy className="h-4 w-4" />
+                                      <span>কপি</span>
+                                    </button>
+                                    <button
+                                      onClick={() => downloadBotResponse(message.text)}
+                                      className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded transition-colors duration-200 font-solaiman-lipi text-sm"
+                                    >
+                                      <Download className="h-4 w-4" />
+                                      <span>ডাউনলোড</span>
+                                    </button>
+                                    <button
+                                      onClick={clearCurrentReport}
+                                      className="flex items-center space-x-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded transition-colors duration-200 font-solaiman-lipi text-sm"
+                                    >
+                                      <Search className="h-4 w-4" />
+                                      <span>নতুন সার্চ</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Report Content */}
+                              <div className="p-6">
+                                {message.summary && (
+                                  <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                    <h3 className="text-lg font-semibold text-blue-900 mb-2 font-solaiman-lipi">সংক্ষিপ্ত সারাংশ:</h3>
+                                    <p className="text-blue-800 font-solaiman-lipi leading-relaxed">{message.summary}</p>
+                                  </div>
+                                )}
+                                
+                                <div className="prose prose-lg max-w-none font-solaiman-lipi">
+                                  <div 
+                                    className="leading-relaxed text-gray-800"
+                                    dangerouslySetInnerHTML={{ 
+                                      __html: sanitizeHtml(parseMarkdown(message.text)) 
+                                    }}
+                                  />
+                                </div>
+                                    
+                                {/* Article Metadata Widget */}
+                                {currentReport && (
+                                  <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                    <h4 className="text-sm font-semibold text-blue-900 mb-3 font-solaiman-lipi flex items-center space-x-2">
+                                      <span>📊</span>
+                                      <span>রিপোর্ট মেটাডাটা</span>
+                                    </h4>
+                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                      <div>
+                                        <p className="text-blue-700 font-medium font-solaiman-lipi">প্রশ্ন:</p>
+                                        <p className="text-blue-900 font-solaiman-lipi">{currentReport.query}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-blue-700 font-medium font-solaiman-lipi">ফলাফল:</p>
+                                        <p className="text-blue-900 font-solaiman-lipi">
+                                          {currentReport.verdict ? getVerdictText(currentReport.verdict) : 'অযাচাইকৃত'}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-blue-700 font-medium font-solaiman-lipi">তৈরির তারিখ:</p>
+                                        <p className="text-blue-900 font-solaiman-lipi" suppressHydrationWarning>
+                                          {typeof window !== 'undefined' ? currentReport.timestamp.toLocaleString('bn-BD') : currentReport.timestamp.toISOString()}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-blue-700 font-medium font-solaiman-lipi">উৎস সংখ্যা:</p>
+                                        <p className="text-blue-900 font-solaiman-lipi">{currentReport.sources?.length || 0}টি</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {/* Sources Section */}
+                                {message.sources && message.sources.length > 0 && (
+                                  <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+                                    <h4 className="text-lg font-semibold text-gray-900 mb-4 font-solaiman-lipi">
+                                      রেফারেন্স:
+                                    </h4>
+                                    <div className="space-y-3">
+                                      {message.sources.map((source) => (
+                                        <div key={source.id} className="bg-white p-3 rounded border border-gray-200">
+                                          <div className="flex justify-between items-start mb-2">
+                                            <h5 className="font-semibold text-gray-900 font-solaiman-lipi">
+                                              <a 
+                                                href={source.url} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 underline"
+                                              >
+                                                {source.book_title}
+                                              </a>
+                                            </h5>
+                                            <span className="text-sm text-gray-500 font-solaiman-lipi">পৃষ্ঠা {source.page}</span>
+                                          </div>
+                                          <p className="text-sm text-gray-600 font-solaiman-lipi leading-relaxed">
+                                            {source.content_preview}
+                                          </p>
+                                          <div className="mt-2 flex space-x-2">
+                                            <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                                              {source.category}
+                                            </span>
+                                            <span className="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium">
+                                              {source.language}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {/* Our Site Recommendations */}
+                                {message.ourSiteArticles && message.ourSiteArticles.length > 0 && (
+                                  <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
+                                    <h4 className="text-lg font-semibold text-green-900 mb-4 font-solaiman-lipi flex items-center space-x-2">
+                                      <span>📚 আমাদের সাইটের প্রস্তাবিত নিবন্ধসমূহ:</span>
+                                    </h4>
+                                    <div className="space-y-3">
+                                      {message.ourSiteArticles.map((article, index) => (
+                                        <div key={index} className="bg-white p-3 rounded border border-green-200">
+                                          <div className="flex justify-between items-start mb-2">
+                                            <h5 className="font-semibold text-green-900 font-solaiman-lipi">
+                                              <a 
+                                                href={article.url} 
+                                                className="text-green-600 hover:text-green-800 underline"
+                                              >
+                                                {article.title}
+                                              </a>
+                                            </h5>
+                                            <span className="text-sm text-green-600 font-solaiman-lipi">আমাদের সাইট</span>
+                                          </div>
+                                          <p className="text-sm text-green-800 font-solaiman-lipi leading-relaxed">
+                                            {article.snippet}
+                                          </p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {/* Report Footer */}
+                                <div className="mt-6 pt-4 border-t border-gray-200">
+                                  <p className="text-xs text-gray-500 font-solaiman-lipi" suppressHydrationWarning>
+                                    প্রতিবেদন তৈরি: {typeof window !== 'undefined' ? message.timestamp.toLocaleString('bn-BD') : message.timestamp.toISOString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                    
+                    {isLoading && (
+                      <div className="flex justify-center items-center py-12">
+                        <div className="text-center">
+                          <Loader2 className="h-8 w-8 animate-spin text-gray-600 mx-auto mb-4" />
+                          <p className="text-lg text-gray-600 font-solaiman-lipi">প্রতিবেদন তৈরি হচ্ছে...</p>
+                          <p className="text-sm text-gray-500 font-solaiman-lipi mt-2">অনুগ্রহ করে অপেক্ষা করুন</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                    )}
+                    
+                    <div ref={messagesEndRef} />
+                  </>
+                )}
+              </div>
+            </div>
 
-              {/* Sources */}
-              {result.sources && result.sources.length > 0 && (
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3 font-solaiman-lipi">
-                    অতিরিক্ত উৎসসমূহ
-                  </h4>
-                  <div className="space-y-2">
-                    {result.sources.map((source, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
-                        <a 
-                          href={source} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-gray-700 hover:text-gray-900 underline font-solaiman-lipi"
-                        >
-                          {source}
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-                             {/* Timestamp */}
-               <div className="mt-6 pt-4 border-t border-gray-200">
-                 <p className="text-sm text-gray-500 font-solaiman-lipi" suppressHydrationWarning>
-                   যাচাইকৃত: {typeof window !== 'undefined' ? new Date(result.timestamp).toLocaleString('bn-BD') : result.timestamp}
-                 </p>
-               </div>
+            {/* Info Section */}
+            <div className="mt-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6 border border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3 font-solaiman-lipi">
+                এই টুল সম্পর্কে
+              </h3>
+              <p className="text-gray-800 font-solaiman-lipi leading-relaxed">
+                এই মিথবাস্টিং টুল বৈজ্ঞানিক দাবি, কুসংস্কার, ভূতুড়ে ঘটনা এবং সিউডোসায়েন্স সম্পর্কে 
+                সঠিক তথ্য প্রদান করে। আমরা বৈজ্ঞানিক গবেষণা এবং প্রমাণের ভিত্তিতে আপনার প্রশ্নের উত্তর দিই।
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="bg-white text-gray-800 px-3 py-1 rounded-full text-sm font-medium border border-gray-300">
+                  বৈজ্ঞানিক দাবি
+                </span>
+                <span className="bg-black text-white px-3 py-1 rounded-full text-sm font-medium">
+                  কুসংস্কার
+                </span>
+                <span className="bg-white text-gray-800 px-3 py-1 rounded-full text-sm font-medium border border-gray-300">
+                  সিউডোসায়েন্স
+                </span>
+                <span className="bg-black text-white px-3 py-1 rounded-full text-sm font-medium">
+                  ভূতুড়ে ঘটনা
+                </span>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Info Section */}
-        <div className="mt-8 bg-gray-100 rounded-xl p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3 font-solaiman-lipi">
-            এই টুল সম্পর্কে
-          </h3>
-          <p className="text-gray-700 font-solaiman-lipi leading-relaxed">
-            এই মিথবাস্টিং টুল বৈজ্ঞানিক দাবি, কুসংস্কার, ভূতুড়ে ঘটনা এবং সিউডোসায়েন্স সম্পর্কে 
-            সঠিক তথ্য প্রদান করে। আমরা বৈজ্ঞানিক গবেষণা এবং প্রমাণের ভিত্তিতে আপনার প্রশ্নের উত্তর দিই।
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="bg-white text-gray-800 px-3 py-1 rounded-full text-sm font-medium border border-gray-300">
-              বৈজ্ঞানিক দাবি
-            </span>
-            <span className="bg-black text-white px-3 py-1 rounded-full text-sm font-medium">
-              কুসংস্কার
-            </span>
-            <span className="bg-white text-gray-800 px-3 py-1 rounded-full text-sm font-medium border border-gray-300">
-              সিউডোসায়েন্স
-            </span>
-            <span className="bg-black text-white px-3 py-1 rounded-full text-sm font-medium">
-              ভূতুড়ে ঘটনা
-            </span>
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <MythbustingSidebar 
+              searchHistory={searchHistory}
+              onLoadReport={loadReportFromHistory}
+              onClearHistory={clearSearchHistory}
+            />
+          </div>
+        </div>
+      </div>
+      
+      {/* Floating Sidebar Toggle for Mobile */}
+      <div className="fixed bottom-6 right-6 lg:hidden z-50">
+        <button
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className="bg-gray-700 hover:bg-gray-800 text-white p-3 rounded-full shadow-lg transition-all duration-200"
+          title={isSidebarCollapsed ? "সার্চ হিস্টরি দেখুন" : "সার্চ হিস্টরি বন্ধ করুন"}
+        >
+          {isSidebarCollapsed ? (
+            <PanelLeftOpen className="h-5 w-5" />
+          ) : (
+            <PanelLeftClose className="h-5 w-5" />
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {!isSidebarCollapsed && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setIsSidebarCollapsed(true)} />
+      )}
+
+      {/* Mobile Sidebar */}
+      <div className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 z-50 lg:hidden ${isSidebarCollapsed ? 'translate-x-full' : 'translate-x-0'}`}>
+        <div className="h-full flex flex-col">
+          {/* Header */}
+          <div className="flex-shrink-0 p-4 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-600 font-solaiman-lipi">সার্চ হিস্টরি</h3>
+              <button
+                onClick={() => setIsSidebarCollapsed(true)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <PanelLeftClose className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <MythbustingSidebar 
+              searchHistory={searchHistory}
+              onLoadReport={(report) => {
+                loadReportFromHistory(report)
+                setIsSidebarCollapsed(true) // Close sidebar after loading report
+              }}
+              onClearHistory={clearSearchHistory}
+            />
           </div>
         </div>
       </div>
