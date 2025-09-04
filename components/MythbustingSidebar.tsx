@@ -6,20 +6,7 @@ import Image from 'next/image'
 import { Calendar, ChevronLeft, ChevronRight, History, Trash2, Clock } from 'lucide-react'
 import { getMythbustingArticles } from '@/lib/data'
 import { FactCheckArticle } from '@/lib/utils'
-
-interface SearchHistory {
-  id: string
-  query: string
-  response: string
-  timestamp: Date
-  verdict?: string
-  summary?: string
-  sources?: Array<{
-    title: string
-    url: string
-    snippet: string
-  }>
-}
+import { SearchHistory } from '@/lib/types'
 
 interface MythbustingSidebarProps {
   className?: string

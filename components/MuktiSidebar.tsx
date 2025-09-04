@@ -6,24 +6,7 @@ import Image from 'next/image'
 import { Calendar, ChevronLeft, ChevronRight, History, Trash2, Clock } from 'lucide-react'
 import { getMuktijuddhoArticles } from '@/lib/data'
 import { FactCheckArticle } from '@/lib/utils'
-
-interface SearchHistory {
-  id: string
-  query: string
-  response: string
-  timestamp: Date
-  category: string
-  subcategory?: string | null
-  sources?: Array<{
-    id: number
-    book_title: string
-    page: number
-    category: string
-    language: string
-    content_preview: string
-    url: string
-  }>
-}
+import { SearchHistory } from '@/lib/types'
 
 interface MuktiSidebarProps {
   className?: string

@@ -6,6 +6,7 @@ import Footer from '@/components/Footer'
 import MythbustingSidebar from '@/components/MythbustingSidebar'
 import { Send, Loader2, Search, Copy, Download, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { parseMarkdown, sanitizeHtml } from '@/lib/markdown'
+import { SearchHistory } from '@/lib/types'
 
 interface ChatMessage {
   id: string
@@ -13,39 +14,12 @@ interface ChatMessage {
   isUser: boolean
   timestamp: Date
   sources?: Array<{
-    id: number
-    book_title: string
-    page: number
-    category: string
-    language: string
-    content_preview: string
-    url: string
-  }>
-  verdict?: string
-  summary?: string
-  ourSiteArticles?: Array<{
     title: string
     url: string
     snippet: string
   }>
-}
-
-interface SearchHistory {
-  id: string
-  query: string
-  response: string
-  timestamp: Date
   verdict?: string
   summary?: string
-  sources?: Array<{
-    id: number
-    book_title: string
-    page: number
-    category: string
-    language: string
-    content_preview: string
-    url: string
-  }>
   ourSiteArticles?: Array<{
     title: string
     url: string
@@ -555,8 +529,8 @@ ${messageText}
                                       রেফারেন্স:
                                     </h4>
                                     <div className="space-y-3">
-                                      {message.sources.map((source) => (
-                                        <div key={source.id} className="bg-white p-3 rounded border border-gray-200">
+                                      {message.sources.map((source, index) => (
+                                        <div key={index} className="bg-white p-3 rounded border border-gray-200">
                                           <div className="flex justify-between items-start mb-2">
                                             <h5 className="font-semibold text-gray-900 font-solaiman-lipi">
                                               <a 
@@ -565,22 +539,13 @@ ${messageText}
                                                 rel="noopener noreferrer"
                                                 className="text-blue-600 hover:text-blue-800 underline"
                                               >
-                                                {source.book_title}
+                                                {source.title}
                                               </a>
                                             </h5>
-                                            <span className="text-sm text-gray-500 font-solaiman-lipi">পৃষ্ঠা {source.page}</span>
                                           </div>
                                           <p className="text-sm text-gray-600 font-solaiman-lipi leading-relaxed">
-                                            {source.content_preview}
+                                            {source.snippet}
                                           </p>
-                                          <div className="mt-2 flex space-x-2">
-                                            <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-                                              {source.category}
-                                            </span>
-                                            <span className="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium">
-                                              {source.language}
-                                            </span>
-                                          </div>
                                         </div>
                                       ))}
                                     </div>
