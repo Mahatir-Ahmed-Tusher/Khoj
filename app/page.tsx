@@ -1,33 +1,69 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SearchBar from '@/components/SearchBar'
-import FeatureWidget from '@/components/FeatureWidget'
-import AIFactCheckWidget from '@/components/AIFactCheckWidget'
 import Link from 'next/link'
 import { getLatestArticles } from '@/lib/data'
+import { visitTracker, isFirstVisit, isNewSession, hasSeenTour, markTourAsSeen } from '@/lib/visit-tracker'
+import SiteTour from '@/components/SiteTour'
+
+// Lazy load heavy components
+const FeatureWidget = dynamic(() => import('@/components/FeatureWidget'), {
+  loading: () => <div className="w-80 h-64 bg-gray-100 rounded-lg animate-pulse" />
+})
+const AIFactCheckWidget = dynamic(() => import('@/components/AIFactCheckWidget'), {
+  loading: () => <div className="w-80 h-64 bg-gray-100 rounded-lg animate-pulse" />
+})
 
 export default function HomePage() {
-  const allFactChecks = getLatestArticles(10)
+  // Memoize expensive data operations
+  const allFactChecks = useMemo(() => getLatestArticles(10), [])
+  const latestArticles = useMemo(() => allFactChecks.slice(0, 3), [allFactChecks])
+  
   const [filter, setFilter] = useState('all')
   const [filteredArticles, setFilteredArticles] = useState(allFactChecks)
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [showSiteTour, setShowSiteTour] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
-  // Get the 3 latest articles for hero carousel
-  const latestArticles = allFactChecks.slice(0, 3)
-
-  // Auto-slide carousel
+  // Track visit and check if first visit
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % latestArticles.length)
-    }, 5000) // 5 seconds
+    // Track this page visit
+    visitTracker.trackVisit('home')
+    
+    // Check if mobile device
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    // Check if this is the first visit, mobile, and hasn't seen tour
+    if (isFirstVisit() && isMobile && !hasSeenTour()) {
+      // Show site tour after a short delay
+      setTimeout(() => {
+        setShowSiteTour(true)
+      }, 1000)
+    }
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [isMobile])
 
-    return () => clearInterval(interval)
+  // Auto-slide carousel - optimized with useCallback
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % latestArticles.length)
   }, [latestArticles.length])
 
-  const handleFilterChange = (newFilter: string) => {
+  useEffect(() => {
+    const interval = setInterval(nextSlide, 5000) // 5 seconds
+    return () => clearInterval(interval)
+  }, [nextSlide])
+
+  const handleFilterChange = useCallback((newFilter: string) => {
     setFilter(newFilter)
     if (newFilter === 'all') {
       setFilteredArticles(allFactChecks)
@@ -35,23 +71,50 @@ export default function HomePage() {
       const filtered = allFactChecks.filter(article => article.verdict === newFilter)
       setFilteredArticles(filtered)
     }
-  }
+  }, [allFactChecks])
 
-  const getFilterText = (filterValue: string) => {
+  const getFilterText = useCallback((filterValue: string) => {
     switch (filterValue) {
       case 'true': return 'সত্য'
       case 'false': return 'মিথ্যা'
       case 'misleading': return 'ভ্রান্তিমূলক'
       default: return 'সব'
     }
-  }
+  }, [])
+
+  // Memoize filter options to prevent recreation on every render
+  const filterOptions = useMemo(() => [
+    { value: 'all', label: 'সব', color: 'bg-gray-100 text-gray-700' },
+    { value: 'true', label: 'সত্য', color: 'bg-green-100 text-green-700' },
+    { value: 'false', label: 'মিথ্যা', color: 'bg-red-100 text-red-700' },
+    { value: 'misleading', label: 'ভ্রান্তিমূলক', color: 'bg-yellow-100 text-yellow-700' },
+    { value: 'debunk', label: 'খন্ডন', color: 'bg-purple-100 text-purple-700' }
+  ], [])
+
+  const handleArticleClick = useCallback((slug: string) => {
+    window.location.href = `/factchecks/${slug}`
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
+      {/* Site Tour - Only for first-time visitors */}
+      <SiteTour 
+        isOpen={showSiteTour}
+        onClose={() => {
+          setShowSiteTour(false)
+          markTourAsSeen() // Mark tour as seen
+        }}
+        onComplete={() => {
+          console.log('Site tour completed!')
+          setShowSiteTour(false)
+          markTourAsSeen() // Mark tour as seen
+        }}
+      />
+      
       {/* Hero Section with Grid Background */}
-      <section className="relative bg-cover bg-center bg-no-repeat text-white py-12">
+      <section className="hero-section relative bg-cover bg-center bg-no-repeat text-white py-12">
         {/* Grid Background - Behind the image */}
         <div className="absolute inset-0" style={{
           backgroundImage: `
@@ -72,11 +135,13 @@ export default function HomePage() {
             <h1 className="text-3xl md:text-5xl font-bold mb-3 font-solaiman-lipi" style={{
               textShadow: '0 0 4px rgba(255, 255, 255, 0.4), 0 0 8px rgba(255, 255, 255, 0.3)'
             }}>খোঁজ</h1>
-            <p className="text-xl md:text-2xl text-white mb-6 font-solaiman-lipi animate-pulse" style={{
+            <p className="text-xl md:text-2xl text-white mb-6 font-solaiman-lipi animate-pulse cursor-pointer hover:text-blue-200 transition-colors duration-300" style={{
               textShadow: '0 0 3px rgba(255, 255, 255, 0.3), 0 0 6px rgba(255, 255, 255, 0.2)',
               animation: 'glow 2s ease-in-out infinite alternate'
             }}>
-              কৃত্রিম বুদ্ধিমত্তা চালিত প্রথম বাংলা ফ্যাক্টচেকিং প্ল্যাটফর্ম
+              <Link href="/fact-checking-verification" className="hover:underline">
+                কৃত্রিম বুদ্ধিমত্তা চালিত প্রথম বাংলা ফ্যাক্টচেকিং প্ল্যাটফর্ম
+              </Link>
             </p>
           </div>
           
@@ -84,6 +149,7 @@ export default function HomePage() {
             <SearchBar 
               placeholder="যেকোনো দাবি বা তথ্য লিখুন..."
               className="mb-4"
+              data-tour="search-bar"
             />
             <p className="text-white text-sm mb-6">
               সত্যের সন্ধান, তথ্যের শুদ্ধি
@@ -91,16 +157,16 @@ export default function HomePage() {
             
             {/* Floating Feature Buttons */}
             <div className="flex justify-center space-x-2 md:space-x-4 flex-wrap">
-              <Link href="/image-check" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg">
+              <Link href="/image-check" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg" data-tour="image-check">
                 <span className="text-white text-sm font-medium font-solaiman-lipi">ছবি যাচাই</span>
               </Link>
-              <Link href="/text-check" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg">
+              <Link href="/text-check" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg" data-tour="text-check">
                 <span className="text-white text-sm font-medium font-solaiman-lipi">লেখা যাচাই</span>
               </Link>
-              <Link href="/source-search" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg">
+              <Link href="/source-search" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg" data-tour="source-search">
                 <span className="text-white text-sm font-medium font-solaiman-lipi">উৎস সন্ধান</span>
               </Link>
-              <Link href="/mythbusting" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg">
+              <Link href="/mythbusting" className="mythbusting-button px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg" data-tour="mythbusting">
                 <span className="text-white text-sm font-medium font-solaiman-lipi">মিথবাস্টিং</span>
               </Link>
             </div>
@@ -141,13 +207,7 @@ export default function HomePage() {
           {/* Filter Buttons */}
           <div className="flex justify-center mb-4 w-full">
             <div className="flex space-x-2 bg-white rounded-lg p-1 shadow-md">
-              {[
-                { value: 'all', label: 'সব', color: 'bg-gray-100 text-gray-700' },
-                { value: 'true', label: 'সত্য', color: 'bg-green-100 text-green-700' },
-                { value: 'false', label: 'মিথ্যা', color: 'bg-red-100 text-red-700' },
-                { value: 'misleading', label: 'ভ্রান্তিমূলক', color: 'bg-yellow-100 text-yellow-700' },
-                { value: 'debunk', label: 'খন্ডন', color: 'bg-purple-100 text-purple-700' }
-              ].map((filterOption) => (
+              {filterOptions.map((filterOption) => (
                 <button
                   key={filterOption.value}
                   onClick={() => handleFilterChange(filterOption.value)}
@@ -172,7 +232,7 @@ export default function HomePage() {
                   {latestArticles.map((article, index) => (
                     <div 
                       key={article.id}
-                      className={`absolute transition-all duration-1000 ease-in-out ${
+                      className={`carousel-item absolute transition-all duration-1000 ease-in-out ${
                         index === currentSlide 
                           ? 'z-20 scale-100 opacity-100 transform translate-x-0' 
                           : index === (currentSlide + 1) % latestArticles.length
@@ -194,6 +254,8 @@ export default function HomePage() {
                             src={article.thumbnail || '/khoj.png'} 
                             alt={article.title}
                             className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
                           />
                           {/* Dark Gradient Overlay for Title */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
@@ -268,13 +330,15 @@ export default function HomePage() {
           
           <div className="grid grid-cols-2 gap-10 w-full max-w-6xl">
             {filteredArticles.map((article) => (
-              <article key={article.id} className="bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer rounded-xl" onClick={() => window.location.href = `/factchecks/${article.slug}`}>
+              <article key={article.id} className="article-card bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer rounded-xl" onClick={() => handleArticleClick(article.slug)}>
                 {/* Thumbnail */}
                 <div className="relative h-32 overflow-hidden">
                   <img 
                     src={article.thumbnail || '/khoj.png'} 
                     alt={article.title}
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                   {/* Verdict Badge - Top Right */}
                   <div className="absolute top-1 right-1">
@@ -336,7 +400,7 @@ export default function HomePage() {
             ))}
           </div>
           
-          <div className="text-center mt-6 w-full">
+          <div className="text-center mt-6 w-full space-y-4">
             <Link 
               href="/factchecks"
               className="btn-primary inline-flex items-center"
@@ -344,6 +408,123 @@ export default function HomePage() {
               সব ফ্যাক্টচেক দেখুন
             </Link>
           </div>
+          </div>
+        </div>
+      </section>
+
+      {/* User Invitation Section */}
+      <section className="py-4 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-2 left-2 w-8 h-8 bg-blue-400 rounded-full"></div>
+          <div className="absolute top-4 right-3 w-6 h-6 bg-purple-400 rounded-full"></div>
+          <div className="absolute bottom-2 left-4 w-8 h-8 bg-pink-400 rounded-full"></div>
+          <div className="absolute bottom-3 right-2 w-4 h-4 bg-indigo-400 rounded-full"></div>
+        </div>
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-3">
+            {/* Left Side - Image */}
+            <div className="flex-shrink-0">
+              <img 
+                src="https://i.postimg.cc/VstfbHGq/Chat-GPT-Image-Sep-5-2025-08-04-10-PM.png" 
+                alt="Fact Check Illustration" 
+                className="w-40 h-40 object-contain"
+              />
+            </div>
+            
+            {/* Right Side - Content */}
+            <div className="flex-1 text-center lg:text-left">
+              {/* Main Heading */}
+              <h2 className="text-base md:text-lg font-bold text-gray-900 mb-1 font-solaiman-lipi">
+                আমাদের পরিবারের অংশ হন
+              </h2>
+              
+              {/* Content */}
+              <p className="text-xs text-gray-700 mb-2 font-solaiman-lipi">
+                আপনার চারপাশে ঘটে চলা নানান কিছু এবং প্রচলিত গুজব, নিউজ সম্পর্কে সন্দেহ আছে? 
+                <span className="font-semibold text-blue-600">খোঁজ</span> এর সাথে যুক্ত হয়ে সত্যের সন্ধান করুন।
+              </p>
+              
+              <div className="bg-white rounded-lg p-3 mb-2 border border-gray-100">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {/* Left Side - Invitation */}
+                  <div className="text-left">
+                    <h3 className="text-xs font-bold text-gray-900 mb-1 font-solaiman-lipi">
+                      আমাদের পাঠান
+                    </h3>
+                    <ul className="space-y-0.5 text-xs text-gray-700 font-solaiman-lipi">
+                      <li className="flex items-start space-x-1">
+                        <div className="w-1 h-1 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                        <span>সন্দেহজনক নিউজ বা তথ্য</span>
+                      </li>
+                      <li className="flex items-start space-x-1">
+                        <div className="w-1 h-1 bg-purple-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                        <span>প্রচলিত গুজব বা ভুয়া খবর</span>
+                      </li>
+                      <li className="flex items-start space-x-1">
+                        <div className="w-1 h-1 bg-pink-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                        <span>সামাজিক যোগাযোগমাধ্যমের পোস্ট</span>
+                      </li>
+                      <li className="flex items-start space-x-1">
+                        <div className="w-1 h-1 bg-indigo-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                        <span>যেকোনো সন্দেহজনক দাবি</span>
+                      </li>
+                    </ul>
+                  </div>
+                  
+                  {/* Right Side - Contact */}
+                  <div className="text-left">
+                    <h3 className="text-xs font-bold text-gray-900 mb-1 font-solaiman-lipi">
+                      যোগাযোগ করুন
+                    </h3>
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-1 p-1 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                        <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                          <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-600 font-solaiman-lipi">ইমেইল ঠিকানা</p>
+                          <a 
+                            href="mailto:sysitech1971@gmail.com" 
+                            className="text-blue-600 hover:text-blue-700 font-medium text-xs font-solaiman-lipi transition-colors"
+                          >
+                            sysitech1971@gmail.com
+                          </a>
+                        </div>
+                      </div>
+                      
+                      <div className="p-1 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+                        <p className="text-xs text-gray-700 font-solaiman-lipi">
+                          <span className="font-semibold text-green-600">দ্রুত প্রতিক্রিয়া:</span> 
+                          ২৪-৪৮ ঘন্টার মধ্যে উত্তর।
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Call to Action */}
+              <div className="text-center">
+                <div className="flex flex-col sm:flex-row gap-1 justify-center items-center">
+                  <a 
+                    href="mailto:sysitech1971@gmail.com"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-solaiman-lipi"
+                  >
+                    এখনই ইমেইল করুন
+                  </a>
+                  <Link 
+                    href="/about"
+                    className="bg-white hover:bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 border border-gray-200 hover:border-gray-300 font-solaiman-lipi"
+                  >
+                    আমাদের সম্পর্কে জানুন
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 
@@ -8,12 +8,14 @@ interface SearchBarProps {
   placeholder?: string
   className?: string
   onSearch?: (query: string) => void
+  'data-tour'?: string
 }
 
-export default function SearchBar({ 
+const SearchBar = memo(function SearchBar({ 
   placeholder = "যেকোনো দাবি বা তথ্য লিখুন...", 
   className = "",
-  onSearch 
+  onSearch,
+  'data-tour': dataTour
 }: SearchBarProps) {
   const [query, setQuery] = useState('')
   const router = useRouter()
@@ -29,13 +31,17 @@ export default function SearchBar({
     }
   }
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value)
+  }
+
   return (
-    <form onSubmit={handleSubmit} className={`relative ${className}`}>
+    <form onSubmit={handleSubmit} className={`relative ${className}`} data-tour={dataTour}>
       <div className="relative">
         <input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={handleInputChange}
           placeholder={placeholder}
           className="search-input pr-12"
         />
@@ -48,4 +54,6 @@ export default function SearchBar({
       </div>
     </form>
   )
-}
+})
+
+export default SearchBar

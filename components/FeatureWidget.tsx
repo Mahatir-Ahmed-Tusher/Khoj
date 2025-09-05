@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { BookOpen, MessageCircle, Zap } from 'lucide-react'
+import { BookOpen, Zap } from 'lucide-react'
 
 // Custom Mukti Corner Icon Component
 const MuktiIcon = ({ className }: { className?: string }) => (
@@ -27,7 +27,7 @@ interface FeatureWidgetProps {
 }
 
 export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const features = [
     {
@@ -104,73 +104,64 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
 
       {/* Mobile Floating Action Button */}
       <div className="lg:hidden fixed bottom-6 right-6 z-50">
-                  <button
-            onClick={() => setIsModalOpen(true)}
-            className="w-16 h-16 bg-orange-500 rounded-full shadow-2xl flex items-center justify-center text-white hover:bg-orange-600 transition-all duration-300"
-            style={{
-              boxShadow: '0 4px 20px rgba(249, 115, 22, 0.3), 0 8px 25px rgba(249, 115, 22, 0.2), 0 0 30px rgba(249, 115, 22, 0.15)'
-            }}
-          >
-          <MessageCircle className="h-6 w-6" />
+        {/* Expanded Options */}
+        {isExpanded && (
+          <div className="absolute bottom-20 right-0 flex flex-col space-y-4 mb-4">
+            {features.map((feature, index) => (
+              <Link
+                key={feature.id}
+                href={feature.href}
+                onClick={() => setIsExpanded(false)}
+                className="flex items-center space-x-3 bg-white rounded-full px-4 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                style={{
+                  animationDelay: `${index * 0.1}s`,
+                  animation: 'slideInUp 0.3s ease-out forwards'
+                }}
+              >
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-100">
+                  {feature.id === 'mukti-corner' || feature.id === 'mythbusting' ? (
+                    <feature.icon className="h-8 w-8 object-contain" />
+                  ) : (
+                    <feature.icon className="h-6 w-6 text-gray-700" />
+                  )}
+                </div>
+                <span className="text-sm font-medium text-gray-800 font-solaiman-lipi whitespace-nowrap">
+                  {feature.title}
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Main FAB Button */}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className={`w-16 h-16 bg-blue-500 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-300 ${
+            isExpanded ? 'rotate-45 bg-red-500 hover:bg-red-600' : 'hover:bg-blue-600 hover:scale-110'
+          }`}
+          style={{
+            boxShadow: isExpanded 
+              ? '0 4px 20px rgba(239, 68, 68, 0.4), 0 8px 25px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.2), 0 0 60px rgba(239, 68, 68, 0.1)'
+              : '0 4px 20px rgba(59, 130, 246, 0.4), 0 8px 25px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.2), 0 0 60px rgba(59, 130, 246, 0.1)',
+            filter: isExpanded 
+              ? 'drop-shadow(0 0 20px rgba(239, 68, 68, 0.5))'
+              : 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.5))'
+          }}
+        >
+          {isExpanded ? (
+            <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <img 
+              src="/searching.png" 
+              alt="Search" 
+              className="h-8 w-8 object-contain filter brightness-110"
+            />
+          )}
         </button>
       </div>
 
-      {/* Mobile Modal */}
-      {isModalOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-black bg-opacity-50"
-            onClick={() => setIsModalOpen(false)}
-          />
-          <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-bold text-gray-900 font-solaiman-lipi">
-                আপনার সত্যান্বেষের এ যাত্রায় আরও রয়েছেঃ
-              </h3>
-            </div>
-            
-            <div className="space-y-4">
-              {features.map((feature) => (
-                <Link
-                  key={feature.id}
-                  href={feature.href}
-                  onClick={() => setIsModalOpen(false)}
-                  className="block"
-                >
-                  <div className="bg-gray-50 hover:bg-gray-100 rounded-lg p-4 transition-all duration-300 border border-gray-200">
-                    <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-lg ${feature.id === 'mukti-corner' || feature.id === 'mythbusting' ? 'bg-transparent' : feature.color} transition-colors duration-300`}>
-                        {feature.id === 'mukti-corner' || feature.id === 'mythbusting' ? (
-                          <feature.icon className="h-9 w-9 object-contain" />
-                        ) : (
-                          <feature.icon className="h-5 w-5 text-white" />
-                        )}
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 font-solaiman-lipi">
-                          {feature.title}
-                        </h4>
-                        <p className="text-xs text-gray-600 font-solaiman-lipi">
-                          {feature.description}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
     </>
   )
 }

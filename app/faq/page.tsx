@@ -48,7 +48,7 @@ export default function FAQ() {
     },
     {
       question: "আমি কীভাবে ভুল ফলাফল রিপোর্ট করতে পারি?",
-      answer: "যদি আপনি কোন ভুল ফলাফল দেখেন, তাহলে আমাদের ইমেইল (mahatirtusher@gmail.com) এ রিপোর্ট করুন। আমরা প্রতিটি রিপোর্ট যত্ন সহকারে পর্যালোচনা করি এবং প্রয়োজনীয় সংশোধন করি।"
+      answer: "যদি আপনি কোন ভুল ফলাফল দেখেন, তাহলে আমাদের ইমেইল (sysitech1971@gmail.com) এ রিপোর্ট করুন। আমরা প্রতিটি রিপোর্ট যত্ন সহকারে পর্যালোচনা করি এবং প্রয়োজনীয় সংশোধন করি।"
     },
     {
       question: "খোঁজ কি বিনামূল্যে?",
@@ -95,7 +95,7 @@ export default function FAQ() {
                 যদি আপনার প্রশ্নের উত্তর এখানে না থাকে, তাহলে আমাদের সাথে যোগাযোগ করুন।
               </p>
               <div className="space-y-2 text-gray-700 font-solaiman-lipi">
-                <p><strong>ইমেইল:</strong> mahatirtusher@gmail.com</p>
+                <p><strong>ইমেইল:</strong> sysitech1971@gmail.com</p>
                 <p><strong>ঠিকানা:</strong> Mirpur 12, Dhaka, Bangladesh</p>
                 <p><strong>GitHub:</strong> <a href="https://github.com/Mahatir-Ahmed-Tusher/Khoj" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">https://github.com/Mahatir-Ahmed-Tusher/Khoj</a></p>
               </div>

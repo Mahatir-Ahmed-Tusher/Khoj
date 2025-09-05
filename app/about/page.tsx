@@ -159,8 +159,8 @@ export default function AboutPage() {
             <div className="space-y-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2 font-solaiman-lipi">ইমেইল:</h3>
-                <a href="mailto:mahatirtusher@gmail.com" className="text-primary-600 hover:text-primary-700 font-medium font-solaiman-lipi">
-                  mahatirtusher@gmail.com
+                <a href="mailto:sysitech1971@gmail.com" className="text-primary-600 hover:text-primary-700 font-medium font-solaiman-lipi">
+                sysitech1971@gmail.com
                 </a>
               </div>
               <div>

@@ -1,190 +1,149 @@
+# খোঁজ (Khoj) — বাংলা ভাষায় প্রথম পূর্ণাঙ্গ এআই-ভিত্তিক ফ্যাক্টচেকিং প্ল্যাটফর্ম
+
 ![Khoj Cover](public/khoj-cover.png)
 
-### Khoj — AI‑Powered Bengali Fact‑Checking Platform
-
-An open-source, AI-assisted platform for verifying claims in Bengali. Built with Next.js 14, TypeScript, and modern AI/search APIs. Crafted for speed, clarity, and credible sourcing.
-
----
-
-### Highlights
-
-- **AI fact‑checking in Bengali**: Generates structured reports in Bengali with clear verdicts and up to 10 sources.
-- **Domain‑first search strategy**: Prioritizes trusted Bangladeshi news/fact‑check sites; falls back intelligently.
-- **Mixed‑language sourcing**: Pulls from Bengali and English when local coverage is thin, but reports in Bengali.
-- **Image authenticity check**: Detects AI‑generated images via Sightengine.
-- **Reverse image search**: Google Lens via SerpAPI for visual matches and provenance hints.
-- **AI/Plagiarism text analysis**: Winston AI endpoints for AI‑detection and plagiarism signals.
-- **Beautiful, responsive UI**: Clean, mobile‑first experience with Tailwind and glowing effects.
-- **Fact‑check library**: Browse latest checks, filters, and detail pages with citations.
-- **AI Fact-Check History**: Store and manage user-generated AI fact-check reports locally.
-- **Mukti Corner & Mythbusting**: Specialized AI chat features for liberation war topics and myth debunking.
-- **Recommendation System**: Smart article recommendations on individual fact-check pages.
-- **Enhanced Markdown Rendering**: Proper formatting for AI-generated content with headings, bold text, and links.
+## 🚀 **লাইভ ডেমো**
+**[khoj.vercel.app](https://khoj.vercel.app)** - এখনই দেখুন এবং পরীক্ষা করুন!
 
 ---
 
-### Tech Stack
+## 🎯 **প্রথম এবং একমাত্র**
 
+**খোঁজ** হলো বাংলা ভাষায় **প্রথম পূর্ণাঙ্গ কৃত্রিম বুদ্ধিমত্তা (এআই)-ভিত্তিক ফ্যাক্টচেকিং প্ল্যাটফর্ম**। আমাদের বিস্তারিত গবেষণা এবং অনুসন্ধান থেকে প্রমাণিত যে বাংলা ভাষায় এমন কোনো সম্পূর্ণ এআই-চালিত প্ল্যাটফর্ম আগে ছিল না।
+
+### 🔍 **কেন আমরা প্রথম?**
+
+- ✅ **বাংলা-কেন্দ্রিক এআই ফ্যাক্টচেকিং**: প্রথমবারের মতো বাংলা ভাষায় এআই দিয়ে দাবি যাচাই
+- ✅ **সম্পূর্ণ প্ল্যাটফর্ম**: টেক্সট, ইমেজ, এবং ঐতিহাসিক তথ্য যাচাইয়ের সমন্বিত সমাধান
+- ✅ **ওপেন-সোর্স**: MIT লাইসেন্সের অধীনে সম্পূর্ণ উন্মুক্ত
+- ✅ **বাংলাদেশী কনটেক্সট**: স্থানীয় সংস্কৃতি এবং ইতিহাসের প্রতি শ্রদ্ধাশীল
+
+---
+
+## 🌟 **মূল বৈশিষ্ট্যসমূহ**
+
+### 🤖 **এআই ফ্যাক্টচেকিং**
+- **বাংলায় স্ট্রাকচার্ড রিপোর্ট**: স্পষ্ট ভার্ডিক্ট (সত্য/মিথ্যা/ভ্রান্তিমূলক) এবং ১০টি সোর্স
+- **ডোমেইন-ফার্স্ট সার্চ**: বিশ্বস্ত বাংলাদেশী সোর্স প্রায়োরিটাইজ করে
+- **মিক্সড-ল্যাঙ্গুয়েজ সোর্সিং**: বাংলা এবং ইংরেজি উভয় সোর্স ব্যবহার
+- **বাংলায় রিপোর্ট**: সবসময় বাংলায় ফলাফল প্রদান
+
+### 🖼️ **মাল্টিমিডিয়া যাচাই**
+- **ইমেজ অথেনটিসিটি চেক**: এআই-জেনারেটেড ইমেজ শনাক্ত (Sightengine)
+- **রিভার্স ইমেজ সার্চ**: Google Lens দিয়ে ভিজুয়াল ম্যাচ
+- **টেক্সট অ্যানালাইসিস**: এআই-ডিটেকশন এবং প্লেজিয়ারিজম চেক (Winston AI)
+
+### 🛠️ **বিশেষায়িত টুলস**
+- **মুক্তিযুদ্ধ কর্নার**: ১৯৭১-এর ইতিহাস ও তথ্য যাচাইয়ের জন্য এআই চ্যাট
+- **মিথবাস্টিং**: রুমর ও মিথ ডিবাঙ্কিংয়ের জন্য এআই-চালিত চ্যাট
+- **ই-গ্রন্থসম্ভার**: ডিজিটাল বই ও রিসোর্স সংগ্রহ
+
+### 🎨 **ইউজার ইন্টারফেস**
+- **রেসপন্সিভ ডিজাইন**: সব ডিভাইসে পারফেক্ট অভিজ্ঞতা
+- **বাংলা টাইপোগ্রাফি**: Solaiman Lipi ফন্ট ব্যবহার
+- **রেড-গ্রিন থিম**: বাংলাদেশী আইডেন্টিটি প্রতিফলিত
+- **ফ্যাক্টচেক লাইব্রেরি**: সর্বশেষ যাচাইকৃত তথ্য ব্রাউজ করুন
+- **রেকমেন্ডেশন সিস্টেম**: সম্পর্কিত আর্টিকেল সুপারিশ
+
+---
+
+## 🏗️ **টেক স্ট্যাক**
+
+### **ফ্রন্টএন্ড**
 - **Framework**: Next.js 14 (App Router) + React 18 + TypeScript
 - **Styling**: Tailwind CSS, `tailwind-merge`, `clsx`
-- **AI Models**: Google Gemini (Pro/Flash), DeepSeek via OpenRouter, GROQ (GPT‑OSS‑20B) fallback
-- **Search**: Tavily API (priority sites + general), custom domain‑first crawler
-- **Media**: Sightengine (AI image detection), SerpAPI (Google Lens)
 - **Icons**: `lucide-react`
-- **Local Storage**: Browser-based storage for user-generated content
-- **Markdown Parsing**: Custom markdown parser with HTML sanitization
+- **Fonts**: Solaiman Lipi (বাংলা), Times Now (হেডিং)
+
+### **এআই এবং সার্চ**
+- **AI Models**: Google Gemini (Pro/Flash), DeepSeek via OpenRouter, GROQ (GPT-OSS-20B)
+- **Search**: Tavily API (১৬টি API কী সহ ১৬০০ সার্চ/মাস)
+- **Media**: Sightengine (AI image detection), SerpAPI (Google Lens)
+- **Text Analysis**: Winston AI (AI detection & plagiarism)
+
+### **ডেটা এবং স্টোরেজ**
+- **Local Storage**: ব্রাউজার-ভিত্তিক ইউজার ডেটা স্টোরেজ
+- **Markdown Parsing**: কাস্টম মার্কডাউন পার্সার HTML স্যানিটাইজেশন সহ
+- **API Endpoints**: JSON রিটার্ন সহ স্কেলেবল এপিআই
 
 ---
 
-### How It Works
+## 🚀 **কিভাবে কাজ করে**
 
-1. User submits a claim (in Bengali).
-2. Server searches trusted Bangladeshi sources first; augments with English sources if needed.
-3. Top sources are compiled and analyzed by AI (DeepSeek → Gemini → GROQ fallback chain).
-4. A structured Bengali report is returned with verdict and reasoning. Related articles from our library are suggested.
-5. User-generated reports are stored locally for future access and management.
-
----
-
-### API Endpoints
-
-- **POST** `/api/factcheck`
-  - Bengali report from prioritized Bangladeshi sources; augments with English if needed.
-- **POST** `/api/factcheck-domain-first`
-  - Deep domain‑first gatherer using `ALLOWED_SITES`; auto‑fallback to Tavily; rich stats.
-- **POST** `/api/search`
-  - Smart search across Bangladeshi and priority sites; de‑duplicated results.
-- **POST** `/api/image-check`
-  - AI image authenticity check using Sightengine (`true/false/misleading` with confidence).
-- **POST** `/api/source-search`
-  - Reverse image search (Google Lens via SerpAPI). Returns visual matches and analysis.
-- **POST** `/api/text-check`
-  - `type: "ai-detection" | "plagiarism"` — Winston AI powered, with AI fallback.
-- **POST** `/api/mukti-corner`
-  - AI chat for liberation war topics and historical fact-checking.
-- **POST** `/api/mythbusting`
-  - AI-powered myth debunking and rumor analysis.
-- **GET** `/api/tavily-status`
-  - Monitor the status of all Tavily API keys and their monthly usage.
-
-All endpoints return JSON. See source files in `app/api/*/route.ts` for request/response shapes.
+1. **দাবি জমা**: ইউজার বাংলায় দাবি সাবমিট করে
+2. **সোর্স সার্চ**: বিশ্বস্ত বাংলাদেশী সোর্স প্রথমে খোঁজা হয়; প্রয়োজনে ইংরেজি সোর্স যোগ করা হয়
+3. **এআই বিশ্লেষণ**: শীর্ষ সোর্সসমূহ এআই দ্বারা বিশ্লেষিত হয় (DeepSeek → Gemini → GROQ)
+4. **রিপোর্ট তৈরি**: স্ট্রাকচার্ড বাংলা রিপোর্ট ভার্ডিক্ট এবং যুক্তি সহ ফিরে আসে
+5. **সংরক্ষণ**: ইউজার-জেনারেটেড রিপোর্ট স্থানীয়ভাবে সংরক্ষিত হয়
 
 ---
 
-### App Pages
+## 📡 **এপিআই এন্ডপয়েন্টস**
 
-- `/` Home with hero search, latest fact‑checks, and AI fact-check widget
-- `/factchecks` Listing with filters; `/factchecks/[slug]` detail pages with recommendations
-- `/factcheck-detail` AI-powered fact-checking with search bar
-- `/factcheck-view` View all user-generated AI fact-check reports
-- `/factcheck-view/[id]` View individual AI fact-check report
-- `/image-check` Image authenticity checker
-- `/text-check` Text AI‑detection and plagiarism analysis
-- `/source-search` Reverse image source search
-- `/mythbusting` AI-powered myth debunking chat
-- `/mukti-corner` Liberation war topics and historical fact-checking
-- `/domain-first-factcheck` Experimental domain‑first flow
-- `/about` Project overview
+### **মূল ফ্যাক্টচেকিং**
+- **POST** `/api/factcheck` - বাংলায় মিশ্র-সোর্স রিপোর্ট
+- **POST** `/api/factcheck-domain-first` - ডোমেইন-ফার্স্ট গ্যাদারার + অটো-ফলব্যাক
 
----
+### **মিডিয়া যাচাই**
+- **POST** `/api/image-check` - এআই ইমেজ অথেনটিসিটি চেক
+- **POST** `/api/source-search` - রিভার্স ইমেজ সার্চ (Google Lens)
+- **POST** `/api/text-check` - এআই-ডিটেকশন এবং প্লেজিয়ারিজম
 
-### Key Features
+### **বিশেষায়িত চ্যাট**
+- **POST** `/api/mukti-corner` - মুক্তিযুদ্ধ বিষয়ক এআই চ্যাট
+- **POST** `/api/mythbusting` - মিথ ডিবাঙ্কিং এআই চ্যাট
 
-#### **AI Fact-Check Widget**
-- Desktop: Left-side widget showing user's AI fact-check history
-- Mobile: Collapsible sidebar with toggle functionality
-- Features: View, download, and delete individual reports
-- Storage: Browser-based local storage for persistence
-
-#### **Enhanced Homepage**
-- **Glowing Text Effects**: Animated glow on main title and subtitle
-- **Double-Column Grid**: 10 most recent articles in responsive 2-column layout
-- **Article Cards**: Thumbnails, verdict badges, tags, previews, and dates
-- **Quick Access Buttons**: ছবি যাচাই, লেখা যাচাই, উৎস সন্ধান, মিথবাস্টিং
-
-#### **Recommendation System**
-- **Individual Article Pages**: Shows 5 recent articles (excluding current)
-- **Smart Filtering**: Excludes current article from recommendations
-- **Rich Metadata**: Thumbnails, titles, verdicts, and dates
-
-#### **Mukti Corner & Mythbusting**
-- **AI Chat Interface**: Specialized for liberation war topics and myth debunking
-- **Concise Summaries**: 2-3 sentence summaries instead of detailed ones
-- **Markdown Rendering**: Proper formatting for AI responses
-
-#### **Enhanced Content**
-- **New Articles**: 3 new fact-check articles (IDs 23, 24, 25) with detailed content
-- **Proper Formatting**: Hyperlinked references and structured content
-- **Rich Metadata**: Tags, thumbnails, and comprehensive analysis
+### **ইউটিলিটি**
+- **POST** `/api/search` - স্মার্ট সার্চ বাংলাদেশী এবং প্রায়োরিটি সাইটে
+- **GET** `/api/tavily-status` - সব Tavily API কী-এর স্ট্যাটাস মনিটর
 
 ---
 
-### Environment Variables
+## 📱 **অ্যাপ পেজসমূহ**
 
-Copy `.env.example` to `.env.local` and fill in your keys.
+### **মূল পেজসমূহ**
+- `/` - হোম পেজ (হিরো সার্চ, সর্বশেষ ফ্যাক্টচেক, এআই উইজেট)
+- `/factcheck-detail` - এআই-চালিত ফ্যাক্টচেকিং ইন্টারফেস
+- `/factchecks` - ফিল্টার সহ লিস্টিং; `/factchecks/[slug]` বিস্তারিত পেজ
 
-```env
-# Tavily API Keys (multiple keys for automatic fallback when monthly limits are reached)
-TAVILY_API_KEY=your_primary_tavily_api_key_here
-TAVILY_API_KEY_2=your_second_tavily_api_key_here
-TAVILY_API_KEY_3=your_third_tavily_api_key_here
-TAVILY_API_KEY_4=your_fourth_tavily_api_key_here
-TAVILY_API_KEY_5=your_fifth_tavily_api_key_here
-TAVILY_API_KEY_6=your_sixth_tavily_api_key_here
-TAVILY_API_KEY_7=your_seventh_tavily_api_key_here
-TAVILY_API_KEY_8=your_eighth_tavily_api_key_here
-TAVILY_API_KEY_9=your_ninth_tavily_api_key_here
-TAVILY_API_KEY_10=your_tenth_tavily_api_key_here
-TAVILY_API_KEY_11=your_eleventh_tavily_api_key_here
-TAVILY_API_KEY_12=your_twelfth_tavily_api_key_here
-TAVILY_API_KEY_13=your_thirteenth_tavily_api_key_here
-TAVILY_API_KEY_14=your_fourteenth_tavily_api_key_here
-TAVILY_API_KEY_15=your_fifteenth_tavily_api_key_here
-TAVILY_API_KEY_16=your_sixteenth_tavily_api_key_here
-# Total: 16 API keys for maximum capacity
+### **মিডিয়া টুলস**
+- `/image-check` - ইমেজ অথেনটিসিটি চেকার
+- `/text-check` - টেক্সট এআই-ডিটেকশন এবং প্লেজিয়ারিজম বিশ্লেষণ
+- `/source-search` - রিভার্স ইমেজ সোর্স সার্চ
 
-OPENROUTER_API_KEY=your_openrouter_api_key_here
-GEMINI_API_KEY=your_gemini_api_key_here
-GROQ_API_KEY=your_groq_api_key_here
-SIGHTENGINE_API_USER=your_sightengine_api_user_here
-SIGHTENGINE_API_SECRET=your_sightengine_api_secret_here
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+### **বিশেষায়িত ফিচার**
+- `/mukti-corner` - মুক্তিযুদ্ধ বিষয়ক চ্যাট ইন্টারফেস
+- `/mythbusting` - মিথ ডিবাঙ্কিং চ্যাট ইন্টারফেস
+- `/e-library` - ই-গ্রন্থসম্ভার
 
-# Additional (used by routes)
-SERPAPI_KEY=your_serpapi_key_here          # For /api/source-search (Google Lens)
-WINSTON_TOKEN=your_winston_token_here      # For /api/text-check (AI/Plagiarism)
-```
-
-**Note:** The system automatically uses multiple Tavily API keys as fallbacks. When one key hits its monthly limit (100 searches), it automatically switches to the next available key. With 16 API keys, you get up to 1,600 searches per month.
+### **ইউজার ম্যানেজমেন্ট**
+- `/factcheck-view` - সব ইউজার-জেনারেটেড এআই ফ্যাক্টচেক রিপোর্ট
+- `/factcheck-view/[id]` - ব্যক্তিগত এআই ফ্যাক্টচেক রিপোর্ট দেখুন
 
 ---
 
-### Getting Started
+## 🔧 **ইনস্টলেশন এবং সেটআপ**
 
-1) Clone and install
-
+### ১) রিপোজিটরি ক্লোন করুন
 ```bash
-git clone https://github.com/Mahatir-Ahmed-Tusher/khoj-fact-checker.git
-cd khoj-fact-checker
+git clone https://github.com/Mahatir-Ahmed-Tusher/Khoj.git
+cd Khoj
 npm install
 ```
 
-2) Configure environment
-
+### ২) এনভায়রনমেন্ট কনফিগার করুন
 ```bash
 cp env.example .env.local
-# then edit .env.local and add your API keys
+# .env.local ফাইল এডিট করে আপনার API কীগুলো যোগ করুন
 ```
 
-3) Run
-
+### ৩) ডেভেলপমেন্ট সার্ভার চালু করুন
 ```bash
 npm run dev
-# open http://localhost:3000
+# http://localhost:3000 খুলুন
 ```
 
-4) Production build
-
+### ৪) প্রোডাকশন বিল্ড
 ```bash
 npm run build
 npm run start
@@ -192,122 +151,144 @@ npm run start
 
 ---
 
-### File Structure
+## 🔑 **এনভায়রনমেন্ট ভেরিয়েবল**
 
-```text
+`.env.example` কপি করে `.env.local` তৈরি করুন এবং আপনার কীগুলো পূরণ করুন।
+
+```env
+# Tavily API Keys (মাসিক লিমিট পূরণ হলে অটোমেটিক ফলব্যাকের জন্য)
+TAVILY_API_KEY=your_primary_tavily_api_key_here
+TAVILY_API_KEY_2=your_second_tavily_api_key_here
+# ... (মোট ১৬টি API কী)
+TAVILY_API_KEY_16=your_sixteenth_tavily_api_key_here
+
+# AI Models
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
+
+# Media Analysis
+SIGHTENGINE_API_USER=your_sightengine_api_user_here
+SIGHTENGINE_API_SECRET=your_sightengine_api_secret_here
+SERPAPI_KEY=your_serpapi_key_here
+WINSTON_TOKEN=your_winston_token_here
+
+# App Configuration
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+**নোট:** সিস্টেমটি অটোমেটিকভাবে একাধিক Tavily API কী ফলব্যাক হিসেবে ব্যবহার করে। একটি কী-এর মাসিক লিমিট (১০০ সার্চ) পূরণ হলে, এটি স্বয়ংক্রিয়ভাবে পরবর্তী উপলব্ধ কী-এ স্যুইচ করে। ১৬টি API কী দিয়ে আপনি মাসে ১,৬০০ সার্চ পেতে পারেন।
+
+---
+
+## 📁 **ফাইল স্ট্রাকচার**
+
+```
 FACT CHECKER/
 ├─ app/
-│  ├─ api/
-│  │  ├─ factcheck/route.ts              # Mixed‑source Bengali fact‑check
-│  │  ├─ factcheck-domain-first/route.ts # Domain‑first gather + fallback
-│  │  ├─ image-check/route.ts            # Sightengine AI image detection
-│  │  ├─ search/route.ts                 # Priority + general search
-│  │  ├─ source-search/route.ts          # Google Lens via SerpAPI
-│  │  ├─ text-check/route.ts             # Winston AI + fallback
-│  │  ├─ mukti-corner/route.ts           # Liberation war AI chat
-│  │  └─ mythbusting/route.ts            # Myth debunking AI chat
-│  ├─ about/page.tsx
-│  ├─ ai-detector/page.tsx
-│  ├─ domain-first-factcheck/page.tsx
-│  ├─ factcheck-detail/page.tsx
-│  ├─ factcheck-view/page.tsx            # All AI fact-check reports
-│  ├─ factcheck-view/[id]/page.tsx      # Individual AI fact-check report
-│  ├─ factchecks/[slug]/page.tsx
-│  ├─ factchecks/page.tsx
-│  ├─ image-check/page.tsx
-│  ├─ mukti-corner/page.tsx             # Liberation war chat interface
-│  ├─ mythbusting/page.tsx              # Myth debunking chat interface
-│  ├─ source-search/page.tsx
-│  ├─ text-check/page.tsx
-│  ├─ results/page.tsx
-│  ├─ layout.tsx
-│  ├─ globals.css
-│  └─ page.tsx                           # Home
+│  ├─ api/                    # API রুটস
+│  │  ├─ factcheck/route.ts              # মিশ্র-সোর্স বাংলা ফ্যাক্টচেক
+│  │  ├─ factcheck-domain-first/route.ts # ডোমেইন-ফার্স্ট গ্যাদার + ফলব্যাক
+│  │  ├─ image-check/route.ts            # Sightengine AI ইমেজ ডিটেকশন
+│  │  ├─ search/route.ts                 # প্রায়োরিটি + জেনারেল সার্চ
+│  │  ├─ source-search/route.ts          # SerpAPI দিয়ে Google Lens
+│  │  ├─ text-check/route.ts             # Winston AI + ফলব্যাক
+│  │  ├─ mukti-corner/route.ts           # মুক্তিযুদ্ধ এআই চ্যাট
+│  │  └─ mythbusting/route.ts            # মিথ ডিবাঙ্কিং এআই চ্যাট
+│  ├─ fact-checking-verification/       # আমাদের প্রথম হওয়ার প্রমাণ
+│  ├─ mukti-corner/page.tsx             # মুক্তিযুদ্ধ চ্যাট ইন্টারফেস
+│  ├─ mythbusting/page.tsx              # মিথ ডিবাঙ্কিং চ্যাট ইন্টারফেস
+│  └─ page.tsx                           # হোম পেজ
 ├─ components/
-│  ├─ AIFactCheckWidget.tsx             # User AI fact-check history widget
-│  ├─ DomainFirstFactChecker.tsx
-│  ├─ FeatureWidget.tsx                 # Feature promotion widget
-│  ├─ Footer.tsx
-│  ├─ MuktiSidebar.tsx                  # Mukti Corner sidebar
-│  ├─ MythbustingSidebar.tsx            # Mythbusting sidebar
-│  ├─ Navbar.tsx
-│  ├─ PromotionalWidget.tsx             # Promotional features widget
-│  ├─ RecommendationWidget.tsx          # Article recommendations
-│  └─ SearchBar.tsx
+│  ├─ AIFactCheckWidget.tsx             # ইউজার এআই ফ্যাক্টচেক হিস্ট্রি উইজেট
+│  ├─ SiteTour.tsx                      # প্রথম-বার ভিজিটরদের জন্য সাইট ট্যুর
+│  ├─ FeatureWidget.tsx                 # ফিচার প্রমোশন উইজেট
+│  └─ SearchBar.tsx                     # সার্চ বার কম্পোনেন্ট
 ├─ lib/
-│  ├─ ai-factcheck-utils.ts             # AI fact-check storage utilities
-│  ├─ data.ts                            # Fact‑check articles, helpers
-│  ├─ markdown.ts                        # Markdown parsing and HTML sanitization
-│  └─ utils.ts                           # PRIORITY_SITES, ALLOWED_SITES, helpers
+│  ├─ ai-factcheck-utils.ts             # এআই ফ্যাক্টচেক স্টোরেজ ইউটিলিটি
+│  ├─ visit-tracker.ts                  # ভিজিট ট্র্যাকিং সিস্টেম
+│  ├─ data.ts                            # ফ্যাক্টচেক আর্টিকেল, হেল্পারস
+│  ├─ markdown.ts                        # মার্কডাউন পার্সিং এবং HTML স্যানিটাইজেশন
+│  └─ utils.ts                           # PRIORITY_SITES, ALLOWED_SITES, হেল্পারস
 ├─ public/
-│  ├─ khoj-cover.png                     # README cover
-│  ├─ khoj.png                           # Hero image
-│  └─ thumbnails/...                     # Listing thumbnails
-├─ tailwind.config.js
-├─ tsconfig.json
-├─ package.json
+│  ├─ khoj-cover.png                     # README কভার
+│  ├─ khoj-logo.png                      # লোগো
+│  ├─ searching.png                      # FAB আইকন
+│  └─ thumbnails/...                     # লিস্টিং থাম্বনেইল
 └─ README.md
 ```
 
 ---
 
-### NPM Scripts
+## 🎮 **এনপিএম স্ক্রিপ্টস**
 
 ```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run start    # Start production server
-npm run lint     # Lint
+npm run dev      # ডেভেলপমেন্ট সার্ভার শুরু করুন
+npm run build    # প্রোডাকশনের জন্য বিল্ড করুন
+npm run start    # প্রোডাকশন সার্ভার শুরু করুন
+npm run lint     # লিন্ট চেক করুন
 ```
 
 ---
 
-### For Hackathon Judges
+## 🏆 **হ্যাকাথন জাজদের জন্য**
 
-- Minimal setup: add keys in `.env.local`, run `npm run dev`, open the home page.
-- Try a claim in Bengali on the homepage; view sources and the generated report.
-- Test media tools:
-  - Image authenticity: `/image-check`
-  - Reverse image search: `/source-search`
-  - Text analysis: `/text-check` (`ai-detection` or `plagiarism`)
-- Test new features:
-  - AI fact-check history: Check the left widget on desktop or mobile sidebar
-  - Mukti Corner: `/mukti-corner` for liberation war topics
-  - Mythbusting: `/mythbusting` for myth debunking
-  - Article recommendations: Click on any individual fact-check article
-- Domain‑first experimental flow: `/domain-first-factcheck`
+### **সর্বনিম্ন সেটআপ**
+1. `.env.local` এ কীগুলো যোগ করুন
+2. `npm run dev` চালান
+3. হোম পেজ খুলুন
 
----
-
-### Contributors
-
-- **Mahatir Ahmed Tusher** — Founder & Author
-- **Sagar Chandra Dey** — UI Designer & Author
-- **Tania Chaity** — Data Collector & Researcher
-
-GitHub: `https://github.com/Mahatir-Ahmed-Tusher`
+### **পরীক্ষা করুন**
+- **বাংলায় দাবি**: হোমপেজে বাংলায় কোনো দাবি লিখুন এবং রিপোর্ট দেখুন
+- **মিডিয়া টুলস**:
+  - ইমেজ অথেনটিসিটি: `/image-check`
+  - রিভার্স ইমেজ সার্চ: `/source-search`
+  - টেক্সট বিশ্লেষণ: `/text-check` (`ai-detection` বা `plagiarism`)
+- **নতুন ফিচার**:
+  - এআই ফ্যাক্টচেক হিস্ট্রি: ডেস্কটপে বাম উইজেট বা মোবাইলে সাইডবার
+  - মুক্তিযুদ্ধ কর্নার: `/mukti-corner`
+  - মিথবাস্টিং: `/mythbusting`
+  - আর্টিকেল রেকমেন্ডেশন: যেকোনো ফ্যাক্টচেক আর্টিকেলে ক্লিক করুন
 
 ---
 
-### Contributing
+## 👥 **কন্ট্রিবিউটরস**
 
-1. Fork the repo
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit: `git commit -m "feat: add amazing feature"`
-4. Push: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+- **মাহাথির আহমেদ তুষার** — প্রতিষ্ঠাতা ও লেখক
+- **সাগর চন্দ্র দে** — ইউআই ডিজাইনার ও লেখক  
+- **তানিয়া চৈতি** — ডেটা কালেক্টর ও গবেষক
 
----
-
-### License
-
-MIT — see `LICENSE` (or include one in the repo).
+**GitHub**: [https://github.com/Mahatir-Ahmed-Tusher/Khoj](https://github.com/Mahatir-Ahmed-Tusher/Khoj)
 
 ---
 
-### Acknowledgments
+## 🤝 **কন্ট্রিবিউটিং**
 
-- Next.js, Tailwind CSS, TypeScript
-- Tavily, Google Gemini, OpenRouter DeepSeek, GROQ
-- Sightengine, SerpAPI (Google Lens), Winston AI
+1. রিপো ফর্ক করুন
+2. ফিচার ব্রাঞ্চ তৈরি করুন: `git checkout -b feature/amazing-feature`
+3. কমিট করুন: `git commit -m "feat: add amazing feature"`
+4. পুশ করুন: `git push origin feature/amazing-feature`
+5. Pull Request খুলুন
 
+---
+
+## 📄 **লাইসেন্স**
+
+MIT — `LICENSE` ফাইল দেখুন।
+
+---
+
+## 🙏 **স্বীকৃতি**
+
+- **Framework**: Next.js, Tailwind CSS, TypeScript
+- **AI Models**: Tavily, Google Gemini, OpenRouter DeepSeek, GROQ
+- **Media Analysis**: Sightengine, SerpAPI (Google Lens), Winston AI
+- **Fonts**: Solaiman Lipi (বাংলা টাইপোগ্রাফি)
+
+---
+
+## 🌟 **কেন খোঁজ বিশেষ?**
+
+খোঁজ শুধু একটি ফ্যাক্টচেকিং প্ল্যাটফর্ম নয়—এটি বাংলা ভাষায় এআই-এর সম্ভাবনার একটি প্রমাণ। আমরা বিশ্বাস করি যে সত্য তথ্য সকলের জন্য সহজলভ্য হওয়া উচিত, বিশেষ করে বাংলা ভাষায়। আমাদের লক্ষ্য হলো বাংলাদেশে ডিজিটাল লিটারেসি বাড়ানো এবং মিথ্যা তথ্যের বিরুদ্ধে লড়াই করা।
+
+**খোঁজের সাথে যুক্ত হয়ে সত্যের সন্ধান করুন!** 🔍✨

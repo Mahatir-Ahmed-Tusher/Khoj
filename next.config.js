@@ -14,7 +14,14 @@ const nextConfig = {
         hostname: 'i.postimg.cc',
       },
     ],
+    // Performance optimizations
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 60,
   },
+  // Performance optimizations
+  compress: true,
+  poweredByHeader: false,
+  generateEtags: false,
   env: {
     TAVILY_API_KEY: process.env.TAVILY_API_KEY,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,

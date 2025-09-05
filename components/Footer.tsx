@@ -124,8 +124,8 @@ export default function Footer() {
             <ul className="space-y-2">
               <li className="text-gray-300 font-solaiman-lipi">
                 <span className="block">ইমেইল:</span>
-                <a href="mailto:mahatirtusher@gmail.com" className="text-primary-400 hover:text-primary-300">
-                  mahatirtusher@gmail.com
+                <a href="mailto:sysitech1971@gmail.com" className="text-primary-400 hover:text-primary-300">
+                  sysitech1971@gmail.com
                 </a>
               </li>
               <li className="text-gray-300 font-solaiman-lipi">
