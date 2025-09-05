@@ -55,9 +55,9 @@ export default function FABTestPage() {
           </h2>
           <ul className="space-y-2 text-yellow-700 font-solaiman-lipi">
             <li>• <strong>Desktop (≥1024px):</strong> FAB should be HIDDEN ❌</li>
-            <li>• <strong>Mobile (<1024px):</strong> FAB should be VISIBLE ✅</li>
+            <li>• <strong>Mobile (&lt;1024px):</strong> FAB should be VISIBLE ✅</li>
             <li>• <strong>Resize window:</strong> Change browser width to test responsiveness</li>
-            <li>• <strong>Check bottom-right:</strong> Look for orange floating button</li>
+            <li>• <strong>Check bottom-right:</strong> Look for blue floating button</li>
           </ul>
         </div>
 
@@ -149,7 +149,7 @@ export default function FABTestPage() {
               </ul>
             </div>
             <div className="bg-white p-4 rounded-lg">
-              <h3 className="font-semibold text-gray-800 mb-2 font-solaiman-lipi">Mobile (<1024px)</h3>
+              <h3 className="font-semibold text-gray-800 mb-2 font-solaiman-lipi">Mobile (&lt;1024px)</h3>
               <ul className="text-sm text-gray-600 space-y-1 font-solaiman-lipi">
                 <li>• Blue FAB with searching.png icon</li>
                 <li>• Click to expand three options</li>
