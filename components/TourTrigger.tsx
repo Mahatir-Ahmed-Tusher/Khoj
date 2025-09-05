@@ -6,13 +6,18 @@ import SiteTour from '@/components/SiteTour'
 interface TourTriggerProps {
   className?: string
   children?: React.ReactNode
+  onClick?: () => void
 }
 
-export default function TourTrigger({ className = '', children }: TourTriggerProps) {
+export default function TourTrigger({ className = '', children, onClick }: TourTriggerProps) {
   const [showTour, setShowTour] = useState(false)
 
   const startTour = () => {
-    setShowTour(true)
+    if (onClick) {
+      onClick()
+    } else {
+      setShowTour(true)
+    }
   }
 
   return (
@@ -31,14 +36,16 @@ export default function TourTrigger({ className = '', children }: TourTriggerPro
         )}
       </button>
 
-      <SiteTour 
-        isOpen={showTour}
-        onClose={() => setShowTour(false)}
-        onComplete={() => {
-          console.log('Site tour completed!')
-          setShowTour(false)
-        }}
-      />
+      {!onClick && (
+        <SiteTour 
+          isOpen={showTour}
+          onClose={() => setShowTour(false)}
+          onComplete={() => {
+            console.log('Site tour completed!')
+            setShowTour(false)
+          }}
+        />
+      )}
     </>
   )
 }
