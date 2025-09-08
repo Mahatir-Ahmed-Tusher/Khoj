@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Footer from '@/components/Footer'
 import MythbustingSidebar from '@/components/MythbustingSidebar'
@@ -29,7 +29,7 @@ interface ChatMessage {
   }>
 }
 
-export default function MythbustingPage() {
+function MythbustingContent() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [searchHistory, setSearchHistory] = useState<SearchHistory[]>([])
   const [currentReport, setCurrentReport] = useState<SearchHistory | null>(null)
@@ -865,5 +865,23 @@ ${messageText}
         remainingSearches={remainingSearches}
       />
     </div>
+  )
+}
+
+export default function MythbustingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative w-16 h-16 mx-auto mb-4">
+            <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+          </div>
+          <p className="text-gray-600 font-solaiman-lipi">লোড হচ্ছে...</p>
+        </div>
+      </div>
+    }>
+      <MythbustingContent />
+    </Suspense>
   )
 }
