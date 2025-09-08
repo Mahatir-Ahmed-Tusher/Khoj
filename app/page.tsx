@@ -213,7 +213,7 @@ export default function HomePage() {
           
           <div className="max-w-2xl mx-auto">
             <SearchBar 
-              placeholder="আজকে কী ব্যাপারে যাচাই-বাচাই করতে চান তা লিখে ফেলুন..."
+              placeholder="আজকে কী ব্যাপারে যাচাই-বাচাই করতে চান?"
               className="mb-4"
               data-tour="search-bar"
               dynamicPlaceholder={
@@ -222,9 +222,9 @@ export default function HomePage() {
                   : isMythbustingActive 
                     ? "যে ব্যাপারে মিথবাস্টিং করতে চান, সেটা এখানে লিখুন..." 
                     : isAIImageCheckActive
-                      ? "কোনো ছবি AI জেনারেটেড কিনা জানতে ছবিটি আপলোড করুন..."
+                      ? "AI জেনারেটেড ছবি কিনা জানতে আপলোড করুন..."
                       : isImageSearchActive
-                        ? "যেকোনো ছবি সার্চ করে জানুন অনলাইনে আর কোথায় আছে সেটা..."
+                        ? "ছবি সার্চ করতে আপলোড করুন..."
                         : undefined
               }
               isNewsCheckMode={isNewsCheckActive}
