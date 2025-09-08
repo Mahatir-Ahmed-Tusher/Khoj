@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SiteTour from '@/components/SiteTour'
 import MobileTourTrigger from '@/components/MobileTourTrigger'
@@ -25,8 +24,6 @@ export default function MobileTourDemo() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       {/* Site Tour */}
       <SiteTour 
         isOpen={showTour}
@@ -86,7 +83,7 @@ export default function MobileTourDemo() {
               <li>1. স্বাগত বার্তা</li>
               <li>2. মোবাইল মেনু</li>
               <li>3. ফ্লোটিং অ্যাকশন বাটন</li>
-              <li>4. ছবি যাচাই</li>
+              <li>4. AI ছবি যাচাই</li>
               <li>5. লেখা যাচাই</li>
               <li>6. উৎস সন্ধান</li>
               <li>7. মিথবাস্টিং</li>

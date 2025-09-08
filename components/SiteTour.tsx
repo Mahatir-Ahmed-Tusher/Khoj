@@ -29,8 +29,8 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
     {
       id: 'welcome',
       target: 'body',
-      title: 'খোঁজে স্বাগতম! 📱',
-      content: 'মোবাইলে খোঁজের ফিচারগুলো দেখুন',
+      title: 'খোঁজে স্বাগতম!',
+      content: 'চলুন আপনাকে ঘুরিয়ে দেখাই, খোঁজে কী কী আছে!',
       position: 'center',
       showArrow: false,
       highlight: false
@@ -38,8 +38,8 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
     {
       id: 'mobile-menu',
       target: '.md\\:hidden button[aria-label="Toggle mobile menu"]',
-      title: 'মোবাইল মেনু',
-      content: 'এখানে সব পেজের লিংক পাবেন',
+      title: 'আপনার ফ্যাক্টচেক',
+      content: 'আপনার যাচাই করা আগের সব এআই ফ্যাক্টচেক দেখতে',
       position: 'bottom',
       showArrow: true,
       highlight: true
@@ -47,8 +47,8 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
     {
       id: 'sidebar-toggle',
       target: '[data-tour="sidebar-toggle"], .md\\:hidden button[aria-label="Toggle mobile menu"]',
-      title: 'আপনার ফ্যাক্টচেক',
-      content: 'আপনার যাচাই করা আগের সব এআই ফ্যাক্টচেক দেখতে',
+      title: 'মোবাইল মেনু',
+      content: 'এখানে সব পেজের লিংক পাবেন',
       position: 'bottom',
       showArrow: true,
       highlight: true
@@ -75,7 +75,7 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
       id: 'source-search',
       target: '[href="/source-search"], [data-tour="source-search"]',
       title: 'উৎস সন্ধান',
-      content: 'তথ্যের উৎস খুঁজুন',
+      content: 'তথ্যের উৎس খুঁজুন',
       position: 'top',
       showArrow: true,
       highlight: true
@@ -97,6 +97,15 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
       position: 'bottom',
       showArrow: true,
       highlight: true
+    },
+    {
+      id: 'floating-action',
+      target: '.lg\\:hidden.fixed.bottom-6.right-6 button',
+      title: '',
+      content: '',
+      position: 'center',
+      showArrow: false,
+      highlight: false
     },
     {
       id: 'complete',
@@ -165,6 +174,17 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
       if (!targetElement) {
         // Last fallback: any mythbusting link
         targetElement = document.querySelector('a[href="/mythbusting"]')
+      }
+    } else if (step.target.includes('floating-action')) {
+      // Look for FAB button specifically
+      targetElement = document.querySelector('.lg\\:hidden.fixed.bottom-6.right-6 button')
+      if (!targetElement) {
+        // Fallback: look for any FAB button
+        targetElement = document.querySelector('.fixed.bottom-6.right-6 button')
+      }
+      if (!targetElement) {
+        // Last fallback: look for FeatureWidget button
+        targetElement = document.querySelector('.lg\\:hidden button')
       }
     } else {
       targetElement = document.querySelector(step.target)
@@ -254,6 +274,9 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
     } else if (currentStepData.id === 'sidebar-toggle') {
       // For sidebar-toggle button, always show below and to the right
       position = 'bottom'
+    } else if (currentStepData.id === 'floating-action') {
+      // For FAB, always show to the left and slightly above
+      position = 'left'
     } else if (['image-check', 'text-check'].includes(currentStepData.id)) {
       // For image-check and text-check buttons, always show to the right
       position = 'right'
@@ -269,8 +292,8 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
     const isNearRight = rect.right > window.innerWidth - 100
 
     // Auto-adjust position based on element location
-    // But don't change position for mobile-menu, image-check, text-check, and sidebar-toggle buttons
-    if (!['mobile-menu', 'image-check', 'text-check', 'sidebar-toggle'].includes(currentStepData.id)) {
+    // But don't change position for mobile-menu, image-check, text-check, sidebar-toggle, and floating-action buttons
+    if (!['mobile-menu', 'image-check', 'text-check', 'sidebar-toggle', 'floating-action'].includes(currentStepData.id)) {
       if (isNearTop && position === 'top') {
         position = 'bottom'
       }
@@ -295,7 +318,7 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
         top = rect.bottom + offset
         left = rect.left + (rect.width / 2) - (tooltipWidth / 2)
         transform = 'translateX(-50%)'
-        // For sidebar-toggle, position tooltip to the right (red marked area)
+        // For sidebar-toggle, position tooltip to the right
         if (currentStepData.id === 'sidebar-toggle') {
           left = rect.right - tooltipWidth
           transform = 'translateX(0)'
@@ -305,8 +328,28 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
         top = rect.top + (rect.height / 2) - (tooltipHeight / 2)
         left = rect.left - tooltipWidth - offset
         transform = 'translateY(-50%)'
+        // Special positioning for FAB - position to the left and slightly above
+        if (currentStepData.id === 'floating-action') {
+          // Position tooltip to the left of the FAB with proper spacing
+          left = rect.left - tooltipWidth - (offset * 2)
+          // Position slightly above center for better visual alignment
+          top = rect.top + (rect.height / 2) - (tooltipHeight / 2) - 10
+          transform = 'translateY(0)'
+          
+          // Ensure tooltip doesn't go off screen
+          if (left < margin) {
+            left = margin
+          }
+          if (top < margin) {
+            top = margin
+          }
+          // Ensure tooltip doesn't go below viewport
+          if (top + tooltipHeight > window.innerHeight - margin) {
+            top = window.innerHeight - tooltipHeight - margin
+          }
+        }
         // For sidebar-toggle, ensure tooltip doesn't cover the button
-        if (currentStepData.id === 'sidebar-toggle') {
+        else if (currentStepData.id === 'sidebar-toggle') {
           // Position tooltip further left to avoid covering
           left = rect.left - tooltipWidth - (offset * 2)
         }
@@ -322,13 +365,16 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
         break
     }
 
-    // Ensure tooltip stays within screen bounds with better margins
-    const finalTop = Math.max(margin, Math.min(top, window.innerHeight - tooltipHeight - margin))
-    const finalLeft = Math.max(margin, Math.min(left, window.innerWidth - tooltipWidth - margin))
+    // Final bounds checking (but skip for FAB as we handled it specifically above)
+    if (currentStepData.id !== 'floating-action') {
+      // Ensure tooltip stays within screen bounds with better margins
+      top = Math.max(margin, Math.min(top, window.innerHeight - tooltipHeight - margin))
+      left = Math.max(margin, Math.min(left, window.innerWidth - tooltipWidth - margin))
+    }
 
     return {
-      top: `${finalTop}px`,
-      left: `${finalLeft}px`,
+      top: `${top}px`,
+      left: `${left}px`,
       transform,
       position: 'fixed' as const,
       width: `${tooltipWidth}px`
@@ -346,81 +392,99 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
         onClick={skipTour}
       />
       
-      {/* Tooltip */}
-      <div
-        ref={tooltipRef}
-        className="fixed z-[60] bg-white rounded-lg shadow-2xl p-3 transition-all duration-300"
-        style={tooltipStyle}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Arrow */}
-        {currentStepData.showArrow && currentStepData.position !== 'center' && (
-          <div className={`absolute w-0 h-0 ${
-            currentStepData.position === 'top' ? 'border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-white top-full left-1/2 transform -translate-x-1/2' :
-            currentStepData.position === 'bottom' ? 'border-l-6 border-r-6 border-b-6 border-l-transparent border-r-transparent border-b-white bottom-full left-1/2 transform -translate-x-1/2' :
-            currentStepData.position === 'left' ? 'border-t-6 border-b-6 border-l-6 border-t-transparent border-b-transparent border-l-white left-full top-1/2 transform -translate-y-1/2' :
-            'border-t-6 border-b-6 border-r-6 border-t-transparent border-b-transparent border-r-white right-full top-1/2 transform -translate-y-1/2'
-          }`} />
-        )}
-
-        {/* Content */}
-        <div className="text-center">
-          <h3 className="text-sm font-bold text-gray-900 mb-1 font-solaiman-lipi">
-            {currentStepData.title}
-          </h3>
-          <p className="text-xs text-gray-700 mb-2 font-solaiman-lipi leading-relaxed">
-            {currentStepData.content}
-          </p>
-          
-          {/* Progress - Smaller for mobile */}
-          <div className="mb-2">
-            <div className="flex justify-center space-x-1">
-              {tourSteps.map((_, index) => (
-                <div
-                  key={index}
-                  className={`w-1 h-1 rounded-full ${
-                    index === currentStep ? 'bg-blue-600' : 
-                    index < currentStep ? 'bg-green-500' : 'bg-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-            <p className="text-xs text-gray-500 mt-1 font-solaiman-lipi">
-              {currentStep + 1}/{tourSteps.length}
+      {/* FAB Notification - Only show for floating-action step */}
+      {currentStepData.id === 'floating-action' && (
+        <div className="fixed bottom-20 right-6 z-[60] bg-blue-600 text-white px-4 py-3 rounded-lg shadow-2xl max-w-xs animate-pulse">
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+            <p className="text-sm font-solaiman-lipi leading-relaxed">
+              মুক্তিযুদ্ধ কর্নার, মিথবাস্টিং কিংবা বইপত্র পড়তে ই-গ্রন্থসম্ভারে যেতে এখানে চলে আসুন
             </p>
           </div>
+          <div className="absolute -bottom-1 right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-blue-600"></div>
+        </div>
+      )}
+      
+      {/* Tooltip - Hide for FAB step */}
+      {currentStepData.id !== 'floating-action' && (
+        <div
+          ref={tooltipRef}
+          className="fixed z-[60] bg-white rounded-lg shadow-2xl p-3 transition-all duration-300"
+          style={tooltipStyle}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Arrow */}
+          {currentStepData.showArrow && currentStepData.position !== 'center' && (
+            <div className={`absolute w-0 h-0 ${
+              currentStepData.position === 'top' ? 
+                'border-l-6 border-r-6 border-t-6 border-l-transparent border-r-transparent border-t-white top-full left-1/2 transform -translate-x-1/2' :
+              currentStepData.position === 'bottom' ? 
+                'border-l-6 border-r-6 border-b-6 border-l-transparent border-r-transparent border-b-white bottom-full left-1/2 transform -translate-x-1/2' :
+              currentStepData.position === 'left' ? 
+                'border-t-6 border-b-6 border-l-6 border-t-transparent border-b-transparent border-l-white left-full top-1/2 transform -translate-y-1/2' :
+              'border-t-6 border-b-6 border-r-6 border-t-transparent border-b-transparent border-r-white right-full top-1/2 transform -translate-y-1/2'
+            }`} />
+          )}
 
-          {/* Navigation - Smaller buttons for mobile */}
-          <div className="flex justify-between items-center">
-            <button
-              onClick={prevStep}
-              disabled={currentStep === 0}
-              className={`px-2 py-1 rounded text-xs font-medium font-solaiman-lipi transition-colors ${
-                currentStep === 0 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              পূর্ববর্তী
-            </button>
+          {/* Content */}
+          <div className="text-center">
+            <h3 className="text-sm font-bold text-gray-900 mb-1 font-solaiman-lipi">
+              {currentStepData.title}
+            </h3>
+            <p className="text-xs text-gray-700 mb-2 font-solaiman-lipi leading-relaxed">
+              {currentStepData.content}
+            </p>
             
-            <button
-              onClick={skipTour}
-              className="absolute top-2 right-2 w-6 h-6 text-red-500 hover:text-red-700 transition-colors text-lg font-bold z-10"
-              title="ট্যুর বন্ধ করুন"
-            >
-              ✕
-            </button>
-            
-            <button
-              onClick={nextStep}
-              className="px-2 py-1 bg-blue-600 text-white rounded text-xs font-medium font-solaiman-lipi hover:bg-blue-700 transition-colors"
-            >
-              {currentStep === tourSteps.length - 1 ? 'সম্পূর্ণ' : 'পরবর্তী'}
-            </button>
+            {/* Progress - Smaller for mobile */}
+            <div className="mb-2">
+              <div className="flex justify-center space-x-1">
+                {tourSteps.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-1 h-1 rounded-full ${
+                      index === currentStep ? 'bg-blue-600' : 
+                      index < currentStep ? 'bg-green-500' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-1 font-solaiman-lipi">
+                {currentStep + 1}/{tourSteps.length}
+              </p>
+            </div>
+
+            {/* Navigation - Smaller buttons for mobile */}
+            <div className="flex justify-between items-center">
+              <button
+                onClick={prevStep}
+                disabled={currentStep === 0}
+                className={`px-2 py-1 rounded text-xs font-medium font-solaiman-lipi transition-colors ${
+                  currentStep === 0 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                পূর্ববর্তী
+              </button>
+              
+              <button
+                onClick={skipTour}
+                className="absolute top-2 right-2 w-6 h-6 text-red-500 hover:text-red-700 transition-colors text-lg font-bold z-10"
+                title="ট্যুর বন্ধ করুন"
+              >
+                ✕
+              </button>
+              
+              <button
+                onClick={nextStep}
+                className="px-2 py-1 bg-blue-600 text-white rounded text-xs font-medium font-solaiman-lipi hover:bg-blue-700 transition-colors"
+              >
+                {currentStep === tourSteps.length - 1 ? 'সম্পূর্ণ' : 'পরবর্তী'}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Custom Styles */}
       <style jsx global>{`

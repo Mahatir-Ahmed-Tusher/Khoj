@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
   images: {
     remotePatterns: [
       {
@@ -17,6 +14,16 @@ const nextConfig = {
     // Performance optimizations
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 60,
+    // Add timeout and retry settings
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Increase timeout for external images
+    unoptimized: false,
+    loader: 'default',
+    // Add retry logic
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   // Performance optimizations
   compress: true,

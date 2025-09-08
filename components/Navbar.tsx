@@ -4,11 +4,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { useSearchLimit } from '@/lib/hooks/useSearchLimit'
+import { LogIn, LogOut, User } from 'lucide-react'
 
 export default function Navbar() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const { isLoggedIn, isLoading, loginWithGoogle, logout, remainingSearches, session } = useSearchLimit()
 
   const navItems = [
     { href: '/', label: 'হোম' },
@@ -63,8 +66,85 @@ export default function Navbar() {
             ))}
           </div>
 
+          {/* Auth Section */}
+          <div className="hidden md:flex items-center space-x-4">
+            {!isLoading && (
+              <>
+                {!isLoggedIn ? (
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm text-gray-600 font-solaiman-lipi">
+                      সার্চ: {remainingSearches === Infinity ? '∞' : remainingSearches}
+                    </span>
+                    <button
+                      onClick={loginWithGoogle}
+                      className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium font-solaiman-lipi text-sm"
+                    >
+                      <LogIn className="h-4 w-4" />
+                      <span>লগ ইন</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
+                      <img 
+                        src={session?.user?.image || '/khoj-logo.png'} 
+                        alt="User" 
+                        className="w-6 h-6 rounded-full"
+                      />
+                      <span className="text-sm text-green-600 font-solaiman-lipi">
+                        {session?.user?.name?.split(' ')[0]}
+                      </span>
+                    </div>
+                    <button
+                      onClick={logout}
+                      className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium font-solaiman-lipi text-sm"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>লগ আউট</span>
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center space-x-3">
+            {/* Mobile Auth Section - Always visible */}
+            {!isLoading && (
+              <>
+                {!isLoggedIn ? (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-gray-600 font-solaiman-lipi">
+                      {remainingSearches === Infinity ? '∞' : remainingSearches}
+                    </span>
+                    <button
+                      onClick={loginWithGoogle}
+                      className="flex items-center space-x-1 bg-primary-600 text-white px-3 py-1.5 rounded-lg hover:bg-primary-700 transition-colors font-medium font-solaiman-lipi text-xs"
+                    >
+                      <LogIn className="h-3 w-3" />
+                      <span>লগ ইন</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <img 
+                      src={session?.user?.image || '/khoj-logo.png'} 
+                      alt="User" 
+                      className="w-5 h-5 rounded-full"
+                    />
+                    <button
+                      onClick={logout}
+                      className="flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors font-medium font-solaiman-lipi text-xs"
+                    >
+                      <LogOut className="h-3 w-3" />
+                      <span>লগ আউট</span>
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+            
             <button 
               onClick={toggleMobileMenu}
               className="text-gray-600 hover:text-gray-900 focus:outline-none focus:text-gray-900"

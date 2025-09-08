@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense, useCallback, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SearchBar from '@/components/SearchBar'
 import { Loader2, Download, ExternalLink, CheckCircle, XCircle, AlertCircle, HelpCircle, ChevronRight } from 'lucide-react'
 import { addAIFactCheck } from '@/lib/ai-factcheck-utils'
 import PromotionalWidget from '@/components/PromotionalWidget'
 import { parseMarkdown, sanitizeHtml } from '@/lib/markdown'
+import { useSearchLimit } from '@/lib/hooks/useSearchLimit'
+import SearchLimitModal from '@/components/SearchLimitModal'
 
 interface FactCheckReport {
   claim: string
@@ -40,21 +41,32 @@ interface FactCheckReport {
   generatedAt: string
 }
 
-export default function FactCheckDetailPage() {
+function FactCheckDetailContent() {
   const searchParams = useSearchParams()
   const query = searchParams.get('query')
   
   const [report, setReport] = useState<FactCheckReport | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showLimitModal, setShowLimitModal] = useState(false)
+  const hasPerformedFactCheck = useRef(false)
+  
+  const { canSearch, recordSearch, loginWithGoogle, remainingSearches } = useSearchLimit()
 
-  useEffect(() => {
-    if (query) {
-      performFactCheck(query)
+  const performFactCheck = useCallback(async (searchQuery: string) => {
+    // Check if user can search
+    if (!canSearch()) {
+      setShowLimitModal(true)
+      return
     }
-  }, [query])
 
-  const performFactCheck = async (searchQuery: string) => {
+    // Record the search
+    const searchRecorded = recordSearch(searchQuery, 'factcheck')
+    if (!searchRecorded) {
+      setShowLimitModal(true)
+      return
+    }
+
     setIsLoading(true)
     setError('')
 
@@ -83,7 +95,14 @@ export default function FactCheckDetailPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [canSearch, recordSearch])
+
+  useEffect(() => {
+    if (query && !hasPerformedFactCheck.current) {
+      hasPerformedFactCheck.current = true
+      performFactCheck(query)
+    }
+  }, [query, performFactCheck])
 
   const downloadReport = () => {
     if (!report) return
@@ -131,7 +150,6 @@ ${report.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).
   if (!query) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             ফ্যাক্ট চেকিং এর জন্য একটি দাবি লিখুন
@@ -144,7 +162,6 @@ ${report.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Promotional Widget - Right Side */}
@@ -171,7 +188,7 @@ ${report.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).
             </div>
             <div className="max-w-2xl mx-auto">
               <SearchBar 
-                placeholder="যেকোনো দাবি বা তথ্য লিখুন..."
+                placeholder="কী নিয়ে যাচাই করতে চান তা লিখে ফেলুন..."
                 className="mb-4"
               />
             </div>
@@ -413,8 +430,31 @@ ${report.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).
           </div>
         )}
       </div>
+      
+      <SearchLimitModal
+        isOpen={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        onLogin={loginWithGoogle}
+        remainingSearches={remainingSearches}
+      />
     </div>
 
+      <Footer />
+    </div>
+  )
+}
+
+export default function FactCheckDetailPage() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Suspense fallback={
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+          <Loader2 className="h-12 w-12 text-primary-600 animate-spin mx-auto mb-4" />
+          <p className="text-lg text-gray-600">লোড হচ্ছে...</p>
+        </div>
+      }>
+        <FactCheckDetailContent />
+      </Suspense>
       <Footer />
     </div>
   )

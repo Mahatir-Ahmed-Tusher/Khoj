@@ -136,16 +136,17 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
         {/* Main FAB Button */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`w-16 h-16 bg-blue-500 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-300 ${
-            isExpanded ? 'rotate-45 bg-red-500 hover:bg-red-600' : 'hover:bg-blue-600 hover:scale-110'
+          className={`w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-300 ${
+            isExpanded ? 'rotate-45 hover:opacity-90' : 'hover:scale-110'
           }`}
           style={{
+            backgroundColor: isExpanded ? '#dc2626' : '#00bfff',
             boxShadow: isExpanded 
-              ? '0 4px 20px rgba(239, 68, 68, 0.4), 0 8px 25px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.2), 0 0 60px rgba(239, 68, 68, 0.1)'
-              : '0 4px 20px rgba(59, 130, 246, 0.4), 0 8px 25px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.2), 0 0 60px rgba(59, 130, 246, 0.1)',
+              ? '0 4px 20px rgba(220, 38, 38, 0.4), 0 8px 25px rgba(220, 38, 38, 0.3), 0 0 40px rgba(220, 38, 38, 0.2), 0 0 60px rgba(220, 38, 38, 0.1)'
+              : '0 4px 20px rgba(0, 191, 255, 0.4), 0 8px 25px rgba(0, 191, 255, 0.3), 0 0 40px rgba(0, 191, 255, 0.2), 0 0 60px rgba(0, 191, 255, 0.1)',
             filter: isExpanded 
-              ? 'drop-shadow(0 0 20px rgba(239, 68, 68, 0.5))'
-              : 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.5))'
+              ? 'drop-shadow(0 0 20px rgba(220, 38, 38, 0.5))'
+              : 'drop-shadow(0 0 20px rgba(0, 191, 255, 0.5))'
           }}
         >
           {isExpanded ? (

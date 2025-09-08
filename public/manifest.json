@@ -1,0 +1,18 @@
+{
+  "name": "Khoj - AI-Powered Bengali Fact Checking Platform",
+  "short_name": "Khoj",
+  "description": "বাংলা ভাষায় সত্যতা যাচাইয়ের জন্য AI-চালিত প্ল্যাটফর্ম",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ],
+  "lang": "bn",
+  "dir": "ltr"
+}

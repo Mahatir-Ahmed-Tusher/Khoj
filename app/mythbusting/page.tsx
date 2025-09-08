@@ -1,25 +1,27 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import Navbar from '@/components/Navbar'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Footer from '@/components/Footer'
 import MythbustingSidebar from '@/components/MythbustingSidebar'
 import { Send, Loader2, Search, Copy, Download, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { parseMarkdown, sanitizeHtml } from '@/lib/markdown'
-import { SearchHistory } from '@/lib/types'
+import { SearchHistory, Source } from '@/lib/types'
+import { useSearchLimit } from '@/lib/hooks/useSearchLimit'
+import SearchLimitModal from '@/components/SearchLimitModal'
+import { useVoiceSearch } from '@/lib/hooks/useVoiceSearch'
+import Image from 'next/image'
 
 interface ChatMessage {
   id: string
   text: string
   isUser: boolean
   timestamp: Date
-  sources?: Array<{
-    title: string
-    url: string
-    snippet: string
-  }>
+  sources?: Source[]
   verdict?: string
   summary?: string
+  conclusion?: string
+  keyTakeaways?: string[]
   ourSiteArticles?: Array<{
     title: string
     url: string
@@ -34,35 +36,24 @@ export default function MythbustingPage() {
   const [isClient, setIsClient] = useState(false)
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true) // Default collapsed
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
+  const [showLimitModal, setShowLimitModal] = useState(false)
+  const [isFromUrl, setIsFromUrl] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const searchParams = useSearchParams()
+  
+  // Voice search functionality
+  const { 
+    isRecording, 
+    isListening, 
+    error: voiceError, 
+    startVoiceSearch, 
+    stopVoiceSearch, 
+    isSupported 
+  } = useVoiceSearch()
+  
+  const { canSearch, recordSearch, loginWithGoogle, remainingSearches } = useSearchLimit()
 
-  // Initialize messages
-  useEffect(() => {
-    setIsClient(true)
-    setMessages([])
-    loadSearchHistory()
-  }, [])
-
-  // Load search history from localStorage
-  const loadSearchHistory = () => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('mythbustingHistory')
-        if (saved) {
-          const history = JSON.parse(saved).map((item: any) => ({
-            ...item,
-            timestamp: new Date(item.timestamp)
-          }))
-          setSearchHistory(history)
-        }
-      } catch (error) {
-        console.error('Error loading search history:', error)
-      }
-    }
-  }
-
-  // Save search history to localStorage
   const saveSearchHistory = (history: SearchHistory[]) => {
     if (typeof window !== 'undefined') {
       try {
@@ -73,16 +64,28 @@ export default function MythbustingPage() {
     }
   }
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const handleSendMessage = async () => {
+  const handleSendMessage = useCallback(async () => {
     if (!inputMessage.trim() || isLoading) return
+
+    console.log('handleSendMessage called, isFromUrl:', isFromUrl)
+
+    if (!isFromUrl) {
+      console.log('Manual search - checking permissions')
+      if (!canSearch()) {
+        console.log('Permission denied for manual search')
+        setShowLimitModal(true)
+        return
+      }
+
+      const searchRecorded = recordSearch(inputMessage, 'mythbusting')
+      if (!searchRecorded) {
+        console.log('Search recording failed')
+        setShowLimitModal(true)
+        return
+      }
+    } else {
+      console.log('URL search - bypassing permissions')
+    }
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -91,13 +94,11 @@ export default function MythbustingPage() {
       timestamp: new Date()
     }
 
-    // Clear previous messages and set new user message
     setMessages([userMessage])
     setInputMessage('')
     setIsLoading(true)
 
     try {
-      // Call mythbusting API
       const response = await fetch('/api/mythbusting', {
         method: 'POST',
         headers: {
@@ -130,13 +131,13 @@ export default function MythbustingPage() {
         })) : [],
         verdict: data.verdict,
         summary: data.summary,
+        conclusion: data.conclusion,
+        keyTakeaways: data.keyTakeaways,
         ourSiteArticles: data.ourSiteArticles || []
       }
 
-      // Set new messages with only current conversation
       setMessages([userMessage, botMessage])
 
-      // Create new report and save to history
       const newReport: SearchHistory = {
         id: Date.now().toString(),
         query: inputMessage,
@@ -153,13 +154,14 @@ export default function MythbustingPage() {
         })) : [],
         verdict: data.verdict,
         summary: data.summary,
+        conclusion: data.conclusion,
+        keyTakeaways: data.keyTakeaways,
         ourSiteArticles: data.ourSiteArticles || []
       }
 
       setCurrentReport(newReport)
       
-      // Add to search history
-      const updatedHistory = [newReport, ...searchHistory].slice(0, 50) // Keep last 50 reports
+      const updatedHistory = [newReport, ...searchHistory].slice(0, 50)
       setSearchHistory(updatedHistory)
       saveSearchHistory(updatedHistory)
 
@@ -175,13 +177,86 @@ export default function MythbustingPage() {
       setMessages([userMessage, errorMessage])
     } finally {
       setIsLoading(false)
+      if (isFromUrl) {
+        setIsFromUrl(false)
+      }
+    }
+  }, [inputMessage, isLoading, canSearch, recordSearch, searchHistory, saveSearchHistory, isFromUrl])
+
+  useEffect(() => {
+    setIsClient(true)
+    setMessages([])
+    loadSearchHistory()
+    
+    const query = searchParams.get('query')
+    console.log('URL query found:', query)
+    if (query) {
+      setInputMessage(query)
+      setIsFromUrl(true)
+      console.log('Set isFromUrl to true')
+    }
+  }, [searchParams])
+
+  useEffect(() => {
+    console.log('isFromUrl changed:', isFromUrl, 'inputMessage:', inputMessage)
+    if (isFromUrl && inputMessage.trim()) {
+      setTimeout(() => {
+        handleSendMessage()
+      }, 100)
+    }
+  }, [isFromUrl, inputMessage, handleSendMessage])
+
+  // Listen for voice search results
+  useEffect(() => {
+    const handleVoiceResult = (event: CustomEvent) => {
+      const transcript = event.detail.transcript
+      setInputMessage(transcript)
+    }
+
+    window.addEventListener('voiceSearchResult', handleVoiceResult as EventListener)
+    return () => {
+      window.removeEventListener('voiceSearchResult', handleVoiceResult as EventListener)
+    }
+  }, [])
+
+  // Load search history from localStorage
+  const loadSearchHistory = () => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('mythbustingHistory')
+        if (saved) {
+          const history = JSON.parse(saved).map((item: any) => ({
+            ...item,
+            timestamp: new Date(item.timestamp)
+          }))
+          setSearchHistory(history)
+        }
+      } catch (error) {
+        console.error('Error loading search history:', error)
+      }
     }
   }
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSendMessage()
+    }
+  }
+
+  const handleMicClick = async () => {
+    if (isRecording) {
+      stopVoiceSearch()
+    } else {
+      await startVoiceSearch()
     }
   }
 
@@ -285,7 +360,6 @@ ${messageText}
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -329,6 +403,19 @@ ${messageText}
                   </button>
                 </div>
                 
+                {/* Voice Search Status Messages */}
+                {voiceError && (
+                  <div className="mb-4 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm font-solaiman-lipi">
+                    {voiceError}
+                  </div>
+                )}
+                
+                {isListening && (
+                  <div className="mb-4 bg-blue-100 border border-blue-300 text-blue-700 px-4 py-3 rounded-lg text-sm font-solaiman-lipi">
+                    🎤 শুনছি... কথা বলুন
+                  </div>
+                )}
+
                 {/* Instructions */}
                 <p className="text-center text-gray-600 mb-6 font-solaiman-lipi">
                   যেকোনো বৈজ্ঞানিক দাবি, ভূতুড়ে ঘটনা, কুসংস্কার বা সিউডোসায়েন্স সম্পর্কে প্রশ্ন করুন। কৃত্রিম বুদ্ধিমত্তা সম্পন্ন এই সার্চ ইঞ্জিন ব্যবহার করে সঠিক তথ্য খুঁজে পেতে পারেন।
@@ -344,9 +431,41 @@ ${messageText}
                       onChange={(e) => setInputMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder="যেমন: ভূত আছে কি নাই? অ্যাস্ট্রোলজি কি সত্য?"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent font-solaiman-lipi text-lg"
+                      className="w-full pl-10 pr-20 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent font-solaiman-lipi text-lg"
                       disabled={isLoading}
                     />
+                    
+                    {/* Mic Icon */}
+                    <button
+                      type="button"
+                      onClick={handleMicClick}
+                      className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-2 transition-all duration-200 ${
+                        isRecording 
+                          ? 'animate-pulse' 
+                          : 'hover:opacity-70'
+                      }`}
+                      title={isRecording ? "Recording... Click to stop" : "Voice Search"}
+                      disabled={!isClient || !isSupported || isLoading}
+                    >
+                      {!isClient ? (
+                        // Server-side fallback
+                        <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
+                      ) : isSupported ? (
+                        <Image
+                          src="/mic.png"
+                          alt="Voice Search"
+                          width={20}
+                          height={20}
+                          className={`w-5 h-5 transition-all duration-200 ${
+                            isRecording 
+                              ? 'filter-none' 
+                              : 'filter grayscale hover:grayscale-0'
+                          }`}
+                        />
+                      ) : (
+                        <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
+                      )}
+                    </button>
                   </div>
                   <button
                     onClick={handleSendMessage}
@@ -489,6 +608,36 @@ ${messageText}
                                     }}
                                   />
                                 </div>
+
+                                {/* Conclusion Section */}
+                                {message.conclusion && (
+                                  <div className="mt-6 p-4 bg-red-50 rounded-lg border border-red-200">
+                                    <h3 className="text-lg font-semibold text-red-900 mb-3 font-solaiman-lipi">তাহলে যেটা দাঁড়ায়:</h3>
+                                    <div className="prose prose-lg max-w-none font-solaiman-lipi">
+                                      <div 
+                                        className="leading-relaxed text-red-800"
+                                        dangerouslySetInnerHTML={{ 
+                                          __html: sanitizeHtml(parseMarkdown(message.conclusion)) 
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Key Takeaways */}
+                                {message.keyTakeaways && message.keyTakeaways.length > 0 && (
+                                  <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                                    <h3 className="text-lg font-semibold text-yellow-900 mb-3 font-solaiman-lipi">মূল বার্তা:</h3>
+                                    <ul className="space-y-2">
+                                      {message.keyTakeaways.map((takeaway, index) => (
+                                        <li key={index} className="flex items-start space-x-2">
+                                          <span className="text-yellow-600 font-bold mt-1">💡</span>
+                                          <p className="text-yellow-800 font-solaiman-lipi leading-relaxed">{takeaway}</p>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
                                     
                                 {/* Article Metadata Widget */}
                                 {currentReport && (
@@ -518,6 +667,16 @@ ${messageText}
                                         <p className="text-blue-700 font-medium font-solaiman-lipi">উৎস সংখ্যা:</p>
                                         <p className="text-blue-900 font-solaiman-lipi">{currentReport.sources?.length || 0}টি</p>
                                       </div>
+                                      <div>
+                                        <p className="text-blue-700 font-medium font-solaiman-lipi">মূল বার্তা:</p>
+                                        <p className="text-blue-900 font-solaiman-lipi">{currentReport.keyTakeaways?.length || 0}টি</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-blue-700 font-medium font-solaiman-lipi">চূড়ান্ত সিদ্ধান্ত:</p>
+                                        <p className="text-blue-900 font-solaiman-lipi">
+                                          {currentReport.conclusion ? 'হ্যাঁ' : 'না'}
+                                        </p>
+                                      </div>
                                     </div>
                                   </div>
                                 )}
@@ -539,12 +698,12 @@ ${messageText}
                                                 rel="noopener noreferrer"
                                                 className="text-blue-600 hover:text-blue-800 underline"
                                               >
-                                                {source.title}
+                                                {source.book_title || source.title}
                                               </a>
                                             </h5>
                                           </div>
                                           <p className="text-sm text-gray-600 font-solaiman-lipi leading-relaxed">
-                                            {source.snippet}
+                                            {source.content_preview || source.snippet}
                                           </p>
                                         </div>
                                       ))}
@@ -698,6 +857,13 @@ ${messageText}
       </div>
       
       <Footer />
+      
+      <SearchLimitModal
+        isOpen={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        onLogin={loginWithGoogle}
+        remainingSearches={remainingSearches}
+      />
     </div>
   )
 }

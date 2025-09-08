@@ -1,4 +1,3 @@
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import RecommendationWidget from '@/components/RecommendationWidget'
 import Link from 'next/link'
@@ -13,13 +12,14 @@ const articlesBySlug = factCheckArticles.reduce((acc, article) => {
 }, {} as Record<string, typeof factCheckArticles[0]>)
 
 interface ArticlePageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default function ArticlePage({ params }: ArticlePageProps) {
-  const article = articlesBySlug[params.slug]
+export default async function ArticlePage({ params }: ArticlePageProps) {
+  const { slug } = await params
+  const article = articlesBySlug[slug]
 
   if (!article) {
     notFound()
@@ -27,8 +27,6 @@ export default function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Breadcrumb */}
         <nav className="mb-8">

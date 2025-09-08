@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SearchBar from '@/components/SearchBar'
 import { Loader2, Download, CheckCircle, XCircle, AlertTriangle, HelpCircle } from 'lucide-react'
@@ -69,7 +68,7 @@ ${result.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).
 
 ---
 খোঁজ - AI-চালিত বাংলা ফ্যাক্টচেকিং প্ল্যাটফর্ম
-https://khoj.bd
+https://khoj.com
     `.trim()
 
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
@@ -97,8 +96,6 @@ https://khoj.bd
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
@@ -110,7 +107,7 @@ https://khoj.bd
           
           <div className="max-w-2xl mx-auto">
             <SearchBar 
-              placeholder="যেকোনো দাবি বা তথ্য লিখুন..."
+              placeholder="কি নিয়ে যাচাই করতে চান তা লিখে ফেলুন..."
               onSearch={handleSearch}
             />
           </div>
@@ -121,10 +118,10 @@ https://khoj.bd
           <div className="text-center py-12">
             <Loader2 className="h-12 w-12 text-primary-600 animate-spin mx-auto mb-4" />
             <p className="text-lg text-gray-600 font-solaiman-lipi">
-              আপনার দাবি যাচাই করা হচ্ছে...
+              আপনার জন্য ফ্যাক্টচেক রিপোর্ট তৈরি হচ্ছে...
             </p>
             <p className="text-sm text-gray-500 mt-2 font-solaiman-lipi">
-              এটি কয়েক সেকেন্ড সময় নিতে পারে
+              আপনার প্রশ্ন বা দাবি কতোটা জটিল, তার উপর ভিত্তি করে তা কয়েক সেকেন্ড থেকে অন্তত এক মিনিট সময় নিতে পারে, অনুগ্রহ পূর্বক অপেক্ষা করুন...
             </p>
           </div>
         )}

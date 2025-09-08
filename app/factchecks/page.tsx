@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { factCheckArticles } from '@/lib/data'
@@ -57,7 +56,12 @@ export default function FactChecksPage() {
       filtered = filtered.filter(article => article.verdict === verdictFilter)
     }
 
-    setFilteredArticles(filtered)
+    // Ensure no duplicates by using a Map
+    const uniqueArticles = Array.from(
+      new Map(filtered.map(article => [article.id, article])).values()
+    )
+
+    setFilteredArticles(uniqueArticles)
   }
 
   const getFilterText = (filterValue: string) => {
@@ -72,8 +76,6 @@ export default function FactChecksPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-6">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 font-solaiman-lipi">
@@ -145,7 +147,7 @@ export default function FactChecksPage() {
               <div className="flex items-center justify-center h-full">
                 {latestArticles.map((article, index) => (
                   <div 
-                    key={article.id}
+                    key={`carousel-${article.id}-${index}`}
                     className={`absolute transition-all duration-1000 ease-in-out ${
                       index === currentSlide 
                         ? 'z-20 scale-100 opacity-100 transform translate-x-0' 
@@ -242,8 +244,8 @@ export default function FactChecksPage() {
 
         {/* Articles Grid - Horizontal Layout */}
         <div className="space-y-2">
-          {filteredArticles.map((article) => (
-            <article key={article.id} className="card hover:shadow-lg transition-shadow duration-200">
+          {filteredArticles.map((article, index) => (
+            <article key={`${article.id}-${index}`} className="card hover:shadow-lg transition-shadow duration-200">
               <div className="flex flex-col md:flex-row">
                 {/* Thumbnail - Left Side */}
                 <div className="relative h-48 md:h-32 md:w-48 mb-2 md:mb-0 rounded-t-lg md:rounded-l-lg md:rounded-t-none overflow-hidden flex-shrink-0">

@@ -59,6 +59,11 @@ export default function Footer() {
                 </a>
               </li>
               <li>
+                <a href="/image-search" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                  ছবি সার্চ
+                </a>
+              </li>
+              <li>
                 <a href="/text-check" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
                   লেখা যাচাই
                 </a>
@@ -98,7 +103,7 @@ export default function Footer() {
 
           {/* Legal & Support */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 font-solaiman-lipi">আইনি ও সহায়তা</h3>
+            <h3 className="text-lg font-semibold mb-4 font-solaiman-lipi">সহায়তা</h3>
             <ul className="space-y-2">
               <li>
                 <a href="/privacy-policy" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
@@ -113,6 +118,11 @@ export default function Footer() {
               <li>
                 <a href="/faq" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
                   FAQ
+                </a>
+              </li>
+              <li>
+                <a href="/how-to-write" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                  লেখা পাঠানোর নিয়ম
                 </a>
               </li>
             </ul>

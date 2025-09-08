@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import Providers from '@/components/Providers'
+import Navbar from '@/components/Navbar'
 
 export const metadata: Metadata = {
   title: 'Khoj - AI-Powered Bengali Fact Checking Platform',
@@ -19,13 +21,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="bn" dir="ltr">
-      <head>
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-        <link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet" />
-      </head>
       <body className="font-solaiman-lipi">
-        {children}
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
       </body>
     </html>
   )

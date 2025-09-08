@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Download, ExternalLink, CheckCircle, XCircle, AlertCircle, HelpCircle, Trash2 } from 'lucide-react'
 import { getAIFactChecks, clearAIFactChecks } from '@/lib/ai-factcheck-utils'
@@ -74,8 +73,7 @@ export default function FactCheckViewAllPage() {
   if (aiFactChecks.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+  <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
           <div className="mb-4">
             <img 
               src="https://i.postimg.cc/BQZw4j8L/image.png"
@@ -103,8 +101,6 @@ export default function FactCheckViewAllPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2 font-solaiman-lipi">

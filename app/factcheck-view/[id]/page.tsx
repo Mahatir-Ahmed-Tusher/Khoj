@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Download, ExternalLink, CheckCircle, XCircle, AlertCircle, HelpCircle } from 'lucide-react'
 import { getAIFactChecks } from '@/lib/ai-factcheck-utils'
@@ -75,8 +74,7 @@ ${factCheck.sources.map(source => `${source.id}. ${source.title} - ${source.url}
   if (notFound) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+  <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             ফ্যাক্ট চেক পাওয়া যায়নি
           </h1>
@@ -92,8 +90,7 @@ ${factCheck.sources.map(source => `${source.id}. ${source.title} - ${source.url}
   if (!factCheck) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+  <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             লোড হচ্ছে...
           </h1>
@@ -105,8 +102,6 @@ ${factCheck.sources.map(source => `${source.id}. ${source.title} - ${source.url}
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">

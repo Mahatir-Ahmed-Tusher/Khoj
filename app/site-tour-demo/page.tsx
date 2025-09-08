@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SiteTour from '@/components/SiteTour'
 import TourTrigger from '@/components/TourTrigger'
@@ -13,8 +12,6 @@ export default function SiteTourDemo() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       {/* Site Tour */}
       <SiteTour 
         isOpen={showTour}

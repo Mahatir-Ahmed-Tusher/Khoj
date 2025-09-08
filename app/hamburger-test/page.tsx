@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Navbar from '@/components/Navbar'
 
 export default function HamburgerTestPage() {
   const [screenSize, setScreenSize] = useState('')
@@ -22,8 +21,6 @@ export default function HamburgerTestPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <div className="py-8">
         <div className="max-w-4xl mx-auto px-4">
           <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center font-solaiman-lipi">

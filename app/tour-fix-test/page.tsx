@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SiteTour from '@/components/SiteTour'
 import MobileTourTrigger from '@/components/MobileTourTrigger'
@@ -25,8 +24,6 @@ export default function TourFixTest() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       {/* Site Tour */}
       <SiteTour 
         isOpen={showTour}
@@ -78,7 +75,7 @@ export default function TourFixTest() {
               className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-solaiman-lipi"
               data-tour="image-check"
             >
-              ছবি যাচাই
+              AI ছবি যাচাই
             </Link>
             <Link 
               href="/text-check" 

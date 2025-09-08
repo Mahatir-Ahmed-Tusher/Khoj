@@ -6,15 +6,184 @@ import { PRIORITY_SITES } from '@/lib/utils'
 import { findRelatedArticles } from '@/lib/data'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" })
-const fallbackModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
 
-// Helper function to generate AI report with three-tier fallback: DeepSeek → Gemini → GROQ
-async function generateAIReport(contentForAI: string, maxRetries: number = 3): Promise<string> {
-  // Step 1: Try DeepSeek (deepseek-r1-0528:free) first (primary)
+// Helper function to create model-specific prompts
+function createModelSpecificPrompt(query: string, crawledContent: any[], modelType: 'gemini' | 'openai' | 'deepseek') {
+  const baseContent = `
+Claim to fact-check: ${query}
+
+Sources found:
+${crawledContent.map((item: any, index: number) => `
+Source ${index + 1}: ${item.title}
+URL: ${item.url}
+Language: ${item.isEnglish ? 'English' : 'Bengali'}
+Content: ${item.content.substring(0, 1000)}...
+`).join('\n')}
+`;
+
+  // Base prompt in English for all models
+  const basePrompt = `${baseContent}
+
+You are an experienced journalist and fact-checker. Create a detailed, human-friendly, and comprehensive report to verify the following claim:
+
+**Main Claim:** ${query}
+
+**Your Task:**
+1. Collect information from available sources
+2. Verify the credibility of each source
+3. Find consistency in the information
+4. Make a clear decision
+
+**Report Structure:**
+
+# Claim
+[Write the main claim clearly]
+
+# Verdict
+[True/False/Misleading/Unverified - write clearly]
+
+# Detailed Analysis
+Include the following topics in this section:
+
+## Primary Information Collection
+- What sources we reviewed
+- What information we found from each source
+- How credible the sources are
+
+## Information Analysis
+- How consistent the found information is with each other
+- Which information is credible and why
+- Which information is questionable and why
+
+## Logic and Evidence
+- Explain step by step the logic for reaching the conclusion
+- Provide evidence behind each argument
+- Use numbered references [1], [2], [3], etc.
+
+## Context and History
+- If relevant, explain the history or context behind the event
+- Explain why this is important
+
+# Warnings and Limitations
+- If any information is unclear or limited
+- If more research is needed
+- If there are questions about source credibility
+
+# Conclusion
+- Summary of main decision
+- Why this decision was reached
+- What it means for common people
+
+**Important Instructions:**
+- Write everything in simple, clear, and human-friendly Bengali
+- Explain complex topics simply
+- Provide logic at each step
+- Be objective and evidence-based
+- If using information from English sources, translate and write in Bengali
+- Write so readers can easily understand
+- Explain complex topics through Q&A or examples
+- **CRITICAL:** Do NOT create "Source List" or "Sources" section yourself. Only use the sources provided above.
+- No need to provide separate source list at the end of the report.
+- **Markdown Formatting:** Use only # and ##. Do NOT use ### or ####.
+- **Detailed Writing:** Write at least 3-4 paragraphs in each section.
+- **Examples and Analysis:** Provide detailed examples and analysis for each point.
+
+Write the report as if an experienced journalist is writing for their readers - simple, clear, and trustworthy.
+**MOST IMPORTANT: This report MUST be detailed and comprehensive. Do NOT write concisely or briefly.**`;
+
+  if (modelType === 'deepseek') {
+    return `${basePrompt}
+
+**CRITICAL INSTRUCTION FOR DEEPSEEK:**
+You MUST write an EXTENSIVE, DETAILED, and COMPREHENSIVE report. Do NOT be concise or brief. Write as if you are a senior investigative journalist writing for a major newspaper. Your report should be AT LEAST 1500-2000 words.
+
+**Additional DeepSeek Instructions:**
+- You MUST write a **detailed and comprehensive report**
+- Do NOT write concisely or briefly
+- Write at least 1500-2000 words
+- Explain each topic in detail
+- Fill with examples and analysis
+- Write so readers get the complete picture`;
+  }
+
+  return basePrompt;
+}
+
+// Helper function to generate AI report with three-tier fallback: Gemini → GROQ → DeepSeek
+async function generateAIReport(query: string, crawledContent: any[], maxRetries: number = 3): Promise<string> {
+  // Step 1: Try Gemini first (gemini-1.5-flash)
+  console.log('🤖 Trying Gemini (gemini-1.5-flash) first...')
+  
+  const geminiPrompt = createModelSpecificPrompt(query, crawledContent, 'gemini')
+  
+  // Try Gemini model with retries
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🤖 Generating AI report with gemini-1.5-flash (attempt ${attempt}/${maxRetries})...`)
+      const result = await model.generateContent(geminiPrompt)
+      const response = await result.response
+      return response.text()
+    } catch (geminiError: any) {
+      console.error(`❌ Gemini AI error (attempt ${attempt}):`, geminiError)
+      
+      // Check if it's a rate limit error
+      if (geminiError.message && geminiError.message.includes('429')) {
+        if (attempt < maxRetries) {
+          // Calculate delay with exponential backoff (6s, 12s, 24s)
+          const delay = Math.min(6000 * Math.pow(2, attempt - 1), 30000)
+          console.log(`⏳ Rate limited. Waiting ${delay/1000}s before retry...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
+          continue
+        } else {
+          console.log('❌ Max retries reached for rate limit, trying GROQ...')
+          break
+        }
+      }
+      
+      // For other errors, try GROQ
+      break
+    }
+  }
+
+  // Step 2: Fallback to GROQ (GPT-OSS-120B)
+  console.log('🔄 Gemini (gemini-1.5-flash) failed, falling back to GROQ...')
+  
   try {
-    console.log('🤖 Trying DeepSeek (deepseek-r1-0528:free)...')
+    console.log('🤖 Trying GROQ (openai/gpt-oss-120b)...')
+    
+    const groqPrompt = createModelSpecificPrompt(query, crawledContent, 'openai')
+    
+    const chatCompletion = await groq.chat.completions.create({
+      "messages": [
+        {
+          "role": "user",
+          "content": groqPrompt
+        }
+      ],
+      "model": "openai/gpt-oss-120b",
+      "temperature": 1,
+      "max_tokens": 8192,
+      "top_p": 1,
+      "stream": false,
+      "stop": null
+    });
+
+    const generatedText = chatCompletion.choices[0]?.message?.content;
+    if (generatedText) {
+      console.log('✅ GROQ report generated successfully');
+      return generatedText;
+    }
+  } catch (groqError) {
+    console.error('❌ GROQ error:', groqError);
+  }
+
+  // Step 3: Final fallback to DeepSeek
+  try {
+    console.log('🔄 GROQ failed, trying DeepSeek (deepseek-r1-0528:free) as final fallback...')
+    
+    const deepseekPrompt = createModelSpecificPrompt(query, crawledContent, 'deepseek')
     
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -29,11 +198,14 @@ async function generateAIReport(contentForAI: string, maxRetries: number = 3): P
         "messages": [
           {
             "role": "user",
-            "content": contentForAI
+            "content": deepseekPrompt
           }
         ],
-        "max_tokens": 4000,
-        "temperature": 0.3
+        "max_tokens": 6000,
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "frequency_penalty": 0.1,
+        "presence_penalty": 0.1
       })
     });
 
@@ -49,76 +221,6 @@ async function generateAIReport(contentForAI: string, maxRetries: number = 3): P
     }
   } catch (deepseekError) {
     console.error('❌ DeepSeek error:', deepseekError);
-  }
-
-  // Step 2: Fallback to Gemini with retry logic
-  console.log('🔄 DeepSeek failed, falling back to Gemini...');
-  
-  // Try main Gemini model first
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      console.log(`🤖 Generating AI report with gemini-1.5-pro (attempt ${attempt}/${maxRetries})...`)
-      const result = await model.generateContent(contentForAI)
-      const response = await result.response
-      return response.text()
-    } catch (geminiError: any) {
-      console.error(`❌ Gemini AI error (attempt ${attempt}):`, geminiError)
-      
-      // Check if it's a rate limit error
-      if (geminiError.message && geminiError.message.includes('429')) {
-        if (attempt < maxRetries) {
-          // Calculate delay with exponential backoff (6s, 12s, 24s)
-          const delay = Math.min(6000 * Math.pow(2, attempt - 1), 30000)
-          console.log(`⏳ Rate limited. Waiting ${delay/1000}s before retry...`)
-          await new Promise(resolve => setTimeout(resolve, delay))
-          continue
-        } else {
-          console.log('❌ Max retries reached for rate limit, trying fallback model...')
-          break
-        }
-      }
-      
-      // For other errors, try fallback model
-      break
-    }
-  }
-  
-  // Try Gemini fallback model
-  try {
-    console.log('🔄 Trying fallback model (gemini-1.5-flash)...')
-    const result = await fallbackModel.generateContent(contentForAI)
-    const response = await result.response
-    return response.text()
-  } catch (fallbackError) {
-    console.error('❌ Fallback model also failed:', fallbackError)
-  }
-
-  // Step 3: Try GROQ (GPT-OSS-20B) as final fallback
-  try {
-    console.log('🔄 Gemini failed, trying GROQ (openai/gpt-oss-20b)...')
-    
-    const chatCompletion = await groq.chat.completions.create({
-      "messages": [
-        {
-          "role": "user",
-          "content": contentForAI
-        }
-      ],
-      "model": "openai/gpt-oss-20b",
-      "temperature": 0.3,
-      "max_tokens": 4000,
-      "top_p": 1,
-      "stream": false,
-      "stop": null
-    });
-
-    const generatedText = chatCompletion.choices[0]?.message?.content;
-    if (generatedText) {
-      console.log('✅ GROQ report generated successfully');
-      return generatedText;
-    }
-  } catch (groqError) {
-    console.error('❌ GROQ error:', groqError);
   }
   
   // Return fallback report if all attempts fail
@@ -155,7 +257,7 @@ export async function POST(request: NextRequest) {
     try {
       const bangladeshiResults = await tavilyManager.search(query, {
         sites: bangladeshiNewsSites,
-        max_results: 8,
+        max_results: 11,
         search_depth: "advanced"
       })
       
@@ -173,7 +275,7 @@ export async function POST(request: NextRequest) {
       try {
         console.log('🔍 Searching for English sources...')
         const englishResults = await tavilyManager.search(query, {
-          max_results: 8,
+          max_results: 11,
           search_depth: "advanced",
           include_domains: [
             'reuters.com', 'bbc.com', 'cnn.com', 'ap.org', 'factcheck.org',
@@ -184,7 +286,7 @@ export async function POST(request: NextRequest) {
         if (englishResults.results && englishResults.results.length > 0) {
           // If we have Bengali sources, append English sources
           if (hasBengaliSources) {
-            searchResults.results = [...searchResults.results, ...englishResults.results.slice(0, 3)]
+            searchResults.results = [...searchResults.results, ...englishResults.results.slice(0, 5)]
           } else {
             searchResults.results = englishResults.results
           }
@@ -201,7 +303,7 @@ export async function POST(request: NextRequest) {
       try {
         console.log('🔍 Trying general search...')
         const generalResults = await tavilyManager.search(query, {
-          max_results: 8,
+          max_results: 11,
           search_depth: "advanced"
         })
         
@@ -215,91 +317,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Use search results directly without crawling for faster response
-    const crawledContent = searchResults.results?.slice(0, 10).map((result: any, index: number) => ({
+    const crawledContent = searchResults.results?.slice(0, 11).map((result: any, index: number) => ({
       title: result.title,
       url: result.url,
       content: (result as any).content || (result as any).snippet || 'Content not available',
       isEnglish: !hasBengaliSources || (hasEnglishSources && index >= searchResults.results.length - 3)
     })) || []
 
-    // Prepare content for AI with enhanced instructions for mixed sources
-    const contentForAI = `
-Claim to fact-check: ${query}
-
-Sources found:
-${crawledContent.map((item: any, index: number) => `
-Source ${index + 1}: ${item.title}
-URL: ${item.url}
-Language: ${item.isEnglish ? 'English' : 'Bengali'}
-Content: ${item.content.substring(0, 1000)}...
-`).join('\n')}
-
-আপনি একজন অভিজ্ঞ সাংবাদিক এবং ফ্যাক্ট চেকার। নিম্নলিখিত দাবিটি যাচাই করে একটি বিস্তারিত, মানবিক এবং সহজবোধ্য রিপোর্ট তৈরি করুন:
-
-**মূল দাবি:** ${query}
-
-**আপনার কাজ:**
-১. উপলব্ধ উৎসসমূহ থেকে তথ্য সংগ্রহ করুন
-২. প্রতিটি উৎসের বিশ্বাসযোগ্যতা যাচাই করুন
-৩. তথ্যের মধ্যে সামঞ্জস্য খুঁজে বের করুন
-৪. একটি স্পষ্ট সিদ্ধান্ত দিন
-
-**রিপোর্টের কাঠামো:**
-
-## দাবি
-[মূল দাবিটি স্পষ্টভাবে লিখুন]
-
-## সিদ্ধান্ত
-[সত্য/মিথ্যা/ভ্রান্তিমূলক/অযাচাইকৃত - স্পষ্টভাবে লিখুন]
-
-## বিস্তারিত বিশ্লেষণ
-এই অংশে নিম্নলিখিত বিষয়গুলি অন্তর্ভুক্ত করুন:
-
-**প্রাথমিক তথ্য সংগ্রহ:**
-- আমরা কী কী উৎস পর্যালোচনা করেছি
-- প্রতিটি উৎস থেকে কী তথ্য পাওয়া গেছে
-- উৎসগুলির বিশ্বাসযোগ্যতা কেমন
-
-**তথ্যের বিশ্লেষণ:**
-- পাওয়া তথ্যগুলি একে অপরের সাথে কতটা সামঞ্জস্যপূর্ণ
-- কোন তথ্যগুলি বিশ্বাসযোগ্য এবং কেন
-- কোন তথ্যগুলি সন্দেহজনক এবং কেন
-
-**যুক্তি ও প্রমাণ:**
-- সিদ্ধান্তে পৌঁছানোর যুক্তি ধাপে ধাপে ব্যাখ্যা করুন
-- প্রতিটি যুক্তির পিছনে প্রমাণ উল্লেখ করুন
-- সংখ্যাযুক্ত রেফারেন্স ব্যবহার করুন [১], [২], [৩] ইত্যাদি
-
-**প্রেক্ষাপট ও ইতিহাস:**
-- যদি প্রাসঙ্গিক হয়, ঘটনার পিছনের ইতিহাস বা প্রেক্ষাপট ব্যাখ্যা করুন
-- এটি কেন গুরুত্বপূর্ণ তা ব্যাখ্যা করুন
-
-## সতর্কতা ও সীমাবদ্ধতা
-- যদি কোন তথ্য অস্পষ্ট বা সীমিত হয়
-- যদি আরও গবেষণার প্রয়োজন হয়
-- যদি কোন উৎসের বিশ্বাসযোগ্যতা নিয়ে প্রশ্ন থাকে
-
-## উপসংহার
-- সারসংক্ষেপে মূল সিদ্ধান্ত
-- কেন এই সিদ্ধান্তে পৌঁছানো হয়েছে
-- সাধারণ মানুষের জন্য কী অর্থ বহন করে
-
-**গুরুত্বপূর্ণ নির্দেশনা:**
-- সবকিছু সহজ, স্পষ্ট এবং মানবিক বাংলায় লিখুন
-- জটিল বিষয়গুলি সহজভাবে ব্যাখ্যা করুন
-- প্রতিটি ধাপে যুক্তি প্রদান করুন
-- উদ্দেশ্যমূলক এবং প্রমাণ-ভিত্তিক হোন
-- যদি ইংরেজি উৎস থেকে তথ্য ব্যবহার করা হয়, তাহলে সেটা বাংলায় অনুবাদ করে লিখুন
-- পাঠক যেন সহজেই বুঝতে পারে এমনভাবে লিখুন
-- প্রশ্নোত্তর আকারে বা উদাহরণ দিয়ে জটিল বিষয়গুলি ব্যাখ্যা করুন
-- **মহত্বপূর্ণ:** আপনি নিজে থেকে "উৎসের তালিকা" বা "উৎসসমূহ" সেকশন তৈরি করবেন না। শুধু উপরে দেওয়া উৎসসমূহ ব্যবহার করে রিপোর্ট লিখুন।
-- রিপোর্টের শেষে আলাদা উৎস তালিকা দেবার প্রয়োজন নেই।
-
-রিপোর্টটি এমনভাবে লিখুন যেন একজন অভিজ্ঞ সাংবাদিক তার পাঠকদের জন্য লিখছেন - সহজ, স্পষ্ট, এবং বিশ্বাসযোগ্য।
-`
-
-    // Generate fact-checking report with Gemini AI
-    const report = await generateAIReport(contentForAI)
+    // Generate fact-checking report with model-specific prompts
+    const report = await generateAIReport(query, crawledContent)
     
     // Find related articles from our database
     const relatedArticles = findRelatedArticles(query, 3)

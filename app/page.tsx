@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SearchBar from '@/components/SearchBar'
 import Link from 'next/link'
@@ -28,6 +27,10 @@ export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [showSiteTour, setShowSiteTour] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [isNewsCheckActive, setIsNewsCheckActive] = useState(false)
+  const [isMythbustingActive, setIsMythbustingActive] = useState(false)
+  const [isAIImageCheckActive, setIsAIImageCheckActive] = useState(false)
+  const [isImageSearchActive, setIsImageSearchActive] = useState(false)
 
   // Track visit and check if first visit
   useEffect(() => {
@@ -89,15 +92,78 @@ export default function HomePage() {
     { value: 'false', label: 'মিথ্যা', color: 'bg-red-100 text-red-700' },
     { value: 'misleading', label: 'ভ্রান্তিমূলক', color: 'bg-yellow-100 text-yellow-700' },
     { value: 'debunk', label: 'খন্ডন', color: 'bg-purple-100 text-purple-700' }
-  ], [])
+  ], [isNewsCheckActive, isMythbustingActive, isAIImageCheckActive, isImageSearchActive])
 
   const handleArticleClick = useCallback((slug: string) => {
     window.location.href = `/factchecks/${slug}`
   }, [])
 
+  const handleNewsCheckClick = useCallback(() => {
+    setIsNewsCheckActive(!isNewsCheckActive)
+    if (isMythbustingActive) {
+      setIsMythbustingActive(false)
+    }
+    if (isAIImageCheckActive) {
+      setIsAIImageCheckActive(false)
+    }
+    if (isImageSearchActive) {
+      setIsImageSearchActive(false)
+    }
+  }, [isNewsCheckActive, isMythbustingActive, isAIImageCheckActive, isImageSearchActive])
+
+  const handleMythbustingClick = useCallback(() => {
+    setIsMythbustingActive(!isMythbustingActive)
+    if (isNewsCheckActive) {
+      setIsNewsCheckActive(false)
+    }
+    if (isAIImageCheckActive) {
+      setIsAIImageCheckActive(false)
+    }
+    if (isImageSearchActive) {
+      setIsImageSearchActive(false)
+    }
+  }, [isMythbustingActive, isNewsCheckActive, isAIImageCheckActive, isImageSearchActive])
+
+  const handleAIImageCheckClick = useCallback(() => {
+    setIsAIImageCheckActive(!isAIImageCheckActive)
+    if (isNewsCheckActive) {
+      setIsNewsCheckActive(false)
+    }
+    if (isMythbustingActive) {
+      setIsMythbustingActive(false)
+    }
+    if (isImageSearchActive) {
+      setIsImageSearchActive(false)
+    }
+  }, [isAIImageCheckActive, isNewsCheckActive, isMythbustingActive, isImageSearchActive])
+
+  const handleImageSearchClick = useCallback(() => {
+    setIsImageSearchActive(!isImageSearchActive)
+    if (isNewsCheckActive) {
+      setIsNewsCheckActive(false)
+    }
+    if (isMythbustingActive) {
+      setIsMythbustingActive(false)
+    }
+    if (isAIImageCheckActive) {
+      setIsAIImageCheckActive(false)
+    }
+  }, [isImageSearchActive, isNewsCheckActive, isMythbustingActive, isAIImageCheckActive])
+
+  const handleSearch = useCallback((query: string) => {
+    if (isMythbustingActive) {
+      window.location.href = `/mythbusting?query=${encodeURIComponent(query)}`
+    } else if (isAIImageCheckActive) {
+      window.location.href = `/image-check?query=${encodeURIComponent(query)}`
+    } else if (isImageSearchActive) {
+      window.location.href = `/image-search?query=${encodeURIComponent(query)}`
+    } else {
+      window.location.href = `/factcheck-detail?query=${encodeURIComponent(query)}`
+    }
+  }, [isMythbustingActive, isAIImageCheckActive, isImageSearchActive])
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
       
       {/* Site Tour - Only for first-time visitors */}
       <SiteTour 
@@ -147,27 +213,77 @@ export default function HomePage() {
           
           <div className="max-w-2xl mx-auto">
             <SearchBar 
-              placeholder="যেকোনো দাবি বা তথ্য লিখুন..."
+              placeholder="আজকে কী ব্যাপারে যাচাই-বাচাই করতে চান তা লিখে ফেলুন..."
               className="mb-4"
               data-tour="search-bar"
+              dynamicPlaceholder={
+                isNewsCheckActive 
+                  ? "যে খবরটা যাচাই করতে চান সেটার লিংক দিন..." 
+                  : isMythbustingActive 
+                    ? "যে ব্যাপারে মিথবাস্টিং করতে চান, সেটা এখানে লিখুন..." 
+                    : isAIImageCheckActive
+                      ? "কোনো ছবি AI জেনারেটেড কিনা জানতে ছবিটি আপলোড করুন..."
+                      : isImageSearchActive
+                        ? "যেকোনো ছবি সার্চ করে জানুন অনলাইনে আর কোথায় আছে সেটা..."
+                        : undefined
+              }
+              isNewsCheckMode={isNewsCheckActive}
+              isAIImageCheckMode={isAIImageCheckActive}
+              isImageSearchMode={isImageSearchActive}
+              onSearch={handleSearch}
             />
             <p className="text-white text-sm mb-6">
               সত্যের সন্ধান, তথ্যের শুদ্ধি
             </p>
             
-            {/* Floating Feature Buttons */}
-            <div className="flex justify-center space-x-2 md:space-x-4 flex-wrap">
-              <Link href="/image-check" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg" data-tour="image-check">
-                <span className="text-white text-sm font-medium font-solaiman-lipi">ছবি যাচাই</span>
-              </Link>
-              <Link href="/text-check" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg" data-tour="text-check">
-                <span className="text-white text-sm font-medium font-solaiman-lipi">লেখা যাচাই</span>
-              </Link>
-              <Link href="/source-search" className="px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg" data-tour="source-search">
-                <span className="text-white text-sm font-medium font-solaiman-lipi">উৎস সন্ধান</span>
-              </Link>
-              <Link href="/mythbusting" className="mythbusting-button px-4 md:px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg" data-tour="mythbusting">
-                <span className="text-white text-sm font-medium font-solaiman-lipi">মিথবাস্টিং</span>
+            {/* Floating Feature Buttons - All in same line even on mobile */}
+            <div className="flex justify-center space-x-1 md:space-x-3 flex-nowrap overflow-x-auto">
+              <button 
+                onClick={handleAIImageCheckClick}
+                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0 ${
+                  isAIImageCheckActive 
+                    ? 'bg-green-500 bg-opacity-80 hover:bg-opacity-90 shadow-green-500/50' 
+                    : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                }`} 
+                data-tour="image-check"
+              >
+                <span className="text-white text-xs md:text-sm font-medium font-solaiman-lipi whitespace-nowrap">AI ছবি যাচাই</span>
+              </button>
+              <button 
+                onClick={handleMythbustingClick}
+                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0 ${
+                  isMythbustingActive 
+                    ? 'bg-blue-500 bg-opacity-80 hover:bg-opacity-90 shadow-blue-500/50' 
+                    : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                }`} 
+                data-tour="mythbusting"
+              >
+                <span className="text-white text-xs md:text-sm font-medium font-solaiman-lipi whitespace-nowrap">মিথবাস্টিং</span>
+              </button>
+              <button 
+                onClick={handleNewsCheckClick}
+                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0 ${
+                  isNewsCheckActive 
+                    ? 'bg-blue-500 bg-opacity-80 hover:bg-opacity-90 shadow-blue-500/50' 
+                    : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                }`} 
+                data-tour="news-check"
+              >
+                <span className="text-white text-xs md:text-sm font-medium font-solaiman-lipi whitespace-nowrap">খবর যাচাই</span>
+              </button>
+              <button 
+                onClick={handleImageSearchClick}
+                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0 ${
+                  isImageSearchActive 
+                    ? 'bg-orange-500 bg-opacity-80 hover:bg-opacity-90 shadow-orange-500/50' 
+                    : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                }`} 
+                data-tour="source-search"
+              >
+                <span className="text-white text-xs md:text-sm font-medium font-solaiman-lipi whitespace-nowrap">ছবি সার্চ</span>
+              </button>
+              <Link href="/text-check" className="px-2 md:px-4 py-2 md:py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0" data-tour="text-check">
+                <span className="text-white text-xs md:text-sm font-medium font-solaiman-lipi whitespace-nowrap">লেখা যাচাই</span>
               </Link>
             </div>
           </div>
@@ -437,7 +553,7 @@ export default function HomePage() {
             <div className="flex-1 text-center lg:text-left">
               {/* Main Heading */}
               <h2 className="text-base md:text-lg font-bold text-gray-900 mb-1 font-solaiman-lipi">
-                আমাদের পরিবারের অংশ হন
+                আমাদের পরিবারের অংশ হোন
               </h2>
               
               {/* Content */}
@@ -509,6 +625,9 @@ export default function HomePage() {
               
               {/* Call to Action */}
               <div className="text-center">
+                <p className="text-xs text-gray-600 mb-2 font-solaiman-lipi">
+                  আমাদের লেখা পাঠানোর নিয়ম জানতে <Link href="/how-to-write" className="text-blue-600 hover:text-blue-700 underline font-medium">এখানে</Link> ক্লিক করুন
+                </p>
                 <div className="flex flex-col sm:flex-row gap-1 justify-center items-center">
                   <a 
                     href="mailto:sysitech1971@gmail.com"

@@ -1,76 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
-
-// RapidAPI web search function using google-search74
-async function searchWithRapidAPI(query: string) {
-  try {
-    const apiKey = process.env.APP_KEY
-    if (!apiKey) {
-      console.log('RapidAPI key not configured')
-      return null
-    }
-
-    console.log('🔍 Searching with RapidAPI (google-search74) for evidence...')
-    
-    const params = new URLSearchParams({
-      query: query,
-      limit: '20',
-      related_keywords: 'true'
-    })
-    
-    const response = await fetch(`https://google-search74.p.rapidapi.com/?${params}`, {
-      method: 'GET',
-      headers: {
-        'X-RapidAPI-Key': apiKey,
-        'X-RapidAPI-Host': 'google-search74.p.rapidapi.com'
-      }
-    })
-
-    if (!response.ok) {
-      console.log(`RapidAPI search failed: ${response.status}`)
-      return null
-    }
-
-    const data = await response.json()
-    console.log(`✅ Found ${data.results?.length || 0} search results from RapidAPI`)
-    return data
-  } catch (error) {
-    console.error('RapidAPI search error:', error)
-    return null
-  }
-}
-
-// Alternative RapidAPI search function using different endpoint
-async function searchWithRapidAPIFallback(query: string) {
-  try {
-    const apiKey = process.env.APP_KEY
-    if (!apiKey) {
-      return null
-    }
-
-    console.log('🔍 Trying alternative RapidAPI search...')
-    
-    const response = await fetch('https://google-search3.p.rapidapi.com/api/v1/search/q=' + encodeURIComponent(query) + '&num=10', {
-      method: 'GET',
-      headers: {
-        'X-RapidAPI-Key': apiKey,
-        'X-RapidAPI-Host': 'google-search3.p.rapidapi.com'
-      }
-    })
-
-    if (!response.ok) {
-      console.log(`Alternative RapidAPI search failed: ${response.status}`)
-      return null
-    }
-
-    const data = await response.json()
-    console.log(`✅ Found ${data.results?.length || 0} search results from alternative RapidAPI`)
-    return data
-  } catch (error) {
-    console.error('Alternative RapidAPI search error:', error)
-    return null
-  }
-}
+import { searchWithRapidAPIFallback, searchWithRapidAPIFallbackAlternative } from '@/lib/rapidapi-manager'
 
 // Generate fallback references when RapidAPI search fails
 function generateFallbackReferences(query: string) {
@@ -182,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Mythbusting request received:', query)
 
-    // Step 1: Search for evidence using RapidAPI
+    // Step 1: Search for evidence using RapidAPI with fallback
     let searchResults = null
     let evidenceSources: Array<{
       title: string
@@ -190,12 +120,12 @@ export async function POST(request: NextRequest) {
       snippet: string
     }> = []
     
-    // Try primary RapidAPI search
-    searchResults = await searchWithRapidAPI(query)
+    // Try primary RapidAPI search with fallback
+    searchResults = await searchWithRapidAPIFallback(query, 20)
     
-    // If primary fails, try alternative
+    // If primary fails, try alternative with fallback
     if (!searchResults) {
-      searchResults = await searchWithRapidAPIFallback(query)
+      searchResults = await searchWithRapidAPIFallbackAlternative(query, 10)
     }
     
     // Extract sources from search results
@@ -259,6 +189,7 @@ export async function POST(request: NextRequest) {
       evidenceContext += `- Provide scientific context and background\n`
       evidenceContext += `- Include counter-arguments if they exist\n`
       evidenceContext += `- Explain the broader implications\n`
+      evidenceContext += `- When referencing sources, include the source name (e.g., "BBC Science [7] mentions...")\n`
       evidenceContext += `- ALWAYS include at least 8 references in your SOURCES section\n`
     } else {
       evidenceContext = '\n\n**Note: No web search results found. Rely on your extensive knowledge base to provide a comprehensive analysis.**'
@@ -271,43 +202,66 @@ export async function POST(request: NextRequest) {
       evidenceContext += `- ALWAYS include at least 8 references in your SOURCES section\n`
     }
 
-    // System prompt for mythbusting with evidence
-    const systemPrompt = `You are a comprehensive scientific fact-checker and mythbuster with extensive knowledge in multiple fields. Your role is to provide detailed, evidence-based analysis of claims about:
+    // Enhanced system prompt for conversational mythbusting
+    const systemPrompt = `You are a friendly, knowledgeable fact-checker who explains complex topics in simple, engaging ways. Your goal is to help ordinary people understand the truth behind claims by telling a clear, interesting story.
 
-1. **Scientific Claims**: Evaluate scientific statements, theories, research, and discoveries
-2. **Pseudoscience**: Identify and debunk pseudoscientific claims, alternative medicine, and fringe theories
-3. **Superstitions**: Analyze traditional beliefs, cultural superstitions, and folk wisdom
-4. **Conspiracy Theories**: Evaluate conspiracy theories, cover-ups, and fringe beliefs
-5. **Health Claims**: Assess medical, nutritional, and health-related claims
-6. **Technology Claims**: Evaluate claims about technology, AI, social media, and digital phenomena
-7. **Environmental Claims**: Analyze climate change, environmental science, and sustainability claims
-8. **Historical Claims**: Evaluate historical events, figures, and revisionist theories
+**Your Communication Style:**
+- Write like you're talking to a curious friend over coffee
+- Use simple, everyday language that anyone can understand
+- Tell a story rather than listing bullet points
+- Make it interesting and engaging, not dry or academic
+- Connect the dots in a logical, flowing narrative
 
-**Comprehensive Analysis Guidelines:**
-- **Combine Multiple Sources**: Use both the provided web search results AND your extensive knowledge base
-- **Cross-Reference**: Compare information from different sources to verify accuracy
-- **Scientific Method**: Apply scientific principles, peer-reviewed research, and established facts
-- **Context Matters**: Consider cultural, historical, and social context when relevant
-- **Nuanced Analysis**: Don't just say true/false - explain the complexity and nuances
-- **Educational Value**: Teach users about the underlying science, history, or principles
-- **Source Quality**: Evaluate the credibility of sources (academic, government, reputable media)
-- **Counter-Evidence**: Present opposing viewpoints when they exist
-- **Uncertainty**: Acknowledge when information is incomplete or contested
-- **Practical Implications**: Explain real-world consequences and applications
+**Your Analysis Approach:**
+- Start with the big picture - what's really going on here?
+- Explain the science/history/context in simple terms
+- Use analogies and examples people can relate to
+- Address common misconceptions naturally in the flow
+- Show why this matters to people's daily lives
+- Be honest about what we know vs. what we don't know
 
-**Detailed Response Format (IMPORTANT - Follow this exact format):**
-VERDICT: [true/false/misleading/unverified/partially_true]
-SUMMARY: [সংক্ষিপ্ত সারাংশ বাংলায় - মূল সিদ্ধান্ত এবং গুরুত্বপূর্ণ তথ্য ২-৩ বাক্যে]
-DETAILED_ANALYSIS: [Extensive analysis in Bengali including:
-- Scientific background and context
-- Evidence from provided sources [1], [2], [3] etc.
-- Additional knowledge from your training data
-- Counter-arguments and opposing views
-- Real-world examples and implications
-- Recommendations for further reading]
-SOURCES: [List of all sources used, including both web results and knowledge base references]
+**Response Format (Write as flowing narrative, not bullet points):**
 
-**Important**: Provide the most comprehensive, educational, and detailed analysis possible. Use your extensive knowledge base to supplement the web search results. Make this analysis valuable for learning and understanding the topic deeply.
+VERDICT: [true/false/misleading/unverified/partially_true/context_dependent]
+
+SUMMARY: [Write a simple, engaging summary in Bengali that explains the main issue]
+
+DETAILED_ANALYSIS: [Write a comprehensive, flowing analysis in Bengali that:
+- Starts and ends naturally
+- Explains complex topics in simple language
+- Uses real-life examples and analogies
+- Corrects common misconceptions
+- Explains why this topic is important
+- Incorporates evidence as part of the story
+- Provides detailed scientific/historical context
+- Analyzes from multiple perspectives
+- Encourages readers to think critically
+- Contains at least 5-7 detailed paragraphs]
+
+CONCLUSION: [Write "তাহলে যেটা দাঁড়ায়" - your own explanation and final opinion that includes:
+- Summary of all analysis
+- Your own assessment
+- Explanation of why you reached this conclusion
+- Importance for people
+- Advice for the future]
+
+KEY_TAKEAWAYS: [Write 2-3 simple, memorable key messages in Bengali]
+
+SOURCES: [List of sources]
+
+**Writing Guidelines:**
+- Avoid bullet points and numbered lists in the main analysis
+- Write in flowing paragraphs that connect naturally
+- Use conversational tone in Bengali - "আপনি হয়তো ভাবছেন..." "এখানে আসল ঘটনা হলো..."
+- Include interesting facts and surprising discoveries
+- Make it feel like a friendly conversation, not a formal report
+- Use Bengali expressions and cultural references when appropriate
+- Be comprehensive - don't just rely on search results, use your extensive knowledge
+- Provide deep analysis with historical context, scientific background, and cultural implications
+- Write at least 5-7 detailed paragraphs in DETAILED_ANALYSIS section
+- In CONCLUSION section, provide your own expert opinion and final assessment
+- Make the analysis educational but accessible to everyone
+- Write ALL content in Bengali except for technical terms that are better in English
 
 Analyze the claim: "`
 
@@ -315,7 +269,13 @@ Analyze the claim: "`
 
 ${evidenceContext}
 
-Please provide a comprehensive mythbusting analysis following the exact format above. Use the provided evidence sources when available and reference them properly.`
+Please provide a comprehensive mythbusting analysis following the exact format above. Use the provided evidence sources when available and reference them properly.
+
+**Example of comprehensive analysis:**
+Instead of: "This claim is false because..."
+Write: "আপনি হয়তো ভাবছেন এটা সত্যি হতে পারে। আসুন দেখি বিজ্ঞান কী বলে... [detailed explanation]... এখন যদি আমরা ইতিহাসের দিকে তাকাই... [historical context]... কিন্তু এখানে আসল প্রশ্ন হলো... [deep analysis]... তাহলে যেটা দাঁড়ায়, এই দাবিটি মূলত ভুল কারণ..."
+
+Write at least 5-7 detailed paragraphs in DETAILED_ANALYSIS and provide your own expert conclusion in CONCLUSION section.`
 
     console.log('Sending request to Gemini AI with evidence...')
     const result = await model.generateContent(prompt)
@@ -332,6 +292,7 @@ Please provide a comprehensive mythbusting analysis following the exact format a
     const parsedResult = parseMythbustingResponse(text, query, evidenceSources)
 
     console.log('Mythbusting analysis completed:', parsedResult.verdict)
+    console.log('Returning evidenceSources:', evidenceSources)
     return NextResponse.json({
       ...parsedResult,
       evidenceSources: evidenceSources,
@@ -348,15 +309,17 @@ Please provide a comprehensive mythbusting analysis following the exact format a
 }
 
 function parseMythbustingResponse(response: string, query: string, evidenceSources: Array<{title: string, url: string, snippet: string}>) {
-  // Default structure
-  let verdict: 'true' | 'false' | 'misleading' | 'unverified' | 'partially_true' = 'unverified'
+  // Enhanced structure with conclusion section
+  let verdict: 'true' | 'false' | 'misleading' | 'unverified' | 'partially_true' | 'context_dependent' = 'unverified'
   let summary = 'প্রশ্নের উত্তর বিশ্লেষণ করা হয়েছে।'
   let detailedAnalysis = response
+  let conclusion = ''
+  let keyTakeaways: string[] = []
   let sources: string[] = []
 
   try {
     // Try to extract verdict
-    const verdictMatch = response.match(/VERDICT:\s*(true|false|misleading|unverified|partially_true)/i)
+    const verdictMatch = response.match(/VERDICT:\s*(true|false|misleading|unverified|partially_true|context_dependent)/i)
     if (verdictMatch) {
       verdict = verdictMatch[1].toLowerCase() as any
     }
@@ -368,9 +331,22 @@ function parseMythbustingResponse(response: string, query: string, evidenceSourc
     }
 
     // Try to extract detailed analysis
-    const analysisMatch = response.match(/DETAILED_ANALYSIS:\s*(.+?)(?=\nSOURCES:|$)/is)
+    const analysisMatch = response.match(/DETAILED_ANALYSIS:\s*(.+?)(?=\nCONCLUSION:|$)/is)
     if (analysisMatch) {
       detailedAnalysis = analysisMatch[1].trim()
+    }
+
+    // Try to extract conclusion
+    const conclusionMatch = response.match(/CONCLUSION:\s*(.+?)(?=\nKEY_TAKEAWAYS:|$)/is)
+    if (conclusionMatch) {
+      conclusion = conclusionMatch[1].trim()
+    }
+
+    // Try to extract key takeaways
+    const takeawaysMatch = response.match(/KEY_TAKEAWAYS:\s*(.+?)(?=\nSOURCES:|$)/is)
+    if (takeawaysMatch) {
+      const takeawaysText = takeawaysMatch[1].trim()
+      keyTakeaways = takeawaysText.split('\n').filter(takeaway => takeaway.trim().length > 0)
     }
 
     // Try to extract sources
@@ -410,6 +386,20 @@ function parseMythbustingResponse(response: string, query: string, evidenceSourc
       sources = [...sources, ...additionalSources]
     }
 
+    // If no key takeaways found, generate some based on the analysis
+    if (keyTakeaways.length === 0) {
+      keyTakeaways = [
+        'প্রমাণের উপর ভিত্তি করে সিদ্ধান্ত নিন',
+        'বিভিন্ন দৃষ্টিকোণ থেকে চিন্তা করুন',
+        'নতুন তথ্য পাওয়া গেলে মত পরিবর্তন করতে প্রস্তুত থাকুন'
+      ]
+    }
+
+    // If no conclusion found, create a simple one
+    if (!conclusion) {
+      conclusion = 'উপরের বিশ্লেষণ থেকে দেখা যায় যে এই দাবিটি মূলত সত্য/মিথ্যা/অর্ধসত্য। তবে এখানে গুরুত্বপূর্ণ বিষয় হলো প্রমাণের উপর ভিত্তি করে সিদ্ধান্ত নেওয়া।'
+    }
+
   } catch (parseError) {
     console.error('Error parsing mythbusting response:', parseError)
     // Keep default values if parsing fails
@@ -420,6 +410,8 @@ function parseMythbustingResponse(response: string, query: string, evidenceSourc
     verdict,
     summary,
     detailedAnalysis,
+    conclusion,
+    keyTakeaways,
     sources
   }
 }

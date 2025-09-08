@@ -1,23 +1,22 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import MuktiSidebar from '@/components/MuktiSidebar'
 import { Send, Loader2, Search, Copy, Download, ChevronDown, ChevronUp, Clock, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { parseMarkdown, sanitizeHtml } from '@/lib/markdown'
-import { SearchHistory } from '@/lib/types'
+import { SearchHistory, Source } from '@/lib/types'
+import { useSearchLimit } from '@/lib/hooks/useSearchLimit'
+import SearchLimitModal from '@/components/SearchLimitModal'
+import { useVoiceSearch } from '@/lib/hooks/useVoiceSearch'
+import Image from 'next/image'
 
 interface ChatMessage {
   id: string
   text: string
   isUser: boolean
   timestamp: Date
-  sources?: Array<{
-    title: string
-    url: string
-    snippet: string
-  }>
+  sources?: Source[]
   category?: string | null
   subcategory?: string | null
   verdict?: string
@@ -43,7 +42,6 @@ export default function MuktiCornerPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [searchHistory, setSearchHistory] = useState<SearchHistory[]>([])
   const [currentReport, setCurrentReport] = useState<SearchHistory | null>(null)
-  const [isClient, setIsClient] = useState(false)
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState('general')
@@ -52,7 +50,21 @@ export default function MuktiCornerPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoadingCategories, setIsLoadingCategories] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true) // Default collapsed
+  const [showLimitModal, setShowLimitModal] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  
+  // Voice search functionality
+  const { 
+    isRecording, 
+    isListening, 
+    error: voiceError, 
+    startVoiceSearch, 
+    stopVoiceSearch, 
+    isSupported 
+  } = useVoiceSearch()
+  
+  const { canSearch, recordSearch, loginWithGoogle, remainingSearches } = useSearchLimit()
 
   // Initialize messages and fetch categories
   useEffect(() => {
@@ -60,6 +72,19 @@ export default function MuktiCornerPage() {
     setMessages([])
     loadSearchHistory()
     fetchCategories()
+  }, [])
+
+  // Listen for voice search results
+  useEffect(() => {
+    const handleVoiceResult = (event: CustomEvent) => {
+      const transcript = event.detail.transcript
+      setInputMessage(transcript)
+    }
+
+    window.addEventListener('voiceSearchResult', handleVoiceResult as EventListener)
+    return () => {
+      window.removeEventListener('voiceSearchResult', handleVoiceResult as EventListener)
+    }
   }, [])
 
   const fetchCategories = async () => {
@@ -130,6 +155,19 @@ export default function MuktiCornerPage() {
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return
+
+    // Check if user can search
+    if (!canSearch()) {
+      setShowLimitModal(true)
+      return
+    }
+
+    // Record the search
+    const searchRecorded = recordSearch(inputMessage, 'mukti-corner')
+    if (!searchRecorded) {
+      setShowLimitModal(true)
+      return
+    }
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -240,6 +278,14 @@ export default function MuktiCornerPage() {
     }
   }
 
+  const handleMicClick = async () => {
+    if (isRecording) {
+      stopVoiceSearch()
+    } else {
+      await startVoiceSearch()
+    }
+  }
+
   const copyBotResponse = async (messageText: string) => {
     try {
       await navigator.clipboard.writeText(messageText)
@@ -334,7 +380,6 @@ ${messageText}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-green-50">
-      <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -396,9 +441,41 @@ ${messageText}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="মুক্তিযুদ্ধ সম্পর্কে আপনার প্রশ্ন লিখুন..."
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent font-solaiman-lipi text-lg"
+                  className="w-full pl-10 pr-20 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent font-solaiman-lipi text-lg"
                   disabled={isLoading}
                 />
+                
+                {/* Mic Icon */}
+                <button
+                  type="button"
+                  onClick={handleMicClick}
+                  className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-2 transition-all duration-200 ${
+                    isRecording 
+                      ? 'animate-pulse' 
+                      : 'hover:opacity-70'
+                  }`}
+                  title={isRecording ? "Recording... Click to stop" : "Voice Search"}
+                  disabled={!isClient || !isSupported || isLoading}
+                >
+                  {!isClient ? (
+                    // Server-side fallback
+                    <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
+                  ) : isSupported ? (
+                    <Image
+                      src="/mic.png"
+                      alt="Voice Search"
+                      width={20}
+                      height={20}
+                      className={`w-5 h-5 transition-all duration-200 ${
+                        isRecording 
+                          ? 'filter-none' 
+                          : 'filter grayscale hover:grayscale-0'
+                      }`}
+                    />
+                  ) : (
+                    <div className="w-5 h-5 bg-gray-300 rounded-full"></div>
+                  )}
+                </button>
               </div>
               <button
                 onClick={handleSendMessage}
@@ -412,6 +489,19 @@ ${messageText}
                 )}
               </button>
             </div>
+            
+            {/* Voice Search Status Messages */}
+            {voiceError && (
+              <div className="mb-4 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm font-solaiman-lipi">
+                {voiceError}
+              </div>
+            )}
+            
+            {isListening && (
+              <div className="mb-4 bg-blue-100 border border-blue-300 text-blue-700 px-4 py-3 rounded-lg text-sm font-solaiman-lipi">
+                🎤 শুনছি... কথা বলুন
+              </div>
+            )}
 
             {/* Category Buttons */}
             <div className="flex flex-wrap gap-3 justify-center">
@@ -433,15 +523,15 @@ ${messageText}
                     >
                       {category.name}
                       {category.subcategories && (
-                        <button
+                        <span
                           onClick={(e) => {
                             e.stopPropagation()
                             setShowSubcategories(!showSubcategories)
                           }}
-                          className="ml-2"
+                          className="ml-2 cursor-pointer inline-flex items-center"
                         >
                           {showSubcategories ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                        </button>
+                        </span>
                       )}
                     </button>
                     
@@ -655,12 +745,12 @@ ${messageText}
                                                  rel="noopener noreferrer"
                                                  className="text-blue-600 hover:text-blue-800 underline"
                                                >
-                                                 {source.title}
+                                                 {source.book_title || source.title}
                                                </a>
                                              </h5>
                                       </div>
                                       <p className="text-sm text-gray-600 font-solaiman-lipi leading-relaxed">
-                                        {source.snippet}
+                                        {source.content_preview || source.snippet}
                                       </p>
                                     </div>
                                   ))}
@@ -815,6 +905,13 @@ ${messageText}
       </div>
       
       <Footer />
+      
+      <SearchLimitModal
+        isOpen={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        onLogin={loginWithGoogle}
+        remainingSearches={remainingSearches}
+      />
     </div>
   )
 }

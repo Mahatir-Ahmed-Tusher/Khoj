@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
-import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { visitTracker, getSafeVisitInfo, getSafeIsFirstVisit, getSafeIsNewSession } from '@/lib/visit-tracker'
 
@@ -14,12 +13,15 @@ const VisitStats = dynamic(() => import('@/components/VisitStats'), {
 
 export default function VisitTrackingDemo() {
   const [visitInfo, setVisitInfo] = useState(getSafeVisitInfo())
-  const [currentTime, setCurrentTime] = useState(new Date())
+  const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
     // Mark as client-side
     setIsClient(true)
+    
+    // Set initial time
+    setCurrentTime(new Date())
     
     // Track this page visit
     visitTracker.trackVisit('visit-tracking-demo')
@@ -43,8 +45,6 @@ export default function VisitTrackingDemo() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
@@ -83,7 +83,7 @@ export default function VisitTrackingDemo() {
               <div className="flex items-center justify-between">
                 <span className="text-gray-600 font-solaiman-lipi">বর্তমান সময়:</span>
                 <span className="font-mono text-sm">
-                  {currentTime.toLocaleTimeString('bn-BD')}
+                  {isClient && currentTime ? currentTime.toLocaleTimeString('bn-BD') : 'লোড হচ্ছে...'}
                 </span>
               </div>
             </div>
