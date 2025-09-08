@@ -11,9 +11,9 @@ export default function Footer() {
                 alt="খোঁজ লোগো" 
                 className="w-8 h-8 object-contain"
               />
-              <h3 className="text-lg font-semibold font-solaiman-lipi">খোঁজ সম্পর্কে</h3>
+              <h3 className="text-lg font-semibold font-tiro-bangla">খোঁজ সম্পর্কে</h3>
             </div>
-            <p className="text-gray-300 mb-4 font-solaiman-lipi">
+            <p className="text-gray-300 mb-4 font-tiro-bangla">
               খোঁজ কৃত্রিম বুদ্ধিমত্তার সাহায্যে যেকোনো দাবির সত্যতা যাচাই করে, দ্রুত ও নির্ভুল তথ্য সামনে আনে।
               আমাদের লক্ষ্য—বাংলাভাষী সমাজকে ভুয়া তথ্যের অন্ধকার থেকে মুক্ত করে সত্যের আলোয় সচেতন রাখা।
             </p>
@@ -41,60 +41,60 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 font-solaiman-lipi">দ্রুত লিংক</h3>
+            <h3 className="text-lg font-semibold mb-4 font-tiro-bangla">দ্রুত লিংক</h3>
             <ul className="space-y-2">
               <li>
-                <a href="/factchecks" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/factchecks" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   ফ্যাক্টচেক সমূহ
                 </a>
               </li>
               <li>
-                <a href="/aifactcheck" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/aifactcheck" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   AI ফ্যাক্টচেক
                 </a>
               </li>
               <li>
-                <a href="/image-check" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/image-check" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   ছবি যাচাই
                 </a>
               </li>
               <li>
-                <a href="/image-search" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/image-search" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   ছবি সার্চ
                 </a>
               </li>
               <li>
-                <a href="/text-check" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/text-check" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   লেখা যাচাই
                 </a>
               </li>
               <li>
-                <a href="/source-search" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/source-search" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   উৎস সন্ধান
                 </a>
               </li>
               <li>
-                <a href="/mukti-corner" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/mukti-corner" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   মুক্তিযুদ্ধ কর্নার
                 </a>
               </li>
               <li>
-                <a href="/mythbusting" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/mythbusting" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   মিথবাস্টিং
                 </a>
               </li>
               <li>
-                <a href="/e-library" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/e-library" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   ই-গ্রন্থ সম্ভার
                 </a>
               </li>
               <li>
-                <a href="/about" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/about" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   আমাদের সম্পর্কে
                 </a>
               </li>
               <li>
-                <a href="https://onneshon-bd.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="https://onneshon-bd.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   অন্বেষণ
                 </a>
               </li>
@@ -103,25 +103,25 @@ export default function Footer() {
 
           {/* Legal & Support */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 font-solaiman-lipi">সহায়তা</h3>
+            <h3 className="text-lg font-semibold mb-4 font-tiro-bangla">সহায়তা</h3>
             <ul className="space-y-2">
               <li>
-                <a href="/privacy-policy" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/privacy-policy" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   গোপনীয়তা নীতি
                 </a>
               </li>
               <li>
-                <a href="/terms" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/terms" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   শর্তাবলী
                 </a>
               </li>
               <li>
-                <a href="/faq" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/faq" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   FAQ
                 </a>
               </li>
               <li>
-                <a href="/how-to-write" className="text-gray-300 hover:text-white transition-colors font-solaiman-lipi">
+                <a href="/how-to-write" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   লেখা পাঠানোর নিয়ম
                 </a>
               </li>
@@ -130,15 +130,15 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 font-solaiman-lipi">যোগাযোগ</h3>
+            <h3 className="text-lg font-semibold mb-4 font-tiro-bangla">যোগাযোগ</h3>
             <ul className="space-y-2">
-              <li className="text-gray-300 font-solaiman-lipi">
+              <li className="text-gray-300 font-tiro-bangla">
                 <span className="block">ইমেইল:</span>
                 <a href="mailto:sysitech1971@gmail.com" className="text-primary-400 hover:text-primary-300">
                   sysitech1971@gmail.com
                 </a>
               </li>
-              <li className="text-gray-300 font-solaiman-lipi">
+              <li className="text-gray-300 font-tiro-bangla">
                 <span className="block">ঠিকানা:</span>
                 <span className="text-primary-400">
                   Mirpur 12, Dhaka, Bangladesh
@@ -149,7 +149,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-          <p className="text-gray-400 font-solaiman-lipi">
+          <p className="text-gray-400 font-tiro-bangla">
             © ২০২৫ খোঁজ। সর্বস্বত্ব সংরক্ষিত।
           </p>
         </div>

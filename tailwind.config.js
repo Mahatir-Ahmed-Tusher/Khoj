@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        'solaiman-lipi': ['SolaimanLipi', 'sans-serif'],
+        'tiro-bangla': ['Tiro Bangla', 'SolaimanLipi', 'serif'],
       },
       colors: {
         primary: {

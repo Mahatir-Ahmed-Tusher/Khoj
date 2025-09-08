@@ -16,7 +16,7 @@ export default function RecommendationWidget({ currentArticleId }: Recommendatio
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 sticky top-4">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4 font-solaiman-lipi">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4 font-tiro-bangla">
         আরও পড়ুন
       </h3>
       
@@ -54,10 +54,10 @@ export default function RecommendationWidget({ currentArticleId }: Recommendatio
               
               {/* Title */}
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors font-solaiman-lipi">
+                <h4 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors font-tiro-bangla">
                   {article.title}
                 </h4>
-                <p className="text-xs text-gray-500 mt-1 font-solaiman-lipi">
+                <p className="text-xs text-gray-500 mt-1 font-tiro-bangla">
                   {new Date(article.publishedAt).toLocaleDateString('bn-BD')}
                 </p>
               </div>

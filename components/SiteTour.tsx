@@ -397,7 +397,7 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
         <div className="fixed bottom-20 right-6 z-[60] bg-blue-600 text-white px-4 py-3 rounded-lg shadow-2xl max-w-xs animate-pulse">
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
-            <p className="text-sm font-solaiman-lipi leading-relaxed">
+            <p className="text-sm font-tiro-bangla leading-relaxed">
               মুক্তিযুদ্ধ কর্নার, মিথবাস্টিং কিংবা বইপত্র পড়তে ই-গ্রন্থসম্ভারে যেতে এখানে চলে আসুন
             </p>
           </div>
@@ -428,10 +428,10 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
 
           {/* Content */}
           <div className="text-center">
-            <h3 className="text-sm font-bold text-gray-900 mb-1 font-solaiman-lipi">
+            <h3 className="text-sm font-bold text-gray-900 mb-1 font-tiro-bangla">
               {currentStepData.title}
             </h3>
-            <p className="text-xs text-gray-700 mb-2 font-solaiman-lipi leading-relaxed">
+            <p className="text-xs text-gray-700 mb-2 font-tiro-bangla leading-relaxed">
               {currentStepData.content}
             </p>
             
@@ -448,7 +448,7 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
                   />
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-1 font-solaiman-lipi">
+              <p className="text-xs text-gray-500 mt-1 font-tiro-bangla">
                 {currentStep + 1}/{tourSteps.length}
               </p>
             </div>
@@ -458,7 +458,7 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
               <button
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className={`px-2 py-1 rounded text-xs font-medium font-solaiman-lipi transition-colors ${
+                className={`px-2 py-1 rounded text-xs font-medium font-tiro-bangla transition-colors ${
                   currentStep === 0 
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -477,7 +477,7 @@ export default function SiteTour({ isOpen, onClose, onComplete }: SiteTourProps)
               
               <button
                 onClick={nextStep}
-                className="px-2 py-1 bg-blue-600 text-white rounded text-xs font-medium font-solaiman-lipi hover:bg-blue-700 transition-colors"
+                className="px-2 py-1 bg-blue-600 text-white rounded text-xs font-medium font-tiro-bangla hover:bg-blue-700 transition-colors"
               >
                 {currentStep === tourSteps.length - 1 ? 'সম্পূর্ণ' : 'পরবর্তী'}
               </button>

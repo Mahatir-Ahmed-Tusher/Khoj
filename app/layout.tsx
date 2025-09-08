@@ -21,7 +21,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="bn" dir="ltr">
-      <body className="font-solaiman-lipi">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap" rel="stylesheet" />
+      </head>
+      <body className="font-tiro-bangla">
         <Providers>
           <Navbar />
           {children}

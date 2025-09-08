@@ -39,22 +39,22 @@ export default function MobileTourDemo() {
       
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 font-tiro-bangla">
             মোবাইল ট্যুর ডেমো 📱
           </h1>
-          <p className="text-gray-600 font-solaiman-lipi mb-6">
+          <p className="text-gray-600 font-tiro-bangla mb-6">
             এই পেজে আপনি মোবাইল-স্পেসিফিক ট্যুর সিস্টেম টেস্ট করতে পারবেন
           </p>
           
           {isMobile ? (
             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
-              <p className="font-solaiman-lipi font-medium">✅ মোবাইল ডিভাইস ডিটেক্ট করা হয়েছে</p>
-              <p className="text-sm font-solaiman-lipi">নিচের ফ্লোটিং বাটনে ক্লিক করে ট্যুর শুরু করুন</p>
+              <p className="font-tiro-bangla font-medium">✅ মোবাইল ডিভাইস ডিটেক্ট করা হয়েছে</p>
+              <p className="text-sm font-tiro-bangla">নিচের ফ্লোটিং বাটনে ক্লিক করে ট্যুর শুরু করুন</p>
             </div>
           ) : (
             <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-lg mb-4">
-              <p className="font-solaiman-lipi font-medium">⚠️ ডেস্কটপ ডিভাইস</p>
-              <p className="text-sm font-solaiman-lipi">ট্যুর শুধুমাত্র মোবাইল ডিভাইসে দেখানো হবে</p>
+              <p className="font-tiro-bangla font-medium">⚠️ ডেস্কটপ ডিভাইস</p>
+              <p className="text-sm font-tiro-bangla">ট্যুর শুধুমাত্র মোবাইল ডিভাইসে দেখানো হবে</p>
             </div>
           )}
         </div>
@@ -62,10 +62,10 @@ export default function MobileTourDemo() {
         {/* Demo Elements */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 font-tiro-bangla">
               মোবাইল ট্যুর বৈশিষ্ট্য
             </h2>
-            <ul className="space-y-2 text-gray-700 font-solaiman-lipi text-sm">
+            <ul className="space-y-2 text-gray-700 font-tiro-bangla text-sm">
               <li>✅ শুধুমাত্র মোবাইলে কাজ করে</li>
               <li>✅ ছোট এবং সংক্ষিপ্ত টুলটিপ</li>
               <li>✅ মোবাইল UI ফিচার ফোকাস</li>
@@ -76,10 +76,10 @@ export default function MobileTourDemo() {
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 font-tiro-bangla">
               ট্যুর স্টেপসমূহ
             </h2>
-            <ol className="space-y-1 text-gray-700 font-solaiman-lipi text-sm">
+            <ol className="space-y-1 text-gray-700 font-tiro-bangla text-sm">
               <li>1. স্বাগত বার্তা</li>
               <li>2. মোবাইল মেনু</li>
               <li>3. ফ্লোটিং অ্যাকশন বাটন</li>
@@ -95,7 +95,7 @@ export default function MobileTourDemo() {
 
         {/* Demo Search Bar */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 font-tiro-bangla">
             ডেমো সার্চ বার
           </h2>
           <SearchBar 
@@ -106,34 +106,34 @@ export default function MobileTourDemo() {
 
         {/* Demo Feature Buttons */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 font-tiro-bangla">
             ডেমো ফিচার বাটনসমূহ
           </h2>
           <div className="grid grid-cols-2 gap-4">
             <Link 
               href="/image-check" 
-              className="px-4 py-3 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors font-solaiman-lipi text-center"
+              className="px-4 py-3 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors font-tiro-bangla text-center"
               data-tour="image-check"
             >
               ছবি যাচাই
             </Link>
             <Link 
               href="/text-check" 
-              className="px-4 py-3 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors font-solaiman-lipi text-center"
+              className="px-4 py-3 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors font-tiro-bangla text-center"
               data-tour="text-check"
             >
               লেখা যাচাই
             </Link>
             <Link 
               href="/source-search" 
-              className="px-4 py-3 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 transition-colors font-solaiman-lipi text-center"
+              className="px-4 py-3 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 transition-colors font-tiro-bangla text-center"
               data-tour="source-search"
             >
               উৎস সন্ধান
             </Link>
             <Link 
               href="/mythbusting" 
-              className="px-4 py-3 bg-orange-100 text-orange-800 rounded-lg hover:bg-orange-200 transition-colors font-solaiman-lipi text-center"
+              className="px-4 py-3 bg-orange-100 text-orange-800 rounded-lg hover:bg-orange-200 transition-colors font-tiro-bangla text-center"
               data-tour="mythbusting"
             >
               মিথবাস্টিং
@@ -143,10 +143,10 @@ export default function MobileTourDemo() {
 
         {/* Instructions */}
         <div className="bg-blue-50 p-6 rounded-lg">
-          <h2 className="text-xl font-bold text-blue-900 mb-4 font-solaiman-lipi">
+          <h2 className="text-xl font-bold text-blue-900 mb-4 font-tiro-bangla">
             কিভাবে ব্যবহার করবেন?
           </h2>
-          <div className="space-y-3 text-blue-800 font-solaiman-lipi text-sm">
+          <div className="space-y-3 text-blue-800 font-tiro-bangla text-sm">
             <p><strong>মোবাইল ডিভাইস:</strong> নিচের ডানদিকের ফ্লোটিং বাটনে ক্লিক করুন</p>
             <p><strong>প্রথম আসা:</strong> মোবাইলে প্রথম আসলে ট্যুর স্বয়ংক্রিয়ভাবে শুরু হবে</p>
             <p><strong>নেভিগেশন:</strong> পরবর্তী/পূর্ববর্তী বাটন দিয়ে ট্যুর চালান</p>

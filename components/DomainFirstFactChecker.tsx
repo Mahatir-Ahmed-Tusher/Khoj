@@ -83,10 +83,10 @@ export default function DomainFirstFactChecker() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold mb-4 font-solaiman-lipi">
+        <h1 className="text-4xl font-bold mb-4 font-tiro-bangla">
           Khoj ডোমেইন-ফার্স্ট ফ্যাক্ট চেকার
         </h1>
-        <p className="text-lg text-gray-600 mb-6 font-solaiman-lipi">
+        <p className="text-lg text-gray-600 mb-6 font-tiro-bangla">
           প্রথমে নির্দিষ্ট ওয়েবসাইটে সার্চ, তারপর প্রয়োজন হলে Tavily API
         </p>
       </div>
@@ -111,7 +111,7 @@ export default function DomainFirstFactChecker() {
         <div className="mt-8">
           {/* সার্চ স্ট্যাটিসটিক্স */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-            <h3 className="text-lg font-semibold mb-4 font-solaiman-lipi">
+            <h3 className="text-lg font-semibold mb-4 font-tiro-bangla">
               সার্চ পরিসংখ্যান
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -160,12 +160,12 @@ export default function DomainFirstFactChecker() {
 
           {/* রিপোর্ট */}
           <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-            <h3 className="text-xl font-semibold mb-4 font-solaiman-lipi">
+            <h3 className="text-xl font-semibold mb-4 font-tiro-bangla">
               ফ্যাক্ট চেকিং রিপোর্ট
             </h3>
             <div className="prose max-w-none">
               <div 
-                className="text-gray-800 leading-relaxed font-solaiman-lipi"
+                className="text-gray-800 leading-relaxed font-tiro-bangla"
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(parseMarkdown(result.report)) }}
               />
             </div>
@@ -173,7 +173,7 @@ export default function DomainFirstFactChecker() {
 
           {/* উৎসসমূহ */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-4 font-solaiman-lipi">
+            <h3 className="text-lg font-semibold mb-4 font-tiro-bangla">
               উৎসসমূহ ({result.selected_urls.length}টি)
             </h3>
             <div className="space-y-4">
@@ -219,7 +219,7 @@ export default function DomainFirstFactChecker() {
           {/* নোটসমূহ */}
           {result.notes.length > 0 && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
-              <h4 className="font-semibold text-yellow-800 mb-2 font-solaiman-lipi">নোটসমূহ:</h4>
+              <h4 className="font-semibold text-yellow-800 mb-2 font-tiro-bangla">নোটসমূহ:</h4>
               <ul className="text-sm text-yellow-700">
                 {result.notes.map((note, index) => (
                   <li key={index} className="mb-1">• {note}</li>
@@ -231,7 +231,7 @@ export default function DomainFirstFactChecker() {
           {/* সম্পর্কিত নিবন্ধসমূহ */}
           {result.relatedArticles && result.relatedArticles.length > 0 && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-6">
-              <h3 className="text-lg font-semibold mb-4 font-solaiman-lipi text-blue-800">
+              <h3 className="text-lg font-semibold mb-4 font-tiro-bangla text-blue-800">
                 📚 সম্পর্কিত নিবন্ধসমূহ
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -247,7 +247,7 @@ export default function DomainFirstFactChecker() {
                       {/* Title Overlay with Shadow - Mobile Only */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent md:hidden"></div>
                       <div className="absolute bottom-0 left-0 right-0 p-3 md:hidden">
-                        <h4 className="text-white font-bold text-sm leading-tight drop-shadow-lg font-solaiman-lipi line-clamp-2">
+                        <h4 className="text-white font-bold text-sm leading-tight drop-shadow-lg font-tiro-bangla line-clamp-2">
                           {article.title}
                         </h4>
                       </div>
@@ -268,7 +268,7 @@ export default function DomainFirstFactChecker() {
                     </div>
                     
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2 text-sm font-solaiman-lipi line-clamp-2 hidden md:block">
+                      <h4 className="font-semibold text-gray-900 mb-2 text-sm font-tiro-bangla line-clamp-2 hidden md:block">
                         <a 
                           href={`/factchecks/${article.slug}`}
                           className="hover:text-blue-600 transition-colors"
@@ -277,7 +277,7 @@ export default function DomainFirstFactChecker() {
                         </a>
                       </h4>
                       
-                      <p className="text-gray-600 text-xs mb-3 line-clamp-2 font-solaiman-lipi">
+                      <p className="text-gray-600 text-xs mb-3 line-clamp-2 font-tiro-bangla">
                         {article.summary}
                       </p>
                       
@@ -289,7 +289,7 @@ export default function DomainFirstFactChecker() {
                       <div className="mt-2">
                         <a 
                           href={`/factchecks/${article.slug}`}
-                          className="text-blue-600 hover:text-blue-800 text-xs font-medium font-solaiman-lipi"
+                          className="text-blue-600 hover:text-blue-800 text-xs font-medium font-tiro-bangla"
                         >
                           পড়ুন →
                         </a>

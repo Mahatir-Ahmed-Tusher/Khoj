@@ -56,10 +56,10 @@ export default function PromotionalWidget() {
     <>
       {/* Desktop Widget */}
       <div className="hidden lg:block bg-white rounded-lg shadow-md p-4 sticky top-4 max-h-[500px] overflow-hidden">
-        <h3 className="text-base font-semibold text-gray-900 mb-3 font-solaiman-lipi">
+        <h3 className="text-base font-semibold text-gray-900 mb-3 font-tiro-bangla">
           আরও অন্বেষণ করুন
         </h3>
-        <p className="text-xs text-gray-600 mb-4 font-solaiman-lipi">
+        <p className="text-xs text-gray-600 mb-4 font-tiro-bangla">
           খোঁজের অন্যান্য বৈশিষ্ট্যগুলি ব্যবহার করে আরও জানুন
         </p>
         
@@ -75,10 +75,10 @@ export default function PromotionalWidget() {
                   {feature.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors font-solaiman-lipi text-sm">
+                  <h4 className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors font-tiro-bangla text-sm">
                     {feature.title}
                   </h4>
-                  <p className="text-xs text-gray-500 font-solaiman-lipi line-clamp-1">
+                  <p className="text-xs text-gray-500 font-tiro-bangla line-clamp-1">
                     {feature.description}
                   </p>
                 </div>
@@ -107,7 +107,7 @@ export default function PromotionalWidget() {
       }`}>
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h3 className="text-base font-semibold text-gray-900 font-solaiman-lipi">
+            <h3 className="text-base font-semibold text-gray-900 font-tiro-bangla">
               আরও অন্বেষণ করুন
             </h3>
             <button
@@ -121,7 +121,7 @@ export default function PromotionalWidget() {
           </div>
           
           <div className="flex-1 overflow-y-auto p-4">
-            <p className="text-xs text-gray-600 mb-4 font-solaiman-lipi">
+            <p className="text-xs text-gray-600 mb-4 font-tiro-bangla">
               খোঁজের অন্যান্য বৈশিষ্ট্যগুলি ব্যবহার করে আরও জানুন
             </p>
             
@@ -138,10 +138,10 @@ export default function PromotionalWidget() {
                       {feature.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors font-solaiman-lipi text-sm">
+                      <h4 className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors font-tiro-bangla text-sm">
                         {feature.title}
                       </h4>
-                      <p className="text-xs text-gray-500 font-solaiman-lipi line-clamp-1">
+                      <p className="text-xs text-gray-500 font-tiro-bangla line-clamp-1">
                         {feature.description}
                       </p>
                     </div>

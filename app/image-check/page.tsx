@@ -116,10 +116,10 @@ export default function ImageCheckPage() {
           <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-amber-200">
             <span className="text-amber-600 text-3xl">🖼️</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-3 font-solaiman-lipi tracking-tight">
+          <h1 className="text-3xl font-bold text-gray-800 mb-3 font-tiro-bangla tracking-tight">
             ছবি যাচাই
           </h1>
-          <p className="text-lg text-gray-600 font-solaiman-lipi">
+          <p className="text-lg text-gray-600 font-tiro-bangla">
             AI দ্বারা তৈরি ছবি সনাক্ত করুন
           </p>
         </div>
@@ -129,7 +129,7 @@ export default function ImageCheckPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* File Upload */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3 font-solaiman-lipi">
+              <label className="block text-sm font-medium text-gray-700 mb-3 font-tiro-bangla">
                 ছবি আপলোড করুন
               </label>
               <input
@@ -146,13 +146,13 @@ export default function ImageCheckPage() {
                 <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-3 bg-white text-gray-500 font-solaiman-lipi">অথবা</span>
+                <span className="px-3 bg-white text-gray-500 font-tiro-bangla">অথবা</span>
               </div>
             </div>
 
             {/* Image URL */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3 font-solaiman-lipi">
+              <label className="block text-sm font-medium text-gray-700 mb-3 font-tiro-bangla">
                 ছবির URL দিন
               </label>
               <input
@@ -179,7 +179,7 @@ export default function ImageCheckPage() {
             <button
               type="submit"
               disabled={isLoading || (!selectedFile && !imageUrl)}
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-6 rounded-xl hover:from-amber-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed font-solaiman-lipi font-medium transition-all duration-200"
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-6 rounded-xl hover:from-amber-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed font-tiro-bangla font-medium transition-all duration-200"
             >
               {isLoading ? 'যাচাই হচ্ছে...' : 'ছবি যাচাই করুন'}
             </button>
@@ -188,21 +188,21 @@ export default function ImageCheckPage() {
           {/* Error Message */}
           {error && (
             <div className="mt-6 p-4 bg-red-50/80 border border-red-200 rounded-xl">
-              <p className="text-red-700 font-solaiman-lipi text-sm">{error}</p>
+              <p className="text-red-700 font-tiro-bangla text-sm">{error}</p>
             </div>
           )}
 
           {/* Result */}
           {result && (
             <div className="mt-8 p-6 bg-gradient-to-br from-gray-50/80 to-slate-50/80 rounded-xl border border-gray-200/50">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 font-solaiman-lipi">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 font-tiro-bangla">
                 যাচাইকরণ ফলাফল
               </h3>
               
               <div className="space-y-4">
                 {/* Verdict */}
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-solaiman-lipi text-sm">ফলাফল:</span>
+                  <span className="text-gray-700 font-tiro-bangla text-sm">ফলাফল:</span>
                   <span className={`px-3 py-1.5 rounded-lg text-sm font-medium border ${getVerdictColor(result.verdict)}`}>
                     {getVerdictText(result.verdict)}
                   </span>
@@ -210,7 +210,7 @@ export default function ImageCheckPage() {
 
                 {/* Confidence */}
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-solaiman-lipi text-sm">আত্মবিশ্বাস:</span>
+                  <span className="text-gray-700 font-tiro-bangla text-sm">আত্মবিশ্বাস:</span>
                   <span className="text-gray-800 font-medium text-sm">
                     {result.confidence === 'high' ? 'উচ্চ' : 
                      result.confidence === 'medium' ? 'মাঝারি' : 'নিম্ন'}
@@ -219,7 +219,7 @@ export default function ImageCheckPage() {
 
                 {/* AI Score */}
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-solaiman-lipi text-sm">AI স্কোর:</span>
+                  <span className="text-gray-700 font-tiro-bangla text-sm">AI স্কোর:</span>
                   <span className="text-gray-800 font-medium text-sm">
                     {(result.aiGeneratedScore * 100).toFixed(1)}%
                   </span>
@@ -227,8 +227,8 @@ export default function ImageCheckPage() {
 
                 {/* Explanation */}
                 <div>
-                  <span className="text-gray-700 font-solaiman-lipi text-sm">ব্যাখ্যা:</span>
-                  <p className="text-gray-800 mt-1 font-solaiman-lipi text-sm">{result.explanation}</p>
+                  <span className="text-gray-700 font-tiro-bangla text-sm">ব্যাখ্যা:</span>
+                  <p className="text-gray-800 mt-1 font-tiro-bangla text-sm">{result.explanation}</p>
                 </div>
 
                 {/* Request ID */}
@@ -244,10 +244,10 @@ export default function ImageCheckPage() {
 
         {/* How it works */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-8 mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 font-solaiman-lipi">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 font-tiro-bangla">
             কিভাবে কাজ করে
           </h2>
-          <p className="text-gray-600 mb-6 font-solaiman-lipi text-sm">
+          <p className="text-gray-600 mb-6 font-tiro-bangla text-sm">
             আমাদের AI সিস্টেম ছবির বিভিন্ন বৈশিষ্ট্য বিশ্লেষণ করে AI দ্বারা তৈরি কিনা তা সনাক্ত করে।
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -255,22 +255,22 @@ export default function ImageCheckPage() {
               <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl flex items-center justify-center mx-auto mb-3 border border-blue-200">
                 <span className="text-blue-600 text-lg">📸</span>
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2 font-solaiman-lipi text-sm">ছবি আপলোড</h3>
-              <p className="text-xs text-gray-600 font-solaiman-lipi">ছবি আপলোড করুন বা URL দিন</p>
+              <h3 className="font-semibold text-gray-800 mb-2 font-tiro-bangla text-sm">ছবি আপলোড</h3>
+              <p className="text-xs text-gray-600 font-tiro-bangla">ছবি আপলোড করুন বা URL দিন</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-3 border border-green-200">
                 <span className="text-green-600 text-lg">🔍</span>
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2 font-solaiman-lipi text-sm">AI বিশ্লেষণ</h3>
-              <p className="text-xs text-gray-600 font-solaiman-lipi">AI ছবি বিশ্লেষণ করে</p>
+              <h3 className="font-semibold text-gray-800 mb-2 font-tiro-bangla text-sm">AI বিশ্লেষণ</h3>
+              <p className="text-xs text-gray-600 font-tiro-bangla">AI ছবি বিশ্লেষণ করে</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl flex items-center justify-center mx-auto mb-3 border border-purple-200">
                 <span className="text-purple-600 text-lg">📊</span>
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2 font-solaiman-lipi text-sm">ফলাফল</h3>
-              <p className="text-xs text-gray-600 font-solaiman-lipi">বিস্তারিত রিপোর্ট পান</p>
+              <h3 className="font-semibold text-gray-800 mb-2 font-tiro-bangla text-sm">ফলাফল</h3>
+              <p className="text-xs text-gray-600 font-tiro-bangla">বিস্তারিত রিপোর্ট পান</p>
             </div>
           </div>
         </div>
@@ -278,7 +278,7 @@ export default function ImageCheckPage() {
         <div className="text-center">
           <Link 
             href="/"
-            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 rounded-xl hover:from-gray-200 hover:to-slate-200 transition-all duration-200 font-solaiman-lipi text-sm font-medium border border-gray-200"
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 rounded-xl hover:from-gray-200 hover:to-slate-200 transition-all duration-200 font-tiro-bangla text-sm font-medium border border-gray-200"
           >
             ← মূল পৃষ্ঠায় ফিরে যান
           </Link>

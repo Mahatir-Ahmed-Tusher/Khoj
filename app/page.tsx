@@ -198,10 +198,10 @@ export default function HomePage() {
         
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="mb-6">
-            <h1 className="text-3xl md:text-5xl font-bold mb-3 font-solaiman-lipi" style={{
+            <h1 className="text-3xl md:text-5xl font-bold mb-3 font-tiro-bangla" style={{
               textShadow: '0 0 4px rgba(255, 255, 255, 0.4), 0 0 8px rgba(255, 255, 255, 0.3)'
             }}>খোঁজ</h1>
-            <p className="text-xl md:text-2xl text-white mb-6 font-solaiman-lipi animate-pulse cursor-pointer hover:text-blue-200 transition-colors duration-300" style={{
+            <p className="text-xl md:text-2xl text-white mb-6 font-tiro-bangla animate-pulse cursor-pointer hover:text-blue-200 transition-colors duration-300" style={{
               textShadow: '0 0 3px rgba(255, 255, 255, 0.3), 0 0 6px rgba(255, 255, 255, 0.2)',
               animation: 'glow 2s ease-in-out infinite alternate'
             }}>
@@ -247,7 +247,7 @@ export default function HomePage() {
                 }`} 
                 data-tour="image-check"
               >
-                <span className="text-white text-xs md:text-sm font-medium font-solaiman-lipi whitespace-nowrap">AI ছবি যাচাই</span>
+                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap">AI ছবি যাচাই</span>
               </button>
               <button 
                 onClick={handleMythbustingClick}
@@ -258,7 +258,7 @@ export default function HomePage() {
                 }`} 
                 data-tour="mythbusting"
               >
-                <span className="text-white text-xs md:text-sm font-medium font-solaiman-lipi whitespace-nowrap">মিথবাস্টিং</span>
+                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap">মিথবাস্টিং</span>
               </button>
               <button 
                 onClick={handleNewsCheckClick}
@@ -269,7 +269,7 @@ export default function HomePage() {
                 }`} 
                 data-tour="news-check"
               >
-                <span className="text-white text-xs md:text-sm font-medium font-solaiman-lipi whitespace-nowrap">খবর যাচাই</span>
+                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap">খবর যাচাই</span>
               </button>
               <button 
                 onClick={handleImageSearchClick}
@@ -280,10 +280,10 @@ export default function HomePage() {
                 }`} 
                 data-tour="source-search"
               >
-                <span className="text-white text-xs md:text-sm font-medium font-solaiman-lipi whitespace-nowrap">ছবি সার্চ</span>
+                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap">ছবি সার্চ</span>
               </button>
               <Link href="/text-check" className="px-2 md:px-4 py-2 md:py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0" data-tour="text-check">
-                <span className="text-white text-xs md:text-sm font-medium font-solaiman-lipi whitespace-nowrap">লেখা যাচাই</span>
+                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap">লেখা যাচাই</span>
               </Link>
             </div>
           </div>
@@ -312,10 +312,10 @@ export default function HomePage() {
           {/* Main Content - Centered */}
           <div className="flex flex-col items-center max-w-4xl mx-auto">
               <div className="text-center mb-4 w-full">
-                <h2 className="text-xl font-bold text-gray-900 mb-2 font-solaiman-lipi">
+                <h2 className="text-xl font-bold text-gray-900 mb-2 font-tiro-bangla">
                   আমাদের সাম্প্রতিক ফ্যাক্টচেক সমূহ
                 </h2>
-                <p className="text-base text-gray-600 font-solaiman-lipi">
+                <p className="text-base text-gray-600 font-tiro-bangla">
                   সর্বশেষ যাচাইকৃত দাবি এবং তথ্য
                 </p>
               </div>
@@ -331,7 +331,7 @@ export default function HomePage() {
                     filter === filterOption.value
                       ? filterOption.color
                       : 'text-gray-600 hover:text-gray-800'
-                  } font-solaiman-lipi`}
+                  } font-tiro-bangla`}
                 >
                   {filterOption.label}
                 </button>
@@ -480,7 +480,7 @@ export default function HomePage() {
                 {/* Content */}
                 <div className="p-2">
                   {/* Title */}
-                  <h3 className="text-sm font-semibold text-gray-900 mb-1 font-solaiman-lipi line-clamp-3 leading-tight">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-1 font-tiro-bangla line-clamp-3 leading-tight">
                     {article.title}
                   </h3>
                   
@@ -488,12 +488,12 @@ export default function HomePage() {
                   {article.tags && article.tags.length > 0 && (
                     <div className="flex space-x-1 mb-2 hidden md:flex">
                       {article.tags.slice(0, 2).map((tag, index) => (
-                        <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-solaiman-lipi">
+                        <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-tiro-bangla">
                           {tag}
                         </span>
                       ))}
                       {article.tags.length > 2 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-solaiman-lipi">
+                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-tiro-bangla">
                           +{article.tags.length - 2}
                         </span>
                       )}
@@ -501,13 +501,13 @@ export default function HomePage() {
                   )}
                   
                   {/* Preview - Desktop Only */}
-                  <p className="text-gray-600 mb-2 line-clamp-1 hidden md:block font-solaiman-lipi text-sm">
+                  <p className="text-gray-600 mb-2 line-clamp-1 hidden md:block font-tiro-bangla text-sm">
                     {article.summary}
                   </p>
                   
                   {/* Date */}
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500 font-solaiman-lipi">
+                    <span className="text-xs text-gray-500 font-tiro-bangla">
                       {new Date(article.publishedAt).toLocaleDateString('bn-BD')}
                     </span>
                   </div>
@@ -552,12 +552,12 @@ export default function HomePage() {
             {/* Right Side - Content */}
             <div className="flex-1 text-center lg:text-left">
               {/* Main Heading */}
-              <h2 className="text-base md:text-lg font-bold text-gray-900 mb-1 font-solaiman-lipi">
+              <h2 className="text-base md:text-lg font-bold text-gray-900 mb-1 font-tiro-bangla">
                 আমাদের পরিবারের অংশ হোন
               </h2>
               
               {/* Content */}
-              <p className="text-xs text-gray-700 mb-2 font-solaiman-lipi">
+              <p className="text-xs text-gray-700 mb-2 font-tiro-bangla">
                 আপনার চারপাশে ঘটে চলা নানান কিছু এবং প্রচলিত গুজব, নিউজ সম্পর্কে সন্দেহ আছে? 
                 <span className="font-semibold text-blue-600">খোঁজ</span> এর সাথে যুক্ত হয়ে সত্যের সন্ধান করুন।
               </p>
@@ -566,10 +566,10 @@ export default function HomePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {/* Left Side - Invitation */}
                   <div className="text-left">
-                    <h3 className="text-xs font-bold text-gray-900 mb-1 font-solaiman-lipi">
+                    <h3 className="text-xs font-bold text-gray-900 mb-1 font-tiro-bangla">
                       আমাদের পাঠান
                     </h3>
-                    <ul className="space-y-0.5 text-xs text-gray-700 font-solaiman-lipi">
+                    <ul className="space-y-0.5 text-xs text-gray-700 font-tiro-bangla">
                       <li className="flex items-start space-x-1">
                         <div className="w-1 h-1 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
                         <span>সন্দেহজনক নিউজ বা তথ্য</span>
@@ -591,7 +591,7 @@ export default function HomePage() {
                   
                   {/* Right Side - Contact */}
                   <div className="text-left">
-                    <h3 className="text-xs font-bold text-gray-900 mb-1 font-solaiman-lipi">
+                    <h3 className="text-xs font-bold text-gray-900 mb-1 font-tiro-bangla">
                       যোগাযোগ করুন
                     </h3>
                     <div className="space-y-1">
@@ -602,10 +602,10 @@ export default function HomePage() {
                           </svg>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-600 font-solaiman-lipi">ইমেইল ঠিকানা</p>
+                          <p className="text-xs text-gray-600 font-tiro-bangla">ইমেইল ঠিকানা</p>
                           <a 
                             href="mailto:sysitech1971@gmail.com" 
-                            className="text-blue-600 hover:text-blue-700 font-medium text-xs font-solaiman-lipi transition-colors"
+                            className="text-blue-600 hover:text-blue-700 font-medium text-xs font-tiro-bangla transition-colors"
                           >
                             sysitech1971@gmail.com
                           </a>
@@ -613,7 +613,7 @@ export default function HomePage() {
                       </div>
                       
                       <div className="p-1 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
-                        <p className="text-xs text-gray-700 font-solaiman-lipi">
+                        <p className="text-xs text-gray-700 font-tiro-bangla">
                           <span className="font-semibold text-green-600">দ্রুত প্রতিক্রিয়া:</span> 
                           ২৪-৪৮ ঘন্টার মধ্যে উত্তর।
                         </p>
@@ -625,19 +625,19 @@ export default function HomePage() {
               
               {/* Call to Action */}
               <div className="text-center">
-                <p className="text-xs text-gray-600 mb-2 font-solaiman-lipi">
+                <p className="text-xs text-gray-600 mb-2 font-tiro-bangla">
                   আমাদের লেখা পাঠানোর নিয়ম জানতে <Link href="/how-to-write" className="text-blue-600 hover:text-blue-700 underline font-medium">এখানে</Link> ক্লিক করুন
                 </p>
                 <div className="flex flex-col sm:flex-row gap-1 justify-center items-center">
                   <a 
                     href="mailto:sysitech1971@gmail.com"
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-solaiman-lipi"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-tiro-bangla"
                   >
                     এখনই ইমেইল করুন
                   </a>
                   <Link 
                     href="/about"
-                    className="bg-white hover:bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 border border-gray-200 hover:border-gray-300 font-solaiman-lipi"
+                    className="bg-white hover:bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 border border-gray-200 hover:border-gray-300 font-tiro-bangla"
                   >
                     আমাদের সম্পর্কে জানুন
                   </Link>

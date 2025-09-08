@@ -131,15 +131,15 @@ export default function ELibraryPage() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <BookOpen className="h-10 w-10 text-green-600" />
-            <h1 className="text-4xl font-bold text-gray-900 font-solaiman-lipi">
+            <h1 className="text-4xl font-bold text-gray-900 font-tiro-bangla">
               ই-গ্রন্থাগার
             </h1>
           </div>
-          <p className="text-xl text-gray-600 font-solaiman-lipi mb-6">
+          <p className="text-xl text-gray-600 font-tiro-bangla mb-6">
             ফ্যাক্ট চেকিং ও যুক্তিবাদী সাহিত্যের বিশাল সম্ভার
           </p>
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <p className="text-lg text-gray-800 font-solaiman-lipi">
+            <p className="text-lg text-gray-800 font-tiro-bangla">
               বই পড়ুন, শিখুন, ভাবুন, এবং খোঁজ-এর সাথে যুক্ত হয়ে জ্ঞানের আলোকে আলোকিত হোন!
             </p>
           </div>
@@ -148,10 +148,10 @@ export default function ELibraryPage() {
         {/* Downloadable Books Section */}
         <section className="mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4 font-tiro-bangla">
               📚 বই পড়া যাবে ডাউনলোড করে
             </h2>
-            <p className="text-lg text-gray-600 font-solaiman-lipi">
+            <p className="text-lg text-gray-600 font-tiro-bangla">
               নিচের বইগুলো বিনামূল্যে ডাউনলোড করে পড়তে পারবেন
             </p>
           </div>
@@ -171,31 +171,31 @@ export default function ELibraryPage() {
 
                   {/* Book Metadata */}
                   <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-3 font-solaiman-lipi">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3 font-tiro-bangla">
                       {book.title}
                     </h3>
                     
                     <div className="space-y-2 mb-6">
                       <div className="flex items-center space-x-2">
                         <User className="h-5 w-5 text-gray-500" />
-                        <span className="text-lg text-gray-700 font-solaiman-lipi">
+                        <span className="text-lg text-gray-700 font-tiro-bangla">
                           লেখকঃ {book.author}
                         </span>
                       </div>
-                      <div className="text-sm text-gray-600 font-solaiman-lipi">
+                      <div className="text-sm text-gray-600 font-tiro-bangla">
                         ধরণঃ ফ্যাক্ট চেকিং, যুক্তিবাদ, গবেষণা
                       </div>
-                      <div className="text-sm text-gray-600 font-solaiman-lipi">
+                      <div className="text-sm text-gray-600 font-tiro-bangla">
                         স্ট্যাটাসঃ বিনামূল্যে ডাউনলোড
                       </div>
                     </div>
 
                     {/* Review */}
                     <div className="mb-6">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-3 font-solaiman-lipi">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-3 font-tiro-bangla">
                         পর্যালোচনা
                       </h4>
-                      <div className="text-gray-700 leading-relaxed font-solaiman-lipi">
+                      <div className="text-gray-700 leading-relaxed font-tiro-bangla">
                         {book.review.split('\n').map((paragraph, index) => (
                           <p key={index} className="mb-3">
                             {paragraph}
@@ -210,7 +210,7 @@ export default function ELibraryPage() {
                         href={book.downloadLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-green-600 hover:text-green-700 font-medium font-solaiman-lipi"
+                        className="text-green-600 hover:text-green-700 font-medium font-tiro-bangla"
                       >
                         ডাউনলোডঃ বইটি পড়তে ডাউনলোড করুন <span className="underline">এখানে</span>।
                       </a>
@@ -225,10 +225,10 @@ export default function ELibraryPage() {
         {/* Recommended Books Section */}
         <section className="mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4 font-tiro-bangla">
               🛒 রেকমেন্ডেশন
             </h2>
-            <p className="text-lg text-gray-600 font-solaiman-lipi">
+            <p className="text-lg text-gray-600 font-tiro-bangla">
               নিচের বইগুলো বিভিন্ন বইয়ের দোকান থেকে কিনে পড়তে পারবেন
             </p>
           </div>
@@ -248,31 +248,31 @@ export default function ELibraryPage() {
 
                   {/* Book Metadata */}
                   <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-3 font-solaiman-lipi">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3 font-tiro-bangla">
                       {book.title}
                     </h3>
                     
                     <div className="space-y-2 mb-6">
                       <div className="flex items-center space-x-2">
                         <User className="h-5 w-5 text-gray-500" />
-                        <span className="text-lg text-gray-700 font-solaiman-lipi">
+                        <span className="text-lg text-gray-700 font-tiro-bangla">
                           লেখকঃ {book.author}
                         </span>
                       </div>
-                      <div className="text-sm text-gray-600 font-solaiman-lipi">
+                      <div className="text-sm text-gray-600 font-tiro-bangla">
                         ধরণঃ যুক্তিবাদ, বিজ্ঞান, গবেষণা
                       </div>
-                      <div className="text-sm text-gray-600 font-solaiman-lipi">
+                      <div className="text-sm text-gray-600 font-tiro-bangla">
                         স্ট্যাটাসঃ কেনার জন্য উপলব্ধ
                       </div>
                     </div>
 
                     {/* Review */}
                     <div className="mb-6">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-3 font-solaiman-lipi">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-3 font-tiro-bangla">
                         পর্যালোচনা
                       </h4>
-                      <div className="text-gray-700 leading-relaxed font-solaiman-lipi">
+                      <div className="text-gray-700 leading-relaxed font-tiro-bangla">
                         {book.review.split('\n').map((paragraph, index) => (
                           <p key={index} className="mb-3">
                             {paragraph}
@@ -287,7 +287,7 @@ export default function ELibraryPage() {
                         href={book.purchaseLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700 font-medium font-solaiman-lipi"
+                        className="text-blue-600 hover:text-blue-700 font-medium font-tiro-bangla"
                       >
                         কেনার জন্যঃ বইটি কিনতে ক্লিক করুন <span className="underline">এখানে</span>।
                       </a>
@@ -301,10 +301,10 @@ export default function ELibraryPage() {
 
         {/* Info Section */}
         <div className="bg-gray-50 rounded-lg p-8 border border-gray-200">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4 font-solaiman-lipi text-center">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4 font-tiro-bangla text-center">
             এই লাইব্রেরি সম্পর্কে
           </h3>
-          <div className="text-gray-700 font-solaiman-lipi leading-relaxed text-lg text-center">
+          <div className="text-gray-700 font-tiro-bangla leading-relaxed text-lg text-center">
             আমাদের ই-গ্রন্থাগারে আপনি পাবেন ফ্যাক্ট চেকিং, যুক্তিবাদ, বিজ্ঞান, এবং সঠিক তথ্য যাচাই সম্পর্কিত বইয়ের বিশাল সম্ভার। 
             কিছু বই বিনামূল্যে ডাউনলোড করে পড়তে পারবেন, আবার কিছু বই বিভিন্ন বইয়ের দোকান থেকে কিনে পড়তে পারবেন। 
             প্রতিটি বইয়ের সাথে বিস্তারিত পর্যালোচনা দেওয়া হয়েছে যাতে আপনি সঠিক বইটি বেছে নিতে পারেন।

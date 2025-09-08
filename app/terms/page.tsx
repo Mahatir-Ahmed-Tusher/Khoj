@@ -7,10 +7,10 @@ export default function Terms() {
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-4 font-times-now">শর্তাবলী</h1>
-            <p className="text-gray-600 font-solaiman-lipi">সর্বশেষ আপডেট: জানুয়ারি ২০২৫</p>
+            <p className="text-gray-600 font-tiro-bangla">সর্বশেষ আপডেট: জানুয়ারি ২০২৫</p>
           </div>
 
-          <div className="prose prose-lg max-w-none font-solaiman-lipi">
+          <div className="prose prose-lg max-w-none font-tiro-bangla">
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-800 mb-4 font-times-now">১. পরিষেবার বিবরণ</h2>
               <p className="text-gray-700 mb-4">
@@ -159,7 +159,7 @@ export default function Terms() {
           <div className="mt-8 pt-6 border-t border-gray-200">
             <Link 
               href="/"
-              className="inline-flex items-center text-blue-600 hover:text-blue-800 font-solaiman-lipi"
+              className="inline-flex items-center text-blue-600 hover:text-blue-800 font-tiro-bangla"
             >
               ← হোমপেজে ফিরে যান
             </Link>

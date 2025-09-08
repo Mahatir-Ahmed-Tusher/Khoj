@@ -70,7 +70,7 @@ export default function FAQ() {
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-4 font-times-now">সর্বাধিক জিজ্ঞাসিত প্রশ্ন</h1>
-            <p className="text-gray-600 font-solaiman-lipi">খোঁজ সম্পর্কে সাধারণ প্রশ্ন এবং উত্তর</p>
+            <p className="text-gray-600 font-tiro-bangla">খোঁজ সম্পর্কে সাধারণ প্রশ্ন এবং উত্তর</p>
           </div>
 
           <div className="space-y-6">
@@ -79,7 +79,7 @@ export default function FAQ() {
                 <h3 className="text-xl font-semibold text-gray-800 mb-3 font-times-now">
                   প্রশ্ন {index + 1}: {faq.question}
                 </h3>
-                <p className="text-gray-700 font-solaiman-lipi leading-relaxed">
+                <p className="text-gray-700 font-tiro-bangla leading-relaxed">
                   {faq.answer}
                 </p>
               </div>
@@ -91,10 +91,10 @@ export default function FAQ() {
               <h3 className="text-xl font-semibold text-gray-800 mb-3 font-times-now">
                 আরও প্রশ্ন আছে?
               </h3>
-              <p className="text-gray-700 mb-4 font-solaiman-lipi">
+              <p className="text-gray-700 mb-4 font-tiro-bangla">
                 যদি আপনার প্রশ্নের উত্তর এখানে না থাকে, তাহলে আমাদের সাথে যোগাযোগ করুন।
               </p>
-              <div className="space-y-2 text-gray-700 font-solaiman-lipi">
+              <div className="space-y-2 text-gray-700 font-tiro-bangla">
                 <p><strong>ইমেইল:</strong> sysitech1971@gmail.com</p>
                 <p><strong>ঠিকানা:</strong> Mirpur 12, Dhaka, Bangladesh</p>
                 <p><strong>GitHub:</strong> <a href="https://github.com/Mahatir-Ahmed-Tusher/Khoj" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">https://github.com/Mahatir-Ahmed-Tusher/Khoj</a></p>
@@ -105,7 +105,7 @@ export default function FAQ() {
           <div className="mt-8 pt-6 border-t border-gray-200">
             <Link 
               href="/"
-              className="inline-flex items-center text-blue-600 hover:text-blue-800 font-solaiman-lipi"
+              className="inline-flex items-center text-blue-600 hover:text-blue-800 font-tiro-bangla"
             >
               ← হোমপেজে ফিরে যান
             </Link>

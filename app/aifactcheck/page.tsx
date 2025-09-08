@@ -98,10 +98,10 @@ https://khoj.com
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4 font-tiro-bangla">
             AI ফ্যাক্টচেক
           </h1>
-          <p className="text-lg text-gray-600 mb-8 font-solaiman-lipi">
+          <p className="text-lg text-gray-600 mb-8 font-tiro-bangla">
             যেকোনো দাবি বা তথ্যের সত্যতা যাচাই করুন AI-এর সাহায্যে
           </p>
           
@@ -117,10 +117,10 @@ https://khoj.com
         {isLoading && (
           <div className="text-center py-12">
             <Loader2 className="h-12 w-12 text-primary-600 animate-spin mx-auto mb-4" />
-            <p className="text-lg text-gray-600 font-solaiman-lipi">
+            <p className="text-lg text-gray-600 font-tiro-bangla">
               আপনার জন্য ফ্যাক্টচেক রিপোর্ট তৈরি হচ্ছে...
             </p>
-            <p className="text-sm text-gray-500 mt-2 font-solaiman-lipi">
+            <p className="text-sm text-gray-500 mt-2 font-tiro-bangla">
               আপনার প্রশ্ন বা দাবি কতোটা জটিল, তার উপর ভিত্তি করে তা কয়েক সেকেন্ড থেকে অন্তত এক মিনিট সময় নিতে পারে, অনুগ্রহ পূর্বক অপেক্ষা করুন...
             </p>
           </div>
@@ -130,10 +130,10 @@ https://khoj.com
         {error && (
           <div className="card text-center py-8">
             <XCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2 font-solaiman-lipi">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">
               ত্রুটি ঘটেছে
             </h3>
-            <p className="text-gray-600 font-solaiman-lipi">{error}</p>
+            <p className="text-gray-600 font-tiro-bangla">{error}</p>
           </div>
         )}
 
@@ -146,10 +146,10 @@ https://khoj.com
                 <div className="flex items-center space-x-3">
                   {getVerdictIcon(result.report)}
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900 font-solaiman-lipi">
+                    <h2 className="text-2xl font-bold text-gray-900 font-tiro-bangla">
                       ফ্যাক্টচেক রিপোর্ট
                     </h2>
-                    <p className="text-gray-600 font-solaiman-lipi">
+                    <p className="text-gray-600 font-tiro-bangla">
                       {new Date(result.generatedAt).toLocaleDateString('bn-BD')}
                     </p>
                   </div>
@@ -164,19 +164,19 @@ https://khoj.com
               </div>
 
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-solaiman-lipi">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">
                   মূল দাবি:
                 </h3>
-                <p className="text-gray-700 bg-gray-50 p-4 rounded-lg font-solaiman-lipi">
+                <p className="text-gray-700 bg-gray-50 p-4 rounded-lg font-tiro-bangla">
                   {result.claim}
                 </p>
               </div>
 
               <div className="prose prose-lg max-w-none">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 font-solaiman-lipi">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 font-tiro-bangla">
                   বিশ্লেষণ:
                 </h3>
-                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap font-solaiman-lipi">
+                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap font-tiro-bangla">
                   {result.report}
                 </div>
               </div>
@@ -185,7 +185,7 @@ https://khoj.com
             {/* Sources */}
             {result.sources.length > 0 && (
               <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 font-solaiman-lipi">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 font-tiro-bangla">
                   উৎসসমূহ ({result.sources.length})
                 </h3>
                 <div className="space-y-4">
@@ -224,7 +224,7 @@ https://khoj.com
         {!isLoading && !result && !error && (
           <div className="card text-center py-12">
             <div className="max-w-2xl mx-auto">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4 font-solaiman-lipi">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4 font-tiro-bangla">
                 কিভাবে কাজ করে?
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
@@ -232,8 +232,8 @@ https://khoj.com
                   <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                     <span className="text-primary-600 font-bold">১</span>
                   </div>
-                  <h4 className="font-medium text-gray-900 mb-2 font-solaiman-lipi">দাবি লিখুন</h4>
-                  <p className="text-sm text-gray-600 font-solaiman-lipi">
+                  <h4 className="font-medium text-gray-900 mb-2 font-tiro-bangla">দাবি লিখুন</h4>
+                  <p className="text-sm text-gray-600 font-tiro-bangla">
                     যেকোনো দাবি বা তথ্য উপরে দেওয়া বাক্সে লিখুন
                   </p>
                 </div>
@@ -241,8 +241,8 @@ https://khoj.com
                   <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                     <span className="text-primary-600 font-bold">২</span>
                   </div>
-                  <h4 className="font-medium text-gray-900 mb-2 font-solaiman-lipi">AI যাচাই করে</h4>
-                  <p className="text-sm text-gray-600 font-solaiman-lipi">
+                  <h4 className="font-medium text-gray-900 mb-2 font-tiro-bangla">AI যাচাই করে</h4>
+                  <p className="text-sm text-gray-600 font-tiro-bangla">
                     AI বিশ্বাসযোগ্য উৎস থেকে তথ্য সংগ্রহ করে যাচাই করে
                   </p>
                 </div>
@@ -250,8 +250,8 @@ https://khoj.com
                   <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                     <span className="text-primary-600 font-bold">৩</span>
                   </div>
-                  <h4 className="font-medium text-gray-900 mb-2 font-solaiman-lipi">রিপোর্ট পান</h4>
-                  <p className="text-sm text-gray-600 font-solaiman-lipi">
+                  <h4 className="font-medium text-gray-900 mb-2 font-tiro-bangla">রিপোর্ট পান</h4>
+                  <p className="text-sm text-gray-600 font-tiro-bangla">
                     বিস্তারিত বিশ্লেষণ এবং উৎস সহ রিপোর্ট পান
                   </p>
                 </div>

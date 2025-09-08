@@ -28,7 +28,7 @@ export default function SignInPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 font-solaiman-lipi">লোড হচ্ছে...</p>
+          <p className="text-gray-600 font-tiro-bangla">লোড হচ্ছে...</p>
         </div>
       </div>
     )
@@ -44,31 +44,31 @@ export default function SignInPage() {
               alt="User" 
               className="w-16 h-16 rounded-full mx-auto mb-4"
             />
-            <h2 className="text-xl font-bold text-gray-900 font-solaiman-lipi">
+            <h2 className="text-xl font-bold text-gray-900 font-tiro-bangla">
               স্বাগতম, {session.user?.name}!
             </h2>
-            <p className="text-gray-600 font-solaiman-lipi">
+            <p className="text-gray-600 font-tiro-bangla">
               আপনি সফলভাবে লগ ইন করেছেন
             </p>
           </div>
           
           <div className="space-y-4">
             <div className="p-4 bg-green-50 rounded-lg">
-              <p className="text-green-800 font-solaiman-lipi">
+              <p className="text-green-800 font-tiro-bangla">
                 ✅ এখন আপনি আনলিমিটেড সার্চ করতে পারবেন
               </p>
             </div>
             
             <button
               onClick={handleSignOut}
-              className="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-200 transition-colors font-medium font-solaiman-lipi"
+              className="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-200 transition-colors font-medium font-tiro-bangla"
             >
               লগ আউট করুন
             </button>
             
             <a
               href="/"
-              className="block w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors font-medium font-solaiman-lipi"
+              className="block w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors font-medium font-tiro-bangla"
             >
               হোম পেজে যান
             </a>
@@ -87,10 +87,10 @@ export default function SignInPage() {
             alt="খোঁজ লোগো" 
             className="w-16 h-16 mx-auto mb-4"
           />
-          <h2 className="text-xl font-bold text-gray-900 font-solaiman-lipi mb-2">
+          <h2 className="text-xl font-bold text-gray-900 font-tiro-bangla mb-2">
             খোঁজে লগ ইন করুন
           </h2>
-          <p className="text-gray-600 font-solaiman-lipi">
+          <p className="text-gray-600 font-tiro-bangla">
             আপনার সার্চ সীমা শেষ হয়ে গেছে। লগ ইন করে চালিয়ে যান
           </p>
         </div>
@@ -98,7 +98,7 @@ export default function SignInPage() {
         <div className="space-y-4">
           <button
             onClick={handleGoogleSignIn}
-            className="w-full bg-white border border-gray-300 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors font-medium font-solaiman-lipi flex items-center justify-center space-x-3"
+            className="w-full bg-white border border-gray-300 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors font-medium font-tiro-bangla flex items-center justify-center space-x-3"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -110,7 +110,7 @@ export default function SignInPage() {
           </button>
           
           <div className="p-4 bg-blue-50 rounded-lg">
-            <p className="text-blue-800 text-sm font-solaiman-lipi">
+            <p className="text-blue-800 text-sm font-tiro-bangla">
               <strong>লগ ইন করার সুবিধা:</strong>
               <br />
               • অসীম সার্চ
@@ -123,7 +123,7 @@ export default function SignInPage() {
           
           <a
             href="/"
-            className="block text-gray-500 hover:text-gray-700 text-sm font-solaiman-lipi"
+            className="block text-gray-500 hover:text-gray-700 text-sm font-tiro-bangla"
           >
             হোম পেজে ফিরে যান
           </a>

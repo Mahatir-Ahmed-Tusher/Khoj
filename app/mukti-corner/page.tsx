@@ -392,7 +392,7 @@ ${messageText}
                 className="h-8 w-8 object-contain"
               />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 font-solaiman-lipi">
+            <h1 className="text-2xl font-bold text-gray-900 font-tiro-bangla">
               মুক্তিযুদ্ধ কর্নার
             </h1>
           </div>
@@ -409,7 +409,7 @@ ${messageText}
             <div className="flex justify-end mb-4 lg:hidden">
               <button
                 onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200 font-solaiman-lipi text-sm"
+                className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200 font-tiro-bangla text-sm"
                 title={isSidebarCollapsed ? "সাইডবার খুলুন" : "সাইডবার বন্ধ করুন"}
               >
                 {isSidebarCollapsed ? (
@@ -427,7 +427,7 @@ ${messageText}
             </div>
             
             {/* Instructions */}
-            <p className="text-center text-gray-600 mb-6 font-solaiman-lipi">
+            <p className="text-center text-gray-600 mb-6 font-tiro-bangla">
               মুক্তিযুদ্ধ নিয়ে আপনার সমস্ত প্রশ্নের উত্তর পেতে কৃত্রিম বুদ্ধিমত্তা সম্পন্ন এই সার্চ ইঞ্জিন ব্যবহার করুন। আপনি "একাত্তোর", "গণহত্যা" বা "ধর্ষণ" ক্যাটাগরি বেছে নিয়ে নির্দিষ্ট তথ্য খুঁজে পেতে পারেন।
             </p>
             
@@ -441,7 +441,7 @@ ${messageText}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="মুক্তিযুদ্ধ সম্পর্কে আপনার প্রশ্ন লিখুন..."
-                  className="w-full pl-10 pr-20 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent font-solaiman-lipi text-lg"
+                  className="w-full pl-10 pr-20 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent font-tiro-bangla text-lg"
                   disabled={isLoading}
                 />
                 
@@ -492,13 +492,13 @@ ${messageText}
             
             {/* Voice Search Status Messages */}
             {voiceError && (
-              <div className="mb-4 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm font-solaiman-lipi">
+              <div className="mb-4 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm font-tiro-bangla">
                 {voiceError}
               </div>
             )}
             
             {isListening && (
-              <div className="mb-4 bg-blue-100 border border-blue-300 text-blue-700 px-4 py-3 rounded-lg text-sm font-solaiman-lipi">
+              <div className="mb-4 bg-blue-100 border border-blue-300 text-blue-700 px-4 py-3 rounded-lg text-sm font-tiro-bangla">
                 🎤 শুনছি... কথা বলুন
               </div>
             )}
@@ -508,14 +508,14 @@ ${messageText}
               {isLoadingCategories ? (
                 <div className="flex items-center space-x-2">
                   <Loader2 className="h-4 w-4 animate-spin text-red-600" />
-                  <span className="text-gray-600 font-solaiman-lipi">ক্যাটাগরি লোড হচ্ছে...</span>
+                  <span className="text-gray-600 font-tiro-bangla">ক্যাটাগরি লোড হচ্ছে...</span>
                 </div>
               ) : categories && categories.length > 0 ? (
                 categories.map((category) => (
                   <div key={category.id} className="relative">
                     <button
                       onClick={() => handleCategoryChange(category.id)}
-                      className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 font-solaiman-lipi ${
+                      className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 font-tiro-bangla ${
                         selectedCategory === category.id
                           ? 'bg-red-600 text-white shadow-lg'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -542,7 +542,7 @@ ${messageText}
                           <button
                             key={subcategory.id}
                             onClick={() => handleSubcategoryChange(subcategory.id)}
-                            className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors font-solaiman-lipi ${
+                            className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors font-tiro-bangla ${
                               selectedSubcategory === subcategory.id ? 'bg-red-50 text-red-700' : 'text-gray-700'
                             }`}
                           >
@@ -554,7 +554,7 @@ ${messageText}
                   </div>
                 ))
               ) : (
-                <div className="text-center text-gray-500 font-solaiman-lipi">
+                <div className="text-center text-gray-500 font-tiro-bangla">
                   <p>ক্যাটাগরি লোড করতে সমস্যা হয়েছে</p>
                 </div>
               )}
@@ -563,7 +563,7 @@ ${messageText}
             {/* Selected Category Info */}
             {selectedCategory && (
               <div className="mt-4 text-center">
-                <p className="text-sm text-gray-600 font-solaiman-lipi">
+                <p className="text-sm text-gray-600 font-tiro-bangla">
                   বর্তমান ক্যাটাগরি: {getCategoryName(selectedCategory)}
                   {selectedSubcategory && (
                     <span> → {getSubcategoryName(selectedCategory, selectedSubcategory)}</span>
@@ -582,13 +582,13 @@ ${messageText}
               <div className="flex justify-center items-center h-full">
                 <div className="flex items-center space-x-2">
                   <Loader2 className="h-6 w-6 animate-spin text-red-600" />
-                  <span className="text-gray-600 font-solaiman-lipi">লোড হচ্ছে...</span>
+                  <span className="text-gray-600 font-tiro-bangla">লোড হচ্ছে...</span>
                 </div>
               </div>
             ) : (
               <>
                 {messages.length === 0 ? (
-                  <div className="text-center text-gray-500 font-solaiman-lipi">
+                  <div className="text-center text-gray-500 font-tiro-bangla">
                     <div className="mb-4">
                       <Search className="h-16 w-16 mx-auto text-gray-300" />
                     </div>
@@ -599,7 +599,7 @@ ${messageText}
                         <p className="text-sm text-gray-400">অথবা সাইডবার থেকে আগের রিপোর্ট লোড করুন</p>
                         <button
                           onClick={() => setIsSidebarCollapsed(false)}
-                          className="mt-2 flex items-center space-x-2 mx-auto bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg transition-colors duration-200 font-solaiman-lipi text-sm lg:hidden"
+                          className="mt-2 flex items-center space-x-2 mx-auto bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg transition-colors duration-200 font-tiro-bangla text-sm lg:hidden"
                         >
                           <PanelLeftOpen className="h-4 w-4" />
                           <span>সার্চ হিস্টরি দেখুন</span>
@@ -612,9 +612,9 @@ ${messageText}
                     <div key={message.id} className="mb-8">
                       {message.isUser ? (
                         <div className="mb-6">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2 font-solaiman-lipi">আপনার প্রশ্ন:</h3>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">আপনার প্রশ্ন:</h3>
                           <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-red-500">
-                            <p className="text-gray-800 font-solaiman-lipi">{message.text}</p>
+                            <p className="text-gray-800 font-tiro-bangla">{message.text}</p>
                             <p className="text-xs text-gray-500 mt-2" suppressHydrationWarning>
                               {typeof window !== 'undefined' ? message.timestamp.toLocaleString('bn-BD') : message.timestamp.toISOString()}
                             </p>
@@ -626,8 +626,8 @@ ${messageText}
                           <div className="bg-gradient-to-r from-red-50 to-green-50 px-6 py-4 border-b border-gray-200 rounded-t-lg">
                             <div className="flex justify-between items-center">
                               <div>
-                                <h2 className="text-xl font-bold text-gray-900 font-solaiman-lipi">মুক্তিযুদ্ধ কর্নার - প্রতিবেদন</h2>
-                                <p className="text-sm text-gray-600 font-solaiman-lipi">
+                                <h2 className="text-xl font-bold text-gray-900 font-tiro-bangla">মুক্তিযুদ্ধ কর্নার - প্রতিবেদন</h2>
+                                <p className="text-sm text-gray-600 font-tiro-bangla">
                                   ক্যাটাগরি: {getCategoryName(message.category || selectedCategory)}
                                   {message.subcategory && (
                                     <span> → {getSubcategoryName(message.category || selectedCategory, message.subcategory)}</span>
@@ -652,21 +652,21 @@ ${messageText}
                               <div className="flex space-x-2">
                                 <button
                                   onClick={() => copyBotResponse(message.text)}
-                                  className="flex items-center space-x-1 bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 rounded border border-gray-300 transition-colors duration-200 font-solaiman-lipi text-sm"
+                                  className="flex items-center space-x-1 bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 rounded border border-gray-300 transition-colors duration-200 font-tiro-bangla text-sm"
                                 >
                                   <Copy className="h-4 w-4" />
                                   <span>কপি</span>
                                 </button>
                                 <button
                                   onClick={() => downloadBotResponse(message.text)}
-                                  className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded transition-colors duration-200 font-solaiman-lipi text-sm"
+                                  className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded transition-colors duration-200 font-tiro-bangla text-sm"
                                 >
                                   <Download className="h-4 w-4" />
                                   <span>ডাউনলোড</span>
                                 </button>
                                      <button
                                        onClick={clearCurrentReport}
-                                       className="flex items-center space-x-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded transition-colors duration-200 font-solaiman-lipi text-sm"
+                                       className="flex items-center space-x-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded transition-colors duration-200 font-tiro-bangla text-sm"
                                      >
                                        <Search className="h-4 w-4" />
                                        <span>নতুন সার্চ</span>
@@ -679,12 +679,12 @@ ${messageText}
                           <div className="p-6">
                             {message.summary && (
                               <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                <h3 className="text-lg font-semibold text-blue-900 mb-2 font-solaiman-lipi">সংক্ষিপ্ত সারাংশ:</h3>
-                                <p className="text-blue-800 font-solaiman-lipi leading-relaxed">{message.summary}</p>
+                                <h3 className="text-lg font-semibold text-blue-900 mb-2 font-tiro-bangla">সংক্ষিপ্ত সারাংশ:</h3>
+                                <p className="text-blue-800 font-tiro-bangla leading-relaxed">{message.summary}</p>
                               </div>
                             )}
                             
-                            <div className="prose prose-lg max-w-none font-solaiman-lipi">
+                            <div className="prose prose-lg max-w-none font-tiro-bangla">
                               <div 
                                 className="leading-relaxed text-gray-800"
                                 dangerouslySetInnerHTML={{ 
@@ -696,18 +696,18 @@ ${messageText}
                                 {/* Article Metadata Widget */}
                                 {currentReport && (
                                   <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                    <h4 className="text-sm font-semibold text-blue-900 mb-3 font-solaiman-lipi flex items-center space-x-2">
+                                    <h4 className="text-sm font-semibold text-blue-900 mb-3 font-tiro-bangla flex items-center space-x-2">
                                       <Clock className="h-4 w-4" />
                                       <span>রিপোর্ট মেটাডাটা</span>
                                     </h4>
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                       <div>
-                                        <p className="text-blue-700 font-medium font-solaiman-lipi">প্রশ্ন:</p>
-                                        <p className="text-blue-900 font-solaiman-lipi">{currentReport.query}</p>
+                                        <p className="text-blue-700 font-medium font-tiro-bangla">প্রশ্ন:</p>
+                                        <p className="text-blue-900 font-tiro-bangla">{currentReport.query}</p>
                                       </div>
                                       <div>
-                                        <p className="text-blue-700 font-medium font-solaiman-lipi">ক্যাটাগরি:</p>
-                                        <p className="text-blue-900 font-solaiman-lipi">
+                                        <p className="text-blue-700 font-medium font-tiro-bangla">ক্যাটাগরি:</p>
+                                        <p className="text-blue-900 font-tiro-bangla">
                                           {getCategoryName(currentReport.category || 'general')}
                                           {currentReport.subcategory && (
                                             <span> → {getSubcategoryName(currentReport.category || 'general', currentReport.subcategory)}</span>
@@ -715,14 +715,14 @@ ${messageText}
                                         </p>
                                       </div>
                                       <div>
-                                        <p className="text-blue-700 font-medium font-solaiman-lipi">তৈরির তারিখ:</p>
-                                        <p className="text-blue-900 font-solaiman-lipi" suppressHydrationWarning>
+                                        <p className="text-blue-700 font-medium font-tiro-bangla">তৈরির তারিখ:</p>
+                                        <p className="text-blue-900 font-tiro-bangla" suppressHydrationWarning>
                                           {typeof window !== 'undefined' ? currentReport.timestamp.toLocaleString('bn-BD') : currentReport.timestamp.toISOString()}
                                         </p>
                                       </div>
                                       <div>
-                                        <p className="text-blue-700 font-medium font-solaiman-lipi">উৎস সংখ্যা:</p>
-                                        <p className="text-blue-900 font-solaiman-lipi">{currentReport.sources?.length || 0}টি</p>
+                                        <p className="text-blue-700 font-medium font-tiro-bangla">উৎস সংখ্যা:</p>
+                                        <p className="text-blue-900 font-tiro-bangla">{currentReport.sources?.length || 0}টি</p>
                                       </div>
                                     </div>
                                   </div>
@@ -731,14 +731,14 @@ ${messageText}
                                                          {/* Sources Section */}
                              {message.sources && message.sources.length > 0 && (
                                <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-                                      <h4 className="text-lg font-semibold text-gray-900 mb-4 font-solaiman-lipi">
+                                      <h4 className="text-lg font-semibold text-gray-900 mb-4 font-tiro-bangla">
                                         রেফারেন্স:
                                       </h4>
                                  <div className="space-y-3">
                                         {message.sources.map((source, index) => (
                                     <div key={index} className="bg-white p-3 rounded border border-gray-200">
                                       <div className="flex justify-between items-start mb-2">
-                                             <h5 className="font-semibold text-gray-900 font-solaiman-lipi">
+                                             <h5 className="font-semibold text-gray-900 font-tiro-bangla">
                                                <a 
                                                  href={source.url} 
                                                  target="_blank" 
@@ -749,7 +749,7 @@ ${messageText}
                                                </a>
                                              </h5>
                                       </div>
-                                      <p className="text-sm text-gray-600 font-solaiman-lipi leading-relaxed">
+                                      <p className="text-sm text-gray-600 font-tiro-bangla leading-relaxed">
                                         {source.content_preview || source.snippet}
                                       </p>
                                     </div>
@@ -761,14 +761,14 @@ ${messageText}
                             {/* Our Site Recommendations */}
                             {message.ourSiteArticles && message.ourSiteArticles.length > 0 && (
                               <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
-                                <h4 className="text-lg font-semibold text-green-900 mb-4 font-solaiman-lipi flex items-center space-x-2">
+                                <h4 className="text-lg font-semibold text-green-900 mb-4 font-tiro-bangla flex items-center space-x-2">
                                   <span>📚 আমাদের সাইটের প্রস্তাবিত নিবন্ধসমূহ:</span>
                                 </h4>
                                 <div className="space-y-3">
                                   {message.ourSiteArticles.map((article, index) => (
                                     <div key={index} className="bg-white p-3 rounded border border-green-200">
                                       <div className="flex justify-between items-start mb-2">
-                                        <h5 className="font-semibold text-green-900 font-solaiman-lipi">
+                                        <h5 className="font-semibold text-green-900 font-tiro-bangla">
                                           <a 
                                             href={article.url} 
                                             className="text-green-600 hover:text-green-800 underline"
@@ -776,9 +776,9 @@ ${messageText}
                                             {article.title}
                                           </a>
                                         </h5>
-                                        <span className="text-sm text-green-600 font-solaiman-lipi">আমাদের সাইট</span>
+                                        <span className="text-sm text-green-600 font-tiro-bangla">আমাদের সাইট</span>
                                       </div>
-                                      <p className="text-sm text-green-800 font-solaiman-lipi leading-relaxed">
+                                      <p className="text-sm text-green-800 font-tiro-bangla leading-relaxed">
                                         {article.snippet}
                                       </p>
                                     </div>
@@ -789,7 +789,7 @@ ${messageText}
                             
                             {/* Report Footer */}
                             <div className="mt-6 pt-4 border-t border-gray-200">
-                              <p className="text-xs text-gray-500 font-solaiman-lipi" suppressHydrationWarning>
+                              <p className="text-xs text-gray-500 font-tiro-bangla" suppressHydrationWarning>
                                 প্রতিবেদন তৈরি: {typeof window !== 'undefined' ? message.timestamp.toLocaleString('bn-BD') : message.timestamp.toISOString()}
                               </p>
                             </div>
@@ -804,8 +804,8 @@ ${messageText}
                   <div className="flex justify-center items-center py-12">
                     <div className="text-center">
                       <Loader2 className="h-8 w-8 animate-spin text-red-600 mx-auto mb-4" />
-                      <p className="text-lg text-gray-600 font-solaiman-lipi">প্রতিবেদন তৈরি হচ্ছে...</p>
-                      <p className="text-sm text-gray-500 font-solaiman-lipi mt-2">অনুগ্রহ করে অপেক্ষা করুন</p>
+                      <p className="text-lg text-gray-600 font-tiro-bangla">প্রতিবেদন তৈরি হচ্ছে...</p>
+                      <p className="text-sm text-gray-500 font-tiro-bangla mt-2">অনুগ্রহ করে অপেক্ষা করুন</p>
                     </div>
                   </div>
                 )}
@@ -818,10 +818,10 @@ ${messageText}
 
         {/* Info Section */}
         <div className="mt-8 bg-gradient-to-r from-red-50 to-green-50 rounded-2xl p-6 border border-red-200">
-          <h3 className="text-lg font-semibold text-red-900 mb-3 font-solaiman-lipi">
+          <h3 className="text-lg font-semibold text-red-900 mb-3 font-tiro-bangla">
             এই সার্চ ইঞ্জিন সম্পর্কে
           </h3>
-          <p className="text-red-800 font-solaiman-lipi leading-relaxed">
+          <p className="text-red-800 font-tiro-bangla leading-relaxed">
             এই সার্চ ইঞ্জিন বাংলাদেশের মুক্তিযুদ্ধ ১৯৭১ সম্পর্কে বিস্তারিত তথ্য প্রদান করে। 
             আপনি মুক্তিযুদ্ধের ইতিহাস, গণহত্যা, যুদ্ধাপরাধ, গুরুত্বপূর্ণ ব্যক্তিত্ব, 
             যুদ্ধের সময়কাল, আন্তর্জাতিক প্রতিক্রিয়া এবং অন্যান্য বিষয়ে প্রশ্ন করতে পারেন।
@@ -880,7 +880,7 @@ ${messageText}
           {/* Header */}
           <div className="flex-shrink-0 p-4 border-b border-gray-200">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-red-600 font-solaiman-lipi">সার্চ হিস্টরি</h3>
+              <h3 className="text-lg font-bold text-red-600 font-tiro-bangla">সার্চ হিস্টরি</h3>
               <button
                 onClick={() => setIsSidebarCollapsed(true)}
                 className="text-gray-500 hover:text-gray-700"

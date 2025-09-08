@@ -45,7 +45,7 @@ export default function Navbar() {
               alt="খোঁজ লোগো" 
               className="w-8 h-8 object-contain"
             />
-            <span className="text-xl font-bold text-gray-900 font-solaiman-lipi">খোঁজ</span>
+            <span className="text-xl font-bold text-gray-900 font-tiro-bangla">খোঁজ</span>
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -55,7 +55,7 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'text-sm font-medium transition-colors duration-200 font-solaiman-lipi',
+                  'text-sm font-medium transition-colors duration-200 font-tiro-bangla',
                   pathname === item.href
                     ? 'text-primary-600 border-b-2 border-primary-600'
                     : 'text-gray-600 hover:text-primary-600'
@@ -72,12 +72,12 @@ export default function Navbar() {
               <>
                 {!isLoggedIn ? (
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm text-gray-600 font-solaiman-lipi">
+                    <span className="text-sm text-gray-600 font-tiro-bangla">
                       সার্চ: {remainingSearches === Infinity ? '∞' : remainingSearches}
                     </span>
                     <button
                       onClick={loginWithGoogle}
-                      className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium font-solaiman-lipi text-sm"
+                      className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium font-tiro-bangla text-sm"
                     >
                       <LogIn className="h-4 w-4" />
                       <span>লগ ইন</span>
@@ -91,13 +91,13 @@ export default function Navbar() {
                         alt="User" 
                         className="w-6 h-6 rounded-full"
                       />
-                      <span className="text-sm text-green-600 font-solaiman-lipi">
+                      <span className="text-sm text-green-600 font-tiro-bangla">
                         {session?.user?.name?.split(' ')[0]}
                       </span>
                     </div>
                     <button
                       onClick={logout}
-                      className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium font-solaiman-lipi text-sm"
+                      className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium font-tiro-bangla text-sm"
                     >
                       <LogOut className="h-4 w-4" />
                       <span>লগ আউট</span>
@@ -115,12 +115,12 @@ export default function Navbar() {
               <>
                 {!isLoggedIn ? (
                   <div className="flex items-center space-x-2">
-                    <span className="text-xs text-gray-600 font-solaiman-lipi">
+                    <span className="text-xs text-gray-600 font-tiro-bangla">
                       {remainingSearches === Infinity ? '∞' : remainingSearches}
                     </span>
                     <button
                       onClick={loginWithGoogle}
-                      className="flex items-center space-x-1 bg-primary-600 text-white px-3 py-1.5 rounded-lg hover:bg-primary-700 transition-colors font-medium font-solaiman-lipi text-xs"
+                      className="flex items-center space-x-1 bg-primary-600 text-white px-3 py-1.5 rounded-lg hover:bg-primary-700 transition-colors font-medium font-tiro-bangla text-xs"
                     >
                       <LogIn className="h-3 w-3" />
                       <span>লগ ইন</span>
@@ -135,7 +135,7 @@ export default function Navbar() {
                     />
                     <button
                       onClick={logout}
-                      className="flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors font-medium font-solaiman-lipi text-xs"
+                      className="flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors font-medium font-tiro-bangla text-xs"
                     >
                       <LogOut className="h-3 w-3" />
                       <span>লগ আউট</span>
@@ -171,7 +171,7 @@ export default function Navbar() {
                   href={item.href}
                   onClick={closeMobileMenu}
                   className={cn(
-                    'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 font-solaiman-lipi',
+                    'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 font-tiro-bangla',
                     pathname === item.href
                       ? 'text-primary-600 bg-primary-50 border-l-4 border-primary-600'
                       : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
@@ -192,7 +192,7 @@ export default function Navbar() {
           <div className="fixed top-0 right-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-bold text-gray-900 font-solaiman-lipi">আপনার ফ্যাক্টচেক</h2>
+                <h2 className="text-lg font-bold text-gray-900 font-tiro-bangla">আপনার ফ্যাক্টচেক</h2>
                 <button 
                   onClick={() => setIsSidebarOpen(false)}
                   className="text-gray-500 hover:text-gray-700"
@@ -205,17 +205,17 @@ export default function Navbar() {
               
               <div className="space-y-4">
                 <div className="p-4 bg-gray-50 rounded-lg">
-                  <h3 className="font-medium text-gray-900 mb-2 font-solaiman-lipi">সাম্প্রতিক ফ্যাক্টচেক</h3>
-                  <p className="text-sm text-gray-600 font-solaiman-lipi">আপনার সব ফ্যাক্টচেক হিস্ট্রি এখানে পাবেন</p>
+                  <h3 className="font-medium text-gray-900 mb-2 font-tiro-bangla">সাম্প্রতিক ফ্যাক্টচেক</h3>
+                  <p className="text-sm text-gray-600 font-tiro-bangla">আপনার সব ফ্যাক্টচেক হিস্ট্রি এখানে পাবেন</p>
                 </div>
                 
                 <div className="space-y-2">
                   <div className="p-3 border rounded-lg">
-                    <p className="text-sm font-medium text-gray-900 font-solaiman-lipi">বাংলাদেশের অর্থনীতি</p>
+                    <p className="text-sm font-medium text-gray-900 font-tiro-bangla">বাংলাদেশের অর্থনীতি</p>
                     <p className="text-xs text-gray-500">২ দিন আগে</p>
                   </div>
                   <div className="p-3 border rounded-lg">
-                    <p className="text-sm font-medium text-gray-900 font-solaiman-lipi">জলবায়ু পরিবর্তন</p>
+                    <p className="text-sm font-medium text-gray-900 font-tiro-bangla">জলবায়ু পরিবর্তন</p>
                     <p className="text-xs text-gray-500">১ সপ্তাহ আগে</p>
                   </div>
                 </div>

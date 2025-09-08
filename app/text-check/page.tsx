@@ -140,10 +140,10 @@ export default function TextCheckPage() {
           <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-primary-600 text-4xl">📝</span>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4 font-tiro-bangla">
             লেখা যাচাই
           </h1>
-          <p className="text-xl text-gray-600 font-solaiman-lipi">
+          <p className="text-xl text-gray-600 font-tiro-bangla">
             AI দ্বারা তৈরি লেখা এবং চুরি করা লেখা সনাক্ত করুন
           </p>
         </div>
@@ -152,7 +152,7 @@ export default function TextCheckPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Check Type Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 font-solaiman-lipi">
+              <label className="block text-sm font-medium text-gray-700 mb-2 font-tiro-bangla">
                 যাচাইয়ের ধরন নির্বাচন করুন
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -167,8 +167,8 @@ export default function TextCheckPage() {
                 >
                   <div className="text-center">
                     <span className="text-2xl mb-2 block">🤖</span>
-                    <h3 className="font-semibold font-solaiman-lipi">AI ডিটেকশন</h3>
-                    <p className="text-sm text-gray-600 font-solaiman-lipi">লেখা AI দ্বারা তৈরি কিনা যাচাই করুন</p>
+                    <h3 className="font-semibold font-tiro-bangla">AI ডিটেকশন</h3>
+                    <p className="text-sm text-gray-600 font-tiro-bangla">লেখা AI দ্বারা তৈরি কিনা যাচাই করুন</p>
                   </div>
                 </button>
                 <button
@@ -182,8 +182,8 @@ export default function TextCheckPage() {
                 >
                   <div className="text-center">
                     <span className="text-2xl mb-2 block">🔍</span>
-                    <h3 className="font-semibold font-solaiman-lipi">প্লেজিয়ারিজম চেক</h3>
-                    <p className="text-sm text-gray-600 font-solaiman-lipi">লেখা চুরি করা কিনা যাচাই করুন</p>
+                    <h3 className="font-semibold font-tiro-bangla">প্লেজিয়ারিজম চেক</h3>
+                    <p className="text-sm text-gray-600 font-tiro-bangla">লেখা চুরি করা কিনা যাচাই করুন</p>
                   </div>
                 </button>
               </div>
@@ -191,7 +191,7 @@ export default function TextCheckPage() {
 
             {/* Text Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 font-solaiman-lipi">
+              <label className="block text-sm font-medium text-gray-700 mb-2 font-tiro-bangla">
                 যাচাই করার জন্য লেখা দিন
               </label>
               <textarea
@@ -201,7 +201,7 @@ export default function TextCheckPage() {
                 rows={8}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 resize-none"
               />
-              <p className="text-sm text-gray-500 mt-1 font-solaiman-lipi">
+              <p className="text-sm text-gray-500 mt-1 font-tiro-bangla">
                 {checkType === 'ai-detection' 
                   ? 'সর্বনিম্ন ৩০০ অক্ষর প্রয়োজন (প্রতিশ্রুতিমূলক ফলাফলের জন্য)'
                   : 'সর্বনিম্ন ১০০ অক্ষর প্রয়োজন (প্লেজিয়ারিজম সনাক্তকরণের জন্য)'
@@ -213,7 +213,7 @@ export default function TextCheckPage() {
             <button
               type="submit"
               disabled={isLoading || text.trim().length < (checkType === 'ai-detection' ? 300 : 100)}
-              className="w-full bg-primary-600 text-white py-3 px-4 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-solaiman-lipi"
+              className="w-full bg-primary-600 text-white py-3 px-4 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-tiro-bangla"
             >
               {isLoading ? 'যাচাই হচ্ছে...' : `${checkType === 'ai-detection' ? 'AI ডিটেকশন' : 'প্লেজিয়ারিজম'} যাচাই করুন`}
             </button>
@@ -222,21 +222,21 @@ export default function TextCheckPage() {
           {/* Error Message */}
           {error && (
             <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-800 font-solaiman-lipi">{error}</p>
+              <p className="text-red-800 font-tiro-bangla">{error}</p>
             </div>
           )}
 
           {/* Result */}
           {result && (
             <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 font-solaiman-lipi">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 font-tiro-bangla">
                 যাচাইকরণ ফলাফল
               </h3>
               
               <div className="space-y-4">
                 {/* Verdict */}
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-solaiman-lipi">ফলাফল:</span>
+                  <span className="text-gray-700 font-tiro-bangla">ফলাফল:</span>
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${getVerdictColor(result.verdict)}`}>
                     {getVerdictText(result.verdict, result.type)}
                   </span>
@@ -244,7 +244,7 @@ export default function TextCheckPage() {
 
                 {/* Confidence */}
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-solaiman-lipi">আত্মবিশ্বাস:</span>
+                  <span className="text-gray-700 font-tiro-bangla">আত্মবিশ্বাস:</span>
                   <span className="text-gray-900 font-medium">
                     {result.confidence === 'high' ? 'উচ্চ' : 
                      result.confidence === 'medium' ? 'মাঝারি' : 'নিম্ন'}
@@ -253,7 +253,7 @@ export default function TextCheckPage() {
 
                 {/* Score */}
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-solaiman-lipi">
+                  <span className="text-gray-700 font-tiro-bangla">
                     {result.type === 'ai-detection' ? 'AI স্কোর:' : 'প্লেজিয়ারিজম স্কোর:'}
                   </span>
                   <span className="text-gray-900 font-medium">
@@ -265,14 +265,14 @@ export default function TextCheckPage() {
                 {result.type === 'ai-detection' && result.details && (
                   <>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-700 font-solaiman-lipi">মানুষের লেখার স্কোর:</span>
+                      <span className="text-gray-700 font-tiro-bangla">মানুষের লেখার স্কোর:</span>
                       <span className="text-gray-900 font-medium">
                         {result.details.humanScore}%
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-700 font-solaiman-lipi">পঠনযোগ্যতা স্কোর:</span>
+                      <span className="text-gray-700 font-tiro-bangla">পঠনযোগ্যতা স্কোর:</span>
                       <span className="text-gray-900 font-medium">
                         {result.details.readabilityScore}%
                       </span>
@@ -280,10 +280,10 @@ export default function TextCheckPage() {
 
                     {result.details.attackDetected && (
                       <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-                        <h4 className="text-sm font-medium text-yellow-800 mb-2 font-solaiman-lipi">
+                        <h4 className="text-sm font-medium text-yellow-800 mb-2 font-tiro-bangla">
                           সুরক্ষা সতর্কতা:
                         </h4>
-                        <ul className="text-sm text-yellow-700 space-y-1 font-solaiman-lipi">
+                        <ul className="text-sm text-yellow-700 space-y-1 font-tiro-bangla">
                           {result.details.attackDetected.zero_width_space && (
                             <li>• লুকানো অক্ষর সনাক্ত হয়েছে</li>
                           )}
@@ -300,42 +300,42 @@ export default function TextCheckPage() {
                 {result.type === 'plagiarism' && result.details && (
                   <>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-700 font-solaiman-lipi">প্লেজিয়ারিজম স্কোর:</span>
+                      <span className="text-gray-700 font-tiro-bangla">প্লেজিয়ারিজম স্কোর:</span>
                       <span className="text-gray-900 font-medium">
                         {result.details.plagiarismScore}%
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-700 font-solaiman-lipi">মিল পাওয়া উৎস:</span>
+                      <span className="text-gray-700 font-tiro-bangla">মিল পাওয়া উৎস:</span>
                       <span className="text-gray-900 font-medium">
                         {result.details.sourceCounts}টি
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-700 font-solaiman-lipi">মোট শব্দ:</span>
+                      <span className="text-gray-700 font-tiro-bangla">মোট শব্দ:</span>
                       <span className="text-gray-900 font-medium">
                         {result.details.textWordCounts}টি
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-700 font-solaiman-lipi">প্লেজিয়ারাইজড শব্দ:</span>
+                      <span className="text-gray-700 font-tiro-bangla">প্লেজিয়ারাইজড শব্দ:</span>
                       <span className="text-gray-900 font-medium">
                         {result.details.totalPlagiarismWords}টি
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-700 font-solaiman-lipi">অভিন্ন শব্দ:</span>
+                      <span className="text-gray-700 font-tiro-bangla">অভিন্ন শব্দ:</span>
                       <span className="text-gray-900 font-medium">
                         {result.details.identicalWordCounts}টি
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-700 font-solaiman-lipi">সদৃশ শব্দ:</span>
+                      <span className="text-gray-700 font-tiro-bangla">সদৃশ শব্দ:</span>
                       <span className="text-gray-900 font-medium">
                         {result.details.similarWordCounts}টি
                       </span>
@@ -344,7 +344,7 @@ export default function TextCheckPage() {
                     {/* Sources List */}
                     {result.details.sources && result.details.sources.length > 0 && (
                       <div className="mt-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2 font-solaiman-lipi">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2 font-tiro-bangla">
                           মিল পাওয়া উৎসসমূহ:
                         </h4>
                         <div className="space-y-2 max-h-40 overflow-y-auto">
@@ -375,7 +375,7 @@ export default function TextCheckPage() {
                           ))}
                         </div>
                         {result.details.sources.length > 5 && (
-                          <p className="text-xs text-gray-500 mt-2 font-solaiman-lipi">
+                          <p className="text-xs text-gray-500 mt-2 font-tiro-bangla">
                             এবং আরও {result.details.sources.length - 5}টি উৎস...
                           </p>
                         )}
@@ -384,10 +384,10 @@ export default function TextCheckPage() {
 
                     {result.details.attackDetected && (
                       <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-                        <h4 className="text-sm font-medium text-yellow-800 mb-2 font-solaiman-lipi">
+                        <h4 className="text-sm font-medium text-yellow-800 mb-2 font-tiro-bangla">
                           সুরক্ষা সতর্কতা:
                         </h4>
-                        <ul className="text-sm text-yellow-700 space-y-1 font-solaiman-lipi">
+                        <ul className="text-sm text-yellow-700 space-y-1 font-tiro-bangla">
                           {result.details.attackDetected.zero_width_space && (
                             <li>• লুকানো অক্ষর সনাক্ত হয়েছে</li>
                           )}
@@ -402,8 +402,8 @@ export default function TextCheckPage() {
 
                 {/* Explanation */}
                 <div>
-                  <span className="text-gray-700 font-solaiman-lipi">ব্যাখ্যা:</span>
-                  <p className="text-gray-900 mt-1 font-solaiman-lipi">{result.explanation}</p>
+                  <span className="text-gray-700 font-tiro-bangla">ব্যাখ্যা:</span>
+                  <p className="text-gray-900 mt-1 font-tiro-bangla">{result.explanation}</p>
                 </div>
               </div>
             </div>
@@ -412,10 +412,10 @@ export default function TextCheckPage() {
 
         {/* How it works */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4 font-solaiman-lipi">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4 font-tiro-bangla">
             কিভাবে কাজ করে
           </h2>
-          <p className="text-gray-600 mb-6 font-solaiman-lipi">
+          <p className="text-gray-600 mb-6 font-tiro-bangla">
             আমাদের AI সিস্টেম লেখার বিভিন্ন বৈশিষ্ট্য বিশ্লেষণ করে AI দ্বারা তৈরি কিনা বা চুরি করা কিনা তা সনাক্ত করে।
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -423,22 +423,22 @@ export default function TextCheckPage() {
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                 <span className="text-blue-600 text-xl">📝</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2 font-solaiman-lipi">লেখা আপলোড</h3>
-              <p className="text-sm text-gray-600 font-solaiman-lipi">যাচাই করার জন্য লেখা দিন</p>
+              <h3 className="font-semibold text-gray-900 mb-2 font-tiro-bangla">লেখা আপলোড</h3>
+              <p className="text-sm text-gray-600 font-tiro-bangla">যাচাই করার জন্য লেখা দিন</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                 <span className="text-green-600 text-xl">🔍</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2 font-solaiman-lipi">AI বিশ্লেষণ</h3>
-              <p className="text-sm text-gray-600 font-solaiman-lipi">AI লেখা বিশ্লেষণ করে</p>
+              <h3 className="font-semibold text-gray-900 mb-2 font-tiro-bangla">AI বিশ্লেষণ</h3>
+              <p className="text-sm text-gray-600 font-tiro-bangla">AI লেখা বিশ্লেষণ করে</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                 <span className="text-purple-600 text-xl">📊</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2 font-solaiman-lipi">ফলাফল</h3>
-              <p className="text-sm text-gray-600 font-solaiman-lipi">বিস্তারিত রিপোর্ট পান</p>
+              <h3 className="font-semibold text-gray-900 mb-2 font-tiro-bangla">ফলাফল</h3>
+              <p className="text-sm text-gray-600 font-tiro-bangla">বিস্তারিত রিপোর্ট পান</p>
             </div>
           </div>
         </div>

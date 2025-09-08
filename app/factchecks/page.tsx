@@ -78,10 +78,10 @@ export default function FactChecksPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 font-solaiman-lipi">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2 font-tiro-bangla">
             ফ্যাক্টচেক সমূহ
           </h1>
-          <p className="text-lg text-gray-600 font-solaiman-lipi">
+          <p className="text-lg text-gray-600 font-tiro-bangla">
             যাচাইকৃত দাবি এবং তথ্যের সম্পূর্ণ তালিকা
           </p>
         </div>
@@ -95,7 +95,7 @@ export default function FactChecksPage() {
                 placeholder="ফ্যাক্টচেক খুঁজুন..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full px-4 py-3 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent font-solaiman-lipi"
+                className="w-full px-4 py-3 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent font-tiro-bangla"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +124,7 @@ export default function FactChecksPage() {
                   filter === filterOption.value
                     ? filterOption.color
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                } font-solaiman-lipi`}
+                } font-tiro-bangla`}
               >
                 {filterOption.label}
               </button>
@@ -134,7 +134,7 @@ export default function FactChecksPage() {
 
         {/* Results Count */}
         <div className="text-center mb-4">
-          <p className="text-gray-600 font-solaiman-lipi">
+          <p className="text-gray-600 font-tiro-bangla">
             {filteredArticles.length} টি ফলাফল পাওয়া গেছে
           </p>
         </div>
@@ -257,7 +257,7 @@ export default function FactChecksPage() {
                   {/* Title Overlay with Shadow - Mobile Only */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent md:hidden"></div>
                   <div className="absolute bottom-0 left-0 right-0 p-4 md:hidden">
-                    <h3 className="text-white font-bold text-lg leading-tight drop-shadow-lg font-solaiman-lipi">
+                    <h3 className="text-white font-bold text-lg leading-tight drop-shadow-lg font-tiro-bangla">
                       {article.title}
                     </h3>
                   </div>
@@ -280,19 +280,19 @@ export default function FactChecksPage() {
                 {/* Content - Right Side */}
                 <div className="p-2 md:p-3 flex-1">
                   <Link href={`/factchecks/${article.slug}`}>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2 font-solaiman-lipi hidden md:block hover:text-primary-600 cursor-pointer">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla hidden md:block hover:text-primary-600 cursor-pointer">
                       {article.title}
                     </h3>
                   </Link>
                   
                   {/* Summary - Desktop Only */}
-                  <p className="text-gray-600 mb-2 line-clamp-2 md:line-clamp-3 font-solaiman-lipi hidden md:block">
+                  <p className="text-gray-600 mb-2 line-clamp-2 md:line-clamp-3 font-tiro-bangla hidden md:block">
                     {article.summary}
                   </p>
                   
                   {/* Claim - Desktop Only */}
                   <div className="mb-2 hidden md:block">
-                    <p className="text-sm text-gray-500 mb-1 font-solaiman-lipi">
+                    <p className="text-sm text-gray-500 mb-1 font-tiro-bangla">
                       <strong>দাবি:</strong> {article.claim}
                     </p>
                   </div>
@@ -303,19 +303,19 @@ export default function FactChecksPage() {
                         {new Date(article.publishedAt).toLocaleDateString('bn-BD')}
                       </span>
                       <span className="text-gray-300 hidden md:inline">•</span>
-                      <span className="text-sm text-gray-500 font-solaiman-lipi hidden md:inline">
+                      <span className="text-sm text-gray-500 font-tiro-bangla hidden md:inline">
                         {article.author}
                       </span>
                       {/* Tags - Mobile Only */}
                       {article.tags && article.tags.length > 0 && (
                         <div className="flex space-x-1 md:hidden">
                           {article.tags.slice(0, 2).map((tag, index) => (
-                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-solaiman-lipi">
+                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-tiro-bangla">
                               {tag}
                             </span>
                           ))}
                           {article.tags.length > 2 && (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-solaiman-lipi">
+                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-tiro-bangla">
                               +{article.tags.length - 2}
                             </span>
                           )}
@@ -324,7 +324,7 @@ export default function FactChecksPage() {
                     </div>
                     <Link 
                       href={`/factchecks/${article.slug}`}
-                      className="text-primary-600 hover:text-primary-700 font-medium text-sm font-solaiman-lipi"
+                      className="text-primary-600 hover:text-primary-700 font-medium text-sm font-tiro-bangla"
                     >
                       আরও পড়ুন →
                     </Link>
@@ -334,12 +334,12 @@ export default function FactChecksPage() {
                   {article.tags && article.tags.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2 hidden md:flex">
                       {article.tags.slice(0, 3).map((tag, index) => (
-                        <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-solaiman-lipi">
+                        <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-tiro-bangla">
                           {tag}
                         </span>
                       ))}
                       {article.tags.length > 3 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-solaiman-lipi">
+                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-tiro-bangla">
                           +{article.tags.length - 3}
                         </span>
                       )}
@@ -355,10 +355,10 @@ export default function FactChecksPage() {
         {filteredArticles.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2 font-solaiman-lipi">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2 font-tiro-bangla">
               কোনো ফলাফল পাওয়া যায়নি
             </h3>
-            <p className="text-gray-600 font-solaiman-lipi">
+            <p className="text-gray-600 font-tiro-bangla">
               আপনার অনুসন্ধানের সাথে মিলে এমন কোনো ফ্যাক্টচেক নেই। অন্য কীওয়ার্ড দিয়ে চেষ্টা করুন।
             </p>
           </div>

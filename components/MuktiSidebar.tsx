@@ -50,10 +50,10 @@ export default function MuktiSidebar({ className = '', searchHistory = [], onLoa
     return (
     <div className={`bg-white rounded-xl shadow-lg border border-gray-200 p-6 ${className}`}>
       <div className="mb-6">
-        <h3 className="text-lg font-bold text-red-600 font-solaiman-lipi mb-2 animate-pulse bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent drop-shadow-lg">
+        <h3 className="text-lg font-bold text-red-600 font-tiro-bangla mb-2 animate-pulse bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent drop-shadow-lg">
           মুক্তিযুদ্ধ সম্পর্কিত ফ্যাক্টচেক
         </h3>
-        <p className="text-sm text-gray-600 font-solaiman-lipi">
+        <p className="text-sm text-gray-600 font-tiro-bangla">
           মুক্তিযুদ্ধ নিয়ে প্রচারিত বিভিন্ন দাবির সত্যতা যাচাই
         </p>
       </div>
@@ -79,7 +79,7 @@ export default function MuktiSidebar({ className = '', searchHistory = [], onLoa
                 
                 {/* Title Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <h4 className="text-white font-semibold text-sm font-solaiman-lipi line-clamp-2 group-hover:text-red-200 transition-colors duration-200">
+                  <h4 className="text-white font-semibold text-sm font-tiro-bangla line-clamp-2 group-hover:text-red-200 transition-colors duration-200">
                     {article.title}
                   </h4>
                 </div>
@@ -88,7 +88,7 @@ export default function MuktiSidebar({ className = '', searchHistory = [], onLoa
               {/* Date Only */}
               <div className="flex items-center space-x-1 text-xs text-gray-500">
                 <Calendar className="h-3 w-3" />
-                <span className="font-solaiman-lipi">
+                <span className="font-tiro-bangla">
                   {new Date(article.publishedAt).toLocaleDateString('bn-BD')}
                 </span>
               </div>
@@ -104,7 +104,7 @@ export default function MuktiSidebar({ className = '', searchHistory = [], onLoa
             <button
               onClick={handlePrevPage}
               disabled={currentPage === 0}
-              className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium font-solaiman-lipi transition-colors duration-200 ${
+              className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium font-tiro-bangla transition-colors duration-200 ${
                 currentPage === 0
                   ? 'text-gray-400 cursor-not-allowed'
                   : 'text-red-600 hover:text-red-700 hover:bg-red-50'
@@ -114,14 +114,14 @@ export default function MuktiSidebar({ className = '', searchHistory = [], onLoa
               <span>পূর্ববর্তী</span>
             </button>
             
-            <span className="text-sm text-gray-500 font-solaiman-lipi">
+            <span className="text-sm text-gray-500 font-tiro-bangla">
               {currentPage + 1} / {totalPages}
             </span>
             
             <button
               onClick={handleNextPage}
               disabled={currentPage === totalPages - 1}
-              className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium font-solaiman-lipi transition-colors duration-200 ${
+              className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium font-tiro-bangla transition-colors duration-200 ${
                 currentPage === totalPages - 1
                   ? 'text-gray-400 cursor-not-allowed'
                   : 'text-red-600 hover:text-red-700 hover:bg-red-50'
@@ -137,7 +137,7 @@ export default function MuktiSidebar({ className = '', searchHistory = [], onLoa
       <div className="mt-4 pt-4 border-t border-gray-200">
         <Link
           href="/factchecks"
-          className="block text-center text-red-600 hover:text-red-700 font-medium font-solaiman-lipi transition-colors duration-200"
+          className="block text-center text-red-600 hover:text-red-700 font-medium font-tiro-bangla transition-colors duration-200"
         >
           সব ফ্যাক্টচেক দেখুন →
         </Link>
@@ -146,7 +146,7 @@ export default function MuktiSidebar({ className = '', searchHistory = [], onLoa
       {/* Search History Section - Now below factcheck */}
       <div className="mt-6 pt-6 border-t border-gray-200">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-bold text-blue-600 font-solaiman-lipi flex items-center space-x-2">
+          <h3 className="text-lg font-bold text-blue-600 font-tiro-bangla flex items-center space-x-2">
             <History className="h-5 w-5" />
             <span>সার্চ হিস্টরি</span>
           </h3>
@@ -162,7 +162,7 @@ export default function MuktiSidebar({ className = '', searchHistory = [], onLoa
         </div>
         
         {searchHistory.length === 0 ? (
-          <p className="text-sm text-gray-500 font-solaiman-lipi">
+          <p className="text-sm text-gray-500 font-tiro-bangla">
             এখনও কোন সার্চ নেই
           </p>
         ) : (
@@ -176,10 +176,10 @@ export default function MuktiSidebar({ className = '', searchHistory = [], onLoa
                 <div className="flex items-start space-x-2">
                   <Clock className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 font-solaiman-lipi line-clamp-2">
+                    <p className="text-sm font-medium text-gray-900 font-tiro-bangla line-clamp-2">
                       {report.query}
                     </p>
-                    <p className="text-xs text-gray-500 font-solaiman-lipi mt-1">
+                    <p className="text-xs text-gray-500 font-tiro-bangla mt-1">
                       {new Date(report.timestamp).toLocaleDateString('bn-BD')} - {new Date(report.timestamp).toLocaleTimeString('bn-BD')}
                     </p>
                     <div className="mt-1 flex space-x-1">
@@ -197,7 +197,7 @@ export default function MuktiSidebar({ className = '', searchHistory = [], onLoa
               </div>
             ))}
             {searchHistory.length > 5 && (
-              <p className="text-xs text-gray-500 text-center font-solaiman-lipi">
+              <p className="text-xs text-gray-500 text-center font-tiro-bangla">
                 আরও {searchHistory.length - 5}টি রিপোর্ট...
               </p>
             )}

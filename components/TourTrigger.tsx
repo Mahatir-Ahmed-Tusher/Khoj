@@ -24,7 +24,7 @@ export default function TourTrigger({ className = '', children, onClick }: TourT
     <>
       <button
         onClick={startTour}
-        className={`inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-solaiman-lipi font-medium ${className}`}
+        className={`inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-tiro-bangla font-medium ${className}`}
       >
         {children || (
           <>

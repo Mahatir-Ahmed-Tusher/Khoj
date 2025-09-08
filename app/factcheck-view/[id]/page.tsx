@@ -123,7 +123,7 @@ ${factCheck.sources.map(source => `${source.id}. ${source.title} - ${source.url}
                   <h2 className="text-2xl font-bold text-gray-900">
                     ফ্যাক্ট চেকিং রিপোর্ট
                   </h2>
-                  <p className="text-gray-600 font-solaiman-lipi">
+                  <p className="text-gray-600 font-tiro-bangla">
                     সংরক্ষিত AI চালিত বিশ্লেষণ
                   </p>
                 </div>

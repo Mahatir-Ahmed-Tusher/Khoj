@@ -66,7 +66,7 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
             background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'
           }}
         >
-          <h3 className="text-lg font-bold mb-4 font-solaiman-lipi text-center text-gray-800">
+          <h3 className="text-lg font-bold mb-4 font-tiro-bangla text-center text-gray-800">
             আপনার সত্যান্বেষের এ যাত্রায় আরও রয়েছেঃ
           </h3>
           
@@ -87,10 +87,10 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
                       )}
                     </div>
                     <div>
-                      <h4 className="font-medium font-solaiman-lipi text-gray-800 group-hover:text-gray-900 transition-colors">
+                      <h4 className="font-medium font-tiro-bangla text-gray-800 group-hover:text-gray-900 transition-colors">
                         {feature.title}
                       </h4>
-                      <p className="text-xs text-gray-600 font-solaiman-lipi">
+                      <p className="text-xs text-gray-600 font-tiro-bangla">
                         {feature.description}
                       </p>
                     </div>
@@ -125,7 +125,7 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
                     <feature.icon className="h-6 w-6 text-gray-700" />
                   )}
                 </div>
-                <span className="text-sm font-medium text-gray-800 font-solaiman-lipi whitespace-nowrap">
+                <span className="text-sm font-medium text-gray-800 font-tiro-bangla whitespace-nowrap">
                   {feature.title}
                 </span>
               </Link>

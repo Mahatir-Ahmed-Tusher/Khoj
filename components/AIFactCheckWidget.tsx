@@ -102,7 +102,7 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
            style={{
              background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'
            }}>
-        <h3 className="text-base font-bold mb-3 font-solaiman-lipi text-center text-gray-800">
+        <h3 className="text-base font-bold mb-3 font-tiro-bangla text-center text-gray-800">
           আপনার এআই ফ্যাক্টচেক সমূহ
         </h3>
         
@@ -115,12 +115,12 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
                 className="w-12 h-12 mx-auto"
               />
             </div>
-            <p className="text-gray-500 text-xs font-solaiman-lipi mb-3">
+            <p className="text-gray-500 text-xs font-tiro-bangla mb-3">
               এখনও কোনো এআই ফ্যাক্টচেক নেই
             </p>
             <Link 
               href="/#search"
-              className="text-primary-600 hover:text-primary-700 text-xs font-medium font-solaiman-lipi"
+              className="text-primary-600 hover:text-primary-700 text-xs font-medium font-tiro-bangla"
             >
               প্রথম ফ্যাক্টচেক করুন →
             </Link>
@@ -173,11 +173,11 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
                         </button>
                       </div>
                     </div>
-                    <h4 className="font-medium font-solaiman-lipi text-gray-800 line-clamp-1 text-sm cursor-pointer hover:text-primary-600 transition-colors"
+                    <h4 className="font-medium font-tiro-bangla text-gray-800 line-clamp-1 text-sm cursor-pointer hover:text-primary-600 transition-colors"
                         onClick={() => window.location.href = `/factcheck-view/${check.id}`}>
                       {check.query}
                     </h4>
-                    <p className="text-xs text-gray-600 font-solaiman-lipi">
+                    <p className="text-xs text-gray-600 font-tiro-bangla">
                       {new Date(check.timestamp).toLocaleDateString('bn-BD')}
                     </p>
                   </div>
@@ -189,7 +189,7 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
               <div className="text-center">
                 <Link 
                   href="/factcheck-view"
-                  className="text-primary-600 hover:text-primary-700 text-xs font-medium font-solaiman-lipi"
+                  className="text-primary-600 hover:text-primary-700 text-xs font-medium font-tiro-bangla"
                 >
                   +{aiFactChecks.length - 3} আরও দেখুন →
                 </Link>
@@ -219,7 +219,7 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
       }`}>
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 font-solaiman-lipi">
+            <h3 className="text-lg font-semibold text-gray-900 font-tiro-bangla">
               আপনার এআই ফ্যাক্টচেক সমূহ
             </h3>
             <button
@@ -242,12 +242,12 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
                     className="w-16 h-16 mx-auto"
                   />
                 </div>
-                <p className="text-gray-500 text-sm font-solaiman-lipi mb-4">
+                <p className="text-gray-500 text-sm font-tiro-bangla mb-4">
                   এখনও কোনো এআই ফ্যাক্টচেক নেই
                 </p>
                 <Link 
                   href="/#search"
-                  className="text-primary-600 hover:text-primary-700 text-sm font-medium font-solaiman-lipi"
+                  className="text-primary-600 hover:text-primary-700 text-sm font-medium font-tiro-bangla"
                 >
                   প্রথম ফ্যাক্টচেক করুন →
                 </Link>
@@ -294,14 +294,14 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
                         </button>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-900 font-solaiman-lipi line-clamp-3 mb-1 cursor-pointer hover:text-primary-600 transition-colors"
+                    <p className="text-sm text-gray-900 font-tiro-bangla line-clamp-3 mb-1 cursor-pointer hover:text-primary-600 transition-colors"
                        onClick={() => {
                          setIsOpen(false);
                          window.location.href = `/factcheck-view/${check.id}`;
                        }}>
                       {check.query}
                     </p>
-                    <p className="text-xs text-gray-500 font-solaiman-lipi">
+                    <p className="text-xs text-gray-500 font-tiro-bangla">
                       {new Date(check.timestamp).toLocaleDateString('bn-BD')}
                     </p>
                   </div>

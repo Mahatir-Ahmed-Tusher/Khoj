@@ -81,15 +81,15 @@ export default function FactCheckViewAllPage() {
               className="w-20 h-20 mx-auto"
             />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4 font-tiro-bangla">
             কোনো এআই ফ্যাক্টচেক নেই
           </h1>
-          <p className="text-gray-600 mb-6 font-solaiman-lipi">
+          <p className="text-gray-600 mb-6 font-tiro-bangla">
             আপনি এখনও কোনো এআই ফ্যাক্টচেক তৈরি করেননি
           </p>
           <Link 
             href="/#search"
-            className="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-solaiman-lipi"
+            className="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-tiro-bangla"
           >
             প্রথম ফ্যাক্টচেক করুন
           </Link>
@@ -103,10 +103,10 @@ export default function FactCheckViewAllPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 font-solaiman-lipi">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 font-tiro-bangla">
             আপনার এআই ফ্যাক্টচেক সমূহ
           </h1>
-          <p className="text-lg text-gray-600 font-solaiman-lipi">
+          <p className="text-lg text-gray-600 font-tiro-bangla">
             আপনার তৈরি করা সব ফ্যাক্টচেক রিপোর্ট
           </p>
         </div>
@@ -115,14 +115,14 @@ export default function FactCheckViewAllPage() {
         <div className="flex flex-wrap gap-4 mb-8">
           <button
             onClick={downloadAllFactChecks}
-            className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-solaiman-lipi"
+            className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-tiro-bangla"
           >
             <Download className="h-4 w-4" />
             <span>সব ডাউনলোড করুন</span>
           </button>
           <button
             onClick={clearAllFactChecks}
-            className="flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-solaiman-lipi"
+            className="flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-tiro-bangla"
           >
             <Trash2 className="h-4 w-4" />
             <span>সব মুছুন</span>
@@ -149,17 +149,17 @@ export default function FactCheckViewAllPage() {
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
-                <h3 className="font-semibold text-gray-900 line-clamp-2 font-solaiman-lipi">
+                <h3 className="font-semibold text-gray-900 line-clamp-2 font-tiro-bangla">
                   {check.query}
                 </h3>
-                <p className="text-xs text-gray-500 mt-2 font-solaiman-lipi">
+                <p className="text-xs text-gray-500 mt-2 font-tiro-bangla">
                   {new Date(check.timestamp).toLocaleString('bn-BD')}
                 </p>
               </div>
 
               {/* Content Preview */}
               <div className="p-4">
-                <p className="text-sm text-gray-600 line-clamp-3 font-solaiman-lipi mb-3">
+                <p className="text-sm text-gray-600 line-clamp-3 font-tiro-bangla mb-3">
                   {check.result.substring(0, 200)}...
                 </p>
                 
@@ -179,7 +179,7 @@ export default function FactCheckViewAllPage() {
                 {/* View Button */}
                 <Link
                   href={`/factcheck-view/${check.id}`}
-                  className="inline-flex items-center space-x-2 text-primary-600 hover:text-primary-700 text-sm font-medium font-solaiman-lipi"
+                  className="inline-flex items-center space-x-2 text-primary-600 hover:text-primary-700 text-sm font-medium font-tiro-bangla"
                 >
                   <span>সম্পূর্ণ রিপোর্ট দেখুন</span>
                   <ExternalLink className="h-3 w-3" />
@@ -199,15 +199,15 @@ export default function FactCheckViewAllPage() {
                 className="w-16 h-16 mx-auto"
               />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2 font-solaiman-lipi">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2 font-tiro-bangla">
               সব ফ্যাক্টচেক মুছে ফেলা হয়েছে
             </h2>
-            <p className="text-gray-600 mb-4 font-solaiman-lipi">
+            <p className="text-gray-600 mb-4 font-tiro-bangla">
               নতুন ফ্যাক্টচেক তৈরি করুন
             </p>
             <Link 
               href="/#search"
-              className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-solaiman-lipi"
+              className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-tiro-bangla"
             >
               নতুন ফ্যাক্টচেক করুন
             </Link>

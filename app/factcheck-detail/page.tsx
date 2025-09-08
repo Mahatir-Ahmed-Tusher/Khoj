@@ -179,10 +179,10 @@ ${report.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).
           {/* Search Bar Section */}
           <div className="mb-8">
             <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2 font-solaiman-lipi">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2 font-tiro-bangla">
                 নতুন ফ্যাক্ট চেক করুন
               </h1>
-              <p className="text-gray-600 font-solaiman-lipi">
+              <p className="text-gray-600 font-tiro-bangla">
                 যেকোনো দাবি বা তথ্য যাচাই করুন
               </p>
             </div>
@@ -238,7 +238,7 @@ ${report.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).
                     <h2 className="text-2xl font-bold text-gray-900">
                       ফ্যাক্ট চেকিং রিপোর্ট
                     </h2>
-                    <p className="text-gray-600 font-solaiman-lipi">
+                    <p className="text-gray-600 font-tiro-bangla">
                       AI চালিত বিস্তারিত বিশ্লেষণ
                     </p>
                   </div>

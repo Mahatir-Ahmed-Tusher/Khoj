@@ -33,11 +33,11 @@ export default function SearchLimitModal({
             <Search className="h-8 w-8 text-red-600" />
           </div>
           
-          <h3 className="text-xl font-bold text-gray-900 mb-2 font-solaiman-lipi">
+          <h3 className="text-xl font-bold text-gray-900 mb-2 font-tiro-bangla">
             সার্চ সীমা শেষ!
           </h3>
           
-          <p className="text-gray-600 mb-6 font-solaiman-lipi leading-relaxed">
+          <p className="text-gray-600 mb-6 font-tiro-bangla leading-relaxed">
             আপনার {remainingSearches === 0 ? '৩টি' : remainingSearches} সার্চ শেষ হয়ে গেছে। 
             <br />
             <span className="font-semibold text-primary-600">অনুগ্রহ করে লগ ইন করুন এবং চালিয়ে যান আপনার সত্যান্বেষণ।</span>
@@ -46,7 +46,7 @@ export default function SearchLimitModal({
           <div className="space-y-3">
             <button
               onClick={onLogin}
-              className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors font-medium font-solaiman-lipi flex items-center justify-center space-x-2"
+              className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg hover:bg-primary-700 transition-colors font-medium font-tiro-bangla flex items-center justify-center space-x-2"
             >
               <LogIn className="h-5 w-5" />
               <span>Google দিয়ে লগ ইন করুন</span>
@@ -54,14 +54,14 @@ export default function SearchLimitModal({
             
             <button
               onClick={onClose}
-              className="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-200 transition-colors font-medium font-solaiman-lipi"
+              className="w-full bg-gray-100 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-200 transition-colors font-medium font-tiro-bangla"
             >
               পরে করব
             </button>
           </div>
 
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800 font-solaiman-lipi">
+            <p className="text-sm text-blue-800 font-tiro-bangla">
               <strong>লগ ইন করার সুবিধা:</strong>
               <br />
               • অসীম সার্চ

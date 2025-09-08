@@ -39,30 +39,30 @@ export default function TourFixTest() {
       
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 font-tiro-bangla">
             ট্যুর ফিক্স টেস্ট 📱
           </h1>
-          <p className="text-gray-600 font-solaiman-lipi mb-6">
+          <p className="text-gray-600 font-tiro-bangla mb-6">
             এই পেজে ট্যুর ফিক্সগুলো টেস্ট করতে পারবেন
           </p>
           
           {isMobile ? (
             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
-              <p className="font-solaiman-lipi font-medium">✅ মোবাইল ডিভাইস</p>
-              <p className="text-sm font-solaiman-lipi">নিচের ফ্লোটিং বাটনে ক্লিক করে ট্যুর শুরু করুন</p>
+              <p className="font-tiro-bangla font-medium">✅ মোবাইল ডিভাইস</p>
+              <p className="text-sm font-tiro-bangla">নিচের ফ্লোটিং বাটনে ক্লিক করে ট্যুর শুরু করুন</p>
             </div>
           ) : (
             <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-lg mb-4">
-              <p className="font-solaiman-lipi font-medium">⚠️ ডেস্কটপ ডিভাইস</p>
-              <p className="text-sm font-solaiman-lipi">ট্যুর শুধুমাত্র মোবাইল ডিভাইসে দেখানো হবে</p>
+              <p className="font-tiro-bangla font-medium">⚠️ ডেস্কটপ ডিভাইস</p>
+              <p className="text-sm font-tiro-bangla">ট্যুর শুধুমাত্র মোবাইল ডিভাইসে দেখানো হবে</p>
             </div>
           )}
         </div>
 
         {/* Hero Section for Testing */}
         <div className="hero-section bg-blue-600 text-white p-8 rounded-lg mb-8">
-          <h2 className="text-xl font-bold mb-4 font-solaiman-lipi">হিরো সেকশন টেস্ট</h2>
-          <p className="mb-6 font-solaiman-lipi">এই সেকশনে ফিচার বাটনগুলো আছে</p>
+          <h2 className="text-xl font-bold mb-4 font-tiro-bangla">হিরো সেকশন টেস্ট</h2>
+          <p className="mb-6 font-tiro-bangla">এই সেকশনে ফিচার বাটনগুলো আছে</p>
           
           <SearchBar 
             placeholder="এখানে কিছু লিখুন..."
@@ -72,28 +72,28 @@ export default function TourFixTest() {
           <div className="flex flex-wrap gap-4 mt-6">
             <Link 
               href="/image-check" 
-              className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-solaiman-lipi"
+              className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-tiro-bangla"
               data-tour="image-check"
             >
               AI ছবি যাচাই
             </Link>
             <Link 
               href="/text-check" 
-              className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-solaiman-lipi"
+              className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-tiro-bangla"
               data-tour="text-check"
             >
               লেখা যাচাই
             </Link>
             <Link 
               href="/source-search" 
-              className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-solaiman-lipi"
+              className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-tiro-bangla"
               data-tour="source-search"
             >
               উৎস সন্ধান
             </Link>
             <Link 
               href="/mythbusting" 
-              className="mythbusting-button px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-solaiman-lipi"
+              className="mythbusting-button px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-tiro-bangla"
               data-tour="mythbusting"
             >
               মিথবাস্টিং
@@ -102,7 +102,7 @@ export default function TourFixTest() {
           
           {/* Special Note for Image and Text Check */}
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-800 font-solaiman-lipi">
+            <p className="text-sm text-yellow-800 font-tiro-bangla">
               <strong>নোট:</strong> ট্যুর সিস্টেম এখন প্রথম ভিজিটরদের জন্য ফিরিয়ে আনা হয়েছে। ট্যুর বাটন নেই, কিন্তু ট্যুর শুধুমাত্র প্রথম ভিজিটরদের জন্য অটো-স্টার্ট হবে এবং একবার দেখার পর আর দেখানো হবে না। ট্যুর বক্সের ক্রস আইকন এখন ছোট এবং সিম্পল - শুধু লাল ক্রস, কোনো শ্যাডো বা ফিল আপ নেই।
             </p>
           </div>
@@ -111,10 +111,10 @@ export default function TourFixTest() {
         {/* Test Results */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 font-tiro-bangla">
               ফিক্স করা সমস্যা
             </h2>
-            <ul className="space-y-2 text-gray-700 font-solaiman-lipi text-sm">
+            <ul className="space-y-2 text-gray-700 font-tiro-bangla text-sm">
               <li>✅ ছবি যাচাই বাটনের টুলটিপ স্ক্রিনের বাইরে যাওয়া</li>
               <li>✅ লেখা যাচাই বাটনের টুলটিপ স্ক্রিনের বাইরে যাওয়া</li>
               <li>✅ সাইডবারকে মিথবাস্টিং বাটন হিসেবে চিহ্নিত করা</li>
@@ -137,10 +137,10 @@ export default function TourFixTest() {
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 font-tiro-bangla">
               উন্নতি
             </h2>
-            <ul className="space-y-2 text-gray-700 font-solaiman-lipi text-sm">
+            <ul className="space-y-2 text-gray-700 font-tiro-bangla text-sm">
               <li>✅ ছোট টুলটিপ (240px x 90px)</li>
               <li>✅ স্মার্ট পজিশনিং</li>
               <li>✅ সঠিক টার্গেট সিলেক্টর</li>
@@ -165,10 +165,10 @@ export default function TourFixTest() {
 
         {/* Instructions */}
         <div className="bg-blue-50 p-6 rounded-lg">
-          <h2 className="text-xl font-bold text-blue-900 mb-4 font-solaiman-lipi">
+          <h2 className="text-xl font-bold text-blue-900 mb-4 font-tiro-bangla">
             টেস্ট করার উপায়
           </h2>
-          <div className="space-y-3 text-blue-800 font-solaiman-lipi text-sm">
+          <div className="space-y-3 text-blue-800 font-tiro-bangla text-sm">
             <p><strong>মোবাইল ডিভাইস:</strong> নিচের ডানদিকের ফ্লোটিং বাটনে ক্লিক করুন</p>
             <p><strong>ট্যুর স্টেপ:</strong> প্রতিটি স্টেপে টুলটিপ স্ক্রিনের মধ্যে আছে কিনা দেখুন</p>
             <p><strong>টার্গেটিং:</strong> সঠিক এলিমেন্ট হাইলাইট হচ্ছে কিনা দেখুন</p>

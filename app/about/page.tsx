@@ -5,10 +5,10 @@ export default function AboutPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 font-solaiman-lipi">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2 font-tiro-bangla">
             আমাদের সম্পর্কে
           </h1>
-          <p className="text-lg text-gray-600 font-solaiman-lipi">
+          <p className="text-lg text-gray-600 font-tiro-bangla">
             খোঁজ - AI-চালিত বাংলা ফ্যাক্টচেকিং প্ল্যাটফর্ম
           </p>
         </div>
@@ -16,10 +16,10 @@ export default function AboutPage() {
         <div className="space-y-6">
           {/* About Khoj */}
           <section className="card">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-tiro-bangla">
               খোঁজ সম্পর্কে
             </h2>
-            <div className="prose prose-lg max-w-none text-gray-700 font-solaiman-lipi leading-relaxed">
+            <div className="prose prose-lg max-w-none text-gray-700 font-tiro-bangla leading-relaxed">
               <p className="mb-4">
                 আমাদের চারপাশে প্রতিদিন অসংখ্য খবর, দাবি আর তথ্য ঘুরে বেড়ায়। এর ভিড়ে কোনটা সত্য আর কোনটা মিথ্যা, তা বুঝে ওঠা আজ অনেক কঠিন। ভুল তথ্যের এই স্রোত শুধু বিভ্রান্তিই ছড়ায় না, সমাজে অবিশ্বাস আর ভয়ের দেয়ালও তৈরি করে।
               </p>
@@ -37,10 +37,10 @@ export default function AboutPage() {
 
           {/* How Khoj was Created */}
           <section className="card">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-tiro-bangla">
               খোঁজের সৃষ্টি
             </h2>
-            <div className="prose prose-lg max-w-none text-gray-700 font-solaiman-lipi leading-relaxed">
+            <div className="prose prose-lg max-w-none text-gray-700 font-tiro-bangla leading-relaxed">
               <p className="mb-4">
                 খোঁজের জন্ম হয়েছে একটি স্বপ্ন থেকে—একটি স্বপ্ন যেখানে প্রতিটি বাংলাভাষী মানুষ সঠিক তথ্যের অধিকার পাবে। আমরা দেখেছি কীভাবে ভুল তথ্য আমাদের সমাজে বিভ্রান্তি ছড়াচ্ছে, কীভাবে মানুষ বিভ্রান্ত হচ্ছে।
               </p>
@@ -55,10 +55,10 @@ export default function AboutPage() {
 
           {/* Our Promise */}
           <section className="card">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-tiro-bangla">
               আমাদের প্রতিশ্রুতি
             </h2>
-            <div className="prose prose-lg max-w-none text-gray-700 font-solaiman-lipi leading-relaxed">
+            <div className="prose prose-lg max-w-none text-gray-700 font-tiro-bangla leading-relaxed">
               <p className="mb-4">
                 আমরা প্রতিশ্রুতি দিচ্ছি যে খোঁজ সবসময় সত্যের পক্ষে থাকবে। আমরা প্রতিশ্রুতি দিচ্ছি যে:
               </p>
@@ -92,11 +92,11 @@ export default function AboutPage() {
 
           {/* Our Team */}
           <section className="card">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-tiro-bangla">
               আমাদের দল
             </h2>
             <div className="text-center mb-6">
-              <p className="text-gray-600 font-solaiman-lipi mb-6">
+              <p className="text-gray-600 font-tiro-bangla mb-6">
                 খোঁজের পিছনে রয়েছে একটি উদ্যমী দল যারা বিশ্বাস করে যে সঠিক তথ্য একটি সুস্থ সমাজের ভিত্তি।
               </p>
             </div>
@@ -109,9 +109,9 @@ export default function AboutPage() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-solaiman-lipi">মাহাথির আহমেদ তুষার</h3>
-                <p className="text-sm text-gray-600 font-solaiman-lipi">প্রতিষ্ঠাতা</p>
-                <p className="text-xs text-gray-500 mt-2 font-solaiman-lipi">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">মাহাথির আহমেদ তুষার</h3>
+                <p className="text-sm text-gray-600 font-tiro-bangla">প্রতিষ্ঠাতা</p>
+                <p className="text-xs text-gray-500 mt-2 font-tiro-bangla">
                   খোঁজের স্বপ্নদ্রষ্টা এবং মূল প্রেরণা
                 </p>
               </div>
@@ -124,9 +124,9 @@ export default function AboutPage() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-solaiman-lipi">সাগর চন্দ্র দে</h3>
-                <p className="text-sm text-gray-600 font-solaiman-lipi">ফ্রন্টএন্ড ডিজাইনার ও লেখক</p>
-                <p className="text-xs text-gray-500 mt-2 font-solaiman-lipi">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">সাগর চন্দ্র দে</h3>
+                <p className="text-sm text-gray-600 font-tiro-bangla">ফ্রন্টএন্ড ডিজাইনার ও লেখক</p>
+                <p className="text-xs text-gray-500 mt-2 font-tiro-bangla">
                   ব্যবহারকারী অভিজ্ঞতা এবং বিষয়বস্তু
                 </p>
               </div>
@@ -139,9 +139,9 @@ export default function AboutPage() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-solaiman-lipi">তানিয়া চৈতি</h3>
-                <p className="text-sm text-gray-600 font-solaiman-lipi">ডেটা সংগ্রহকারী ও গবেষক</p>
-                <p className="text-xs text-gray-500 mt-2 font-solaiman-lipi">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">তানিয়া চৈতি</h3>
+                <p className="text-sm text-gray-600 font-tiro-bangla">ডেটা সংগ্রহকারী ও গবেষক</p>
+                <p className="text-xs text-gray-500 mt-2 font-tiro-bangla">
                   তথ্য যাচাইকরণ এবং গবেষণা
                 </p>
               </div>
@@ -150,19 +150,19 @@ export default function AboutPage() {
 
           {/* Contact */}
           <section className="card text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-solaiman-lipi">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-tiro-bangla">
               যোগাযোগ
             </h2>
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-solaiman-lipi">ইমেইল:</h3>
-                <a href="mailto:sysitech1971@gmail.com" className="text-primary-600 hover:text-primary-700 font-medium font-solaiman-lipi">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">ইমেইল:</h3>
+                <a href="mailto:sysitech1971@gmail.com" className="text-primary-600 hover:text-primary-700 font-medium font-tiro-bangla">
                 sysitech1971@gmail.com
                 </a>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-solaiman-lipi">ঠিকানা:</h3>
-                <p className="text-gray-600 font-solaiman-lipi">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">ঠিকানা:</h3>
+                <p className="text-gray-600 font-tiro-bangla">
                   Mirpur 12, Dhaka, Bangladesh
                 </p>
               </div>

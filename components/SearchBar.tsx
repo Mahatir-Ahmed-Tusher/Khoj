@@ -261,14 +261,14 @@ const SearchBar = memo(function SearchBar({
       
       {/* Error Message */}
       {error && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-md text-sm font-solaiman-lipi z-10">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-md text-sm font-tiro-bangla z-10">
           {error}
         </div>
       )}
       
       {/* Voice Search Status */}
       {isListening && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-blue-100 border border-blue-300 text-blue-700 px-3 py-2 rounded-md text-sm font-solaiman-lipi z-10">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-blue-100 border border-blue-300 text-blue-700 px-3 py-2 rounded-md text-sm font-tiro-bangla z-10">
           🎤 শুনছি... কথা বলুন
         </div>
       )}
