@@ -31,6 +31,7 @@ export default function HomePage() {
   const [isMythbustingActive, setIsMythbustingActive] = useState(false)
   const [isAIImageCheckActive, setIsAIImageCheckActive] = useState(false)
   const [isImageSearchActive, setIsImageSearchActive] = useState(false)
+  const [isTextCheckActive, setIsTextCheckActive] = useState(false)
 
   // Track visit and check if first visit
   useEffect(() => {
@@ -92,7 +93,7 @@ export default function HomePage() {
     { value: 'false', label: 'মিথ্যা', color: 'bg-red-100 text-red-700' },
     { value: 'misleading', label: 'ভ্রান্তিমূলক', color: 'bg-yellow-100 text-yellow-700' },
     { value: 'debunk', label: 'খন্ডন', color: 'bg-purple-100 text-purple-700' }
-  ], [isNewsCheckActive, isMythbustingActive, isAIImageCheckActive, isImageSearchActive])
+  ], [isNewsCheckActive, isMythbustingActive, isAIImageCheckActive, isImageSearchActive, isTextCheckActive])
 
   const handleArticleClick = useCallback((slug: string) => {
     window.location.href = `/factchecks/${slug}`
@@ -109,7 +110,10 @@ export default function HomePage() {
     if (isImageSearchActive) {
       setIsImageSearchActive(false)
     }
-  }, [isNewsCheckActive, isMythbustingActive, isAIImageCheckActive, isImageSearchActive])
+    if (isTextCheckActive) {
+      setIsTextCheckActive(false)
+    }
+  }, [isNewsCheckActive, isMythbustingActive, isAIImageCheckActive, isImageSearchActive, isTextCheckActive])
 
   const handleMythbustingClick = useCallback(() => {
     setIsMythbustingActive(!isMythbustingActive)
@@ -122,7 +126,10 @@ export default function HomePage() {
     if (isImageSearchActive) {
       setIsImageSearchActive(false)
     }
-  }, [isMythbustingActive, isNewsCheckActive, isAIImageCheckActive, isImageSearchActive])
+    if (isTextCheckActive) {
+      setIsTextCheckActive(false)
+    }
+  }, [isMythbustingActive, isNewsCheckActive, isAIImageCheckActive, isImageSearchActive, isTextCheckActive])
 
   const handleAIImageCheckClick = useCallback(() => {
     setIsAIImageCheckActive(!isAIImageCheckActive)
@@ -135,7 +142,10 @@ export default function HomePage() {
     if (isImageSearchActive) {
       setIsImageSearchActive(false)
     }
-  }, [isAIImageCheckActive, isNewsCheckActive, isMythbustingActive, isImageSearchActive])
+    if (isTextCheckActive) {
+      setIsTextCheckActive(false)
+    }
+  }, [isAIImageCheckActive, isNewsCheckActive, isMythbustingActive, isImageSearchActive, isTextCheckActive])
 
   const handleImageSearchClick = useCallback(() => {
     setIsImageSearchActive(!isImageSearchActive)
@@ -148,7 +158,26 @@ export default function HomePage() {
     if (isAIImageCheckActive) {
       setIsAIImageCheckActive(false)
     }
-  }, [isImageSearchActive, isNewsCheckActive, isMythbustingActive, isAIImageCheckActive])
+    if (isTextCheckActive) {
+      setIsTextCheckActive(false)
+    }
+  }, [isImageSearchActive, isNewsCheckActive, isMythbustingActive, isAIImageCheckActive, isTextCheckActive])
+
+  const handleTextCheckClick = useCallback(() => {
+    setIsTextCheckActive(!isTextCheckActive)
+    if (isNewsCheckActive) {
+      setIsNewsCheckActive(false)
+    }
+    if (isMythbustingActive) {
+      setIsMythbustingActive(false)
+    }
+    if (isAIImageCheckActive) {
+      setIsAIImageCheckActive(false)
+    }
+    if (isImageSearchActive) {
+      setIsImageSearchActive(false)
+    }
+  }, [isTextCheckActive, isNewsCheckActive, isMythbustingActive, isAIImageCheckActive, isImageSearchActive])
 
   const handleSearch = useCallback((query: string) => {
     if (isMythbustingActive) {
@@ -157,10 +186,17 @@ export default function HomePage() {
       window.location.href = `/image-check?query=${encodeURIComponent(query)}`
     } else if (isImageSearchActive) {
       window.location.href = `/image-search?query=${encodeURIComponent(query)}`
+    } else if (isTextCheckActive) {
+      // Store text in sessionStorage and redirect to plag-test
+      sessionStorage.setItem('plagiarismText', query)
+      window.location.href = `/plag-test`
+    } else if (isNewsCheckActive) {
+      // Use new news verification API
+      window.location.href = `/news-verification?url=${encodeURIComponent(query)}`
     } else {
       window.location.href = `/factcheck-detail?query=${encodeURIComponent(query)}`
     }
-  }, [isMythbustingActive, isAIImageCheckActive, isImageSearchActive])
+  }, [isMythbustingActive, isAIImageCheckActive, isImageSearchActive, isTextCheckActive, isNewsCheckActive])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -225,7 +261,9 @@ export default function HomePage() {
                       ? "AI জেনারেটেড ছবি কিনা জানতে আপলোড করুন..."
                       : isImageSearchActive
                         ? "ছবি সার্চ করতে আপলোড করুন..."
-                        : undefined
+                        : isTextCheckActive
+                          ? "লেখা চুরি হয়েছে কিনা তা যাচাই করুন এখানে..."
+                          : undefined
               }
               isNewsCheckMode={isNewsCheckActive}
               isAIImageCheckMode={isAIImageCheckActive}
@@ -282,9 +320,17 @@ export default function HomePage() {
               >
                 <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap">ছবি সার্চ</span>
               </button>
-              <Link href="/text-check" className="px-2 md:px-4 py-2 md:py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0" data-tour="text-check">
+              <button 
+                onClick={handleTextCheckClick}
+                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0 ${
+                  isTextCheckActive 
+                    ? 'bg-red-500 bg-opacity-80 hover:bg-opacity-90 shadow-red-500/50' 
+                    : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                }`} 
+                data-tour="text-check"
+              >
                 <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap">লেখা যাচাই</span>
-              </Link>
+              </button>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 
@@ -21,6 +21,41 @@ export default function ImageCheckPage() {
   const [result, setResult] = useState<ImageCheckResult | null>(null)
   const [error, setError] = useState('')
   const [previewUrl, setPreviewUrl] = useState('')
+  const [autoCheckStarted, setAutoCheckStarted] = useState(false)
+
+  // Auto-load image from sessionStorage and start check
+  useEffect(() => {
+    const storedFileData = sessionStorage.getItem('selectedImageFile')
+    if (storedFileData && !autoCheckStarted) {
+      try {
+        const fileData = JSON.parse(storedFileData)
+        
+        // Create a File object from the stored data
+        const byteCharacters = atob(fileData.content.split(',')[1])
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        const file = new File([byteArray], fileData.name, { type: fileData.type })
+        
+        setSelectedFile(file)
+        setPreviewUrl(fileData.content)
+        
+        // Clear the stored data
+        sessionStorage.removeItem('selectedImageFile')
+        
+        // Start auto-check after a short delay
+        setTimeout(() => {
+          setAutoCheckStarted(true)
+          handleImageCheck(file)
+        }, 1000)
+      } catch (error) {
+        console.error('Error loading stored image:', error)
+        sessionStorage.removeItem('selectedImageFile')
+      }
+    }
+  }, [autoCheckStarted])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -40,6 +75,34 @@ export default function ImageCheckPage() {
     setPreviewUrl(url)
     setResult(null)
     setError('')
+  }
+
+  const handleImageCheck = async (file: File) => {
+    setIsLoading(true)
+    setError('')
+    setResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('image', file)
+
+      const response = await fetch('/api/image-check', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setResult(data)
+      } else {
+        setError(data.error || 'ছবি যাচাই করতে সমস্যা হয়েছে')
+      }
+    } catch (err) {
+      setError('নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,6 +186,18 @@ export default function ImageCheckPage() {
             AI দ্বারা তৈরি ছবি সনাক্ত করুন
           </p>
         </div>
+
+        {/* Auto-check Status */}
+        {autoCheckStarted && isLoading && (
+          <div className="bg-blue-50/80 backdrop-blur-sm rounded-2xl border border-blue-200/50 p-6 mb-8">
+            <div className="flex items-center justify-center space-x-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <p className="text-blue-700 font-tiro-bangla font-medium">
+                মেইন পেইজ থেকে আপলোড করা ছবি যাচাই হচ্ছে...
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Main Form */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-8 mb-8">

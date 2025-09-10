@@ -62,7 +62,7 @@ function NewsVerificationContent() {
 
   const verifyNews = async (newsUrl: string) => {
     try {
-      const response = await fetch('/api/news-verification', {
+      const response = await fetch('/api/news-verification-v2', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

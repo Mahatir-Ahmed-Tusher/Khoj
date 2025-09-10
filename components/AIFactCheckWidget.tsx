@@ -260,7 +260,7 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
                       <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getVerdictColor(check.verdict)}`}>
                         {getVerdictText(check.verdict)}
                       </span>
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -270,7 +270,7 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
                           className="text-gray-400 hover:text-primary-600 p-1 rounded transition-colors"
                           title="রিপোর্ট দেখুন"
                         >
-                          <Eye className="w-5 h-5" />
+                          <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={(e) => {
@@ -280,7 +280,7 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
                           className="text-gray-400 hover:text-green-600 p-1 rounded transition-colors"
                           title="ডাউনলোড করুন"
                         >
-                          <Download className="w-5 h-5" />
+                          <Download className="w-4 h-4" />
                         </button>
                         <button
                           onClick={(e) => {
@@ -290,11 +290,11 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
                           className="text-gray-400 hover:text-red-500 p-1 rounded transition-colors"
                           title="মুছুন"
                         >
-                          <X className="w-5 h-5" />
+                          <X className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-900 font-tiro-bangla line-clamp-3 mb-1 cursor-pointer hover:text-primary-600 transition-colors"
+                    <p className="text-sm text-gray-900 font-tiro-bangla line-clamp-3 mb-1 cursor-pointer hover:text-primary-600 transition-colors break-words"
                        onClick={() => {
                          setIsOpen(false);
                          window.location.href = `/factcheck-view/${check.id}`;

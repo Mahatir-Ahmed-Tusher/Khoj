@@ -492,54 +492,9 @@ ${searchResults.map((result, index) => `
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const { url } = await request.json()
-    
-    if (!url) {
-      return NextResponse.json({ error: 'URL is required' }, { status: 400 })
-    }
-    
-    // Validate URL
-    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
-    if (!urlPattern.test(url)) {
-      return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 })
-    }
-    
-    console.log('Starting news verification for:', url)
-    
-    // Step 1: Scrape the news article
-    console.log('Step 1: Scraping news article...')
-    const scrapedContent = await scrapeNewsArticle(url)
-    
-    if (!scrapedContent) {
-      return NextResponse.json({ error: 'Failed to scrape the news article' }, { status: 500 })
-    }
-    
-    // Step 2: Analyze with Gemini
-    console.log('Step 2: Analyzing with Gemini...')
-    const analysis = await analyzeWithGemini(scrapedContent)
-    
-    // Step 3: Search with Tavily
-    console.log('Step 3: Searching with Tavily...')
-    const searchResults = await searchWithTavily(analysis.searchQueries)
-    
-    // Step 4: Generate final report
-    console.log('Step 4: Generating final report...')
-    const finalReport = await generateFinalReport(scrapedContent, analysis, searchResults)
-    
-    console.log('News verification completed successfully')
-    
-    return NextResponse.json({
-      success: true,
-      ...finalReport,
-      originalUrl: url,
-      scrapedTitle: scrapedContent.title
-    })
-    
-  } catch (error) {
-    console.error('News verification error:', error)
-    return NextResponse.json({ 
-      error: 'News verification failed. Please try again.' 
-    }, { status: 500 })
-  }
+  // This API is deprecated - redirect to v2
+  return NextResponse.json({ 
+    error: 'This API is deprecated. Please use /api/news-verification-v2 instead.',
+    redirect: '/api/news-verification-v2'
+  }, { status: 410 })
 }
