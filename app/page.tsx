@@ -694,6 +694,24 @@ export default function HomePage() {
         </div>
       </section>
       
+      {/* YouTube Video Section */}
+      <section className="py-8 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="aspect-video w-full">
+              <iframe
+                src="https://www.youtube.com/embed/x0-DpUwmMm0?si=3KJIMnpYKidTqjh2"
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full rounded-lg shadow-lg"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+      
       <Footer />
     </div>
   )
