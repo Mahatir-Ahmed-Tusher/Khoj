@@ -21,22 +21,86 @@ async function fetchNewsContent(url: string): Promise<NewsAnalysis | null> {
   try {
     console.log('Fetching news content for:', url)
     
-    // Use fetch instead of browser automation for better Vercel compatibility
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-      },
-      // Add timeout
-      signal: AbortSignal.timeout(15000) // 15 seconds timeout
-    })
-
-    if (!response.ok) {
-      console.log(`HTTP error: ${response.status}`)
+    // Try multiple user agents and approaches to bypass 403 errors
+    const userAgents = [
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/121.0'
+    ]
+    
+    let response: Response | null = null
+    let lastError: any = null
+    
+    // Try with different user agents
+    for (const userAgent of userAgents) {
+      try {
+        response = await fetch(url, {
+          headers: {
+            'User-Agent': userAgent,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language': 'en-US,en;q=0.9,bn;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0',
+            'DNT': '1',
+            'Sec-CH-UA': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+            'Sec-CH-UA-Mobile': '?0',
+            'Sec-CH-UA-Platform': '"Windows"'
+          },
+          // Add timeout
+          signal: AbortSignal.timeout(20000) // 20 seconds timeout
+        })
+        
+        if (response.ok) {
+          break // Success, exit the loop
+        } else {
+          console.log(`HTTP error ${response.status} with User-Agent: ${userAgent.substring(0, 50)}...`)
+          lastError = new Error(`HTTP ${response.status}`)
+        }
+      } catch (error) {
+        console.log(`Fetch failed with User-Agent: ${userAgent.substring(0, 50)}...`, error)
+        lastError = error
+        continue
+      }
+    }
+    
+    if (!response || !response.ok) {
+      console.log(`All attempts failed. Last error:`, lastError)
+      
+      // Fallback: Try using Tavily's web scraping capability
+      console.log('Trying Tavily web scraping as fallback...')
+      try {
+        const tavilyResponse = await tavilyClient.search(url, {
+          max_results: 1,
+          include_domains: [],
+          exclude_domains: [],
+          search_depth: "advanced"
+        })
+        
+        if (tavilyResponse.results && tavilyResponse.results.length > 0) {
+          const result = tavilyResponse.results[0]
+          const urlObj = new URL(url)
+          
+          return {
+            title: result.title || 'No title found',
+            content: result.content || 'No content available',
+            url: url,
+            author: '',
+            publishedDate: '',
+            domain: urlObj.hostname
+          }
+        }
+      } catch (tavilyError) {
+        console.log('Tavily fallback also failed:', tavilyError)
+      }
+      
       return null
     }
 
@@ -153,7 +217,8 @@ async function analyzeWithGemini(newsContent: NewsAnalysis): Promise<any> {
 2. দাবির সত্যতা যাচাই করার জন্য প্রয়োজনীয় অনুসন্ধান বিষয় নির্ধারণ করুন
 3. একটি প্রাথমিক বিশ্লেষণ প্রদান করুন
 
-**প্রদান করুন (JSON ফরম্যাটে):**
+**মহানুভবতা:** কেবলমাত্র নিচের JSON ফরম্যাটে উত্তর দিন। অন্য কোনো টেক্সট বা ব্যাখ্যা দেবেন না।
+
 {
   "claim": "মূল দাবি (সংক্ষিপ্ত)",
   "searchQueries": ["অনুসন্ধান বিষয় 1", "অনুসন্ধান বিষয় 2", "অনুসন্ধান বিষয় 3"],
@@ -166,13 +231,55 @@ async function analyzeWithGemini(newsContent: NewsAnalysis): Promise<any> {
     const response = await result.response
     const text = response.text()
     
-    // Parse JSON response
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
+    // Parse JSON response with better error handling
+    try {
+      // Clean the response text first
+      let cleanedText = text.trim()
+      
+      // Remove markdown code blocks more aggressively
+      cleanedText = cleanedText.replace(/```json\s*/gi, '').replace(/```\s*/g, '')
+      cleanedText = cleanedText.replace(/^```json$/gm, '').replace(/^```$/gm, '')
+      
+      // Find JSON object - look for the first complete JSON object
+      const jsonMatch = cleanedText.match(/\{[\s\S]*?\}(?=\s*$|\s*\{)/)
+      if (!jsonMatch) {
+        // Try alternative approach - find everything between first { and last }
+        const firstBrace = cleanedText.indexOf('{')
+        const lastBrace = cleanedText.lastIndexOf('}')
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          cleanedText = cleanedText.substring(firstBrace, lastBrace + 1)
+        } else {
+          throw new Error('No JSON object found in response')
+        }
+      } else {
+        cleanedText = jsonMatch[0]
+      }
+      
+      // Clean up any remaining issues
+      cleanedText = cleanedText.trim()
+      
+      // Try to parse directly without additional escaping
+      const parsed = JSON.parse(cleanedText)
+      
+      // Validate required fields
+      if (!parsed.claim || !parsed.searchQueries || !parsed.analysis) {
+        throw new Error('Missing required fields in response')
+      }
+      
+      return parsed
+      
+    } catch (parseError) {
+      console.error('JSON parsing error:', parseError)
+      console.error('Raw response:', text)
+      
+      // Return a fallback response
+      return {
+        claim: "বিশ্লেষণ ব্যর্থ হয়েছে",
+        searchQueries: ["নিউজ আর্টিকেল", "বাংলাদেশ", "খবর"],
+        analysis: "দুঃখিত, এই নিউজ আর্টিকেলটি বিশ্লেষণ করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+        confidence: 0
+      }
     }
-    
-    throw new Error('Failed to parse Gemini response')
     
   } catch (error) {
     console.error('Gemini analysis error:', error)
@@ -182,24 +289,23 @@ async function analyzeWithGemini(newsContent: NewsAnalysis): Promise<any> {
 
 async function searchWithTavily(searchQueries: string[]): Promise<any[]> {
   try {
-    const searchPromises = searchQueries.slice(0, 3).map(async (query) => {
-      const searchResult = await tavilyClient.search({
-        query: query,
-        search_depth: "basic",
-        max_results: 5,
-        include_answer: false,
-        include_raw_content: false,
-        include_images: false
-      })
-      
-      return {
-        query,
-        results: searchResult.results || []
-      }
-    })
+    const results = []
     
-    const searchResults = await Promise.all(searchPromises)
-    return searchResults.flatMap(sr => sr.results)
+    for (const query of searchQueries.slice(0, 3)) {
+      try {
+        const response = await tavilyClient.search(query, {
+          max_results: 5,
+          include_domains: [],
+          exclude_domains: []
+        })
+        
+        results.push(...response.results)
+      } catch (error) {
+        console.error(`Tavily search failed for query: ${query}`, error)
+      }
+    }
+    
+    return results
     
   } catch (error) {
     console.error('Tavily search error:', error)
@@ -229,7 +335,8 @@ ${analysis.analysis}
 **অনুসন্ধান ফলাফল:**
 ${sourcesText}
 
-**প্রদান করুন (JSON ফরম্যাটে):**
+**মহানুভবতা:** কেবলমাত্র নিচের JSON ফরম্যাটে উত্তর দিন। অন্য কোনো টেক্সট বা ব্যাখ্যা দেবেন না।
+
 {
   "verdict": "true|false|misleading",
   "confidence": 85,
@@ -250,13 +357,56 @@ ${sourcesText}
     const response = await result.response
     const text = response.text()
     
-    // Parse JSON response
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
+    // Parse JSON response with better error handling
+    try {
+      // Clean the response text first
+      let cleanedText = text.trim()
+      
+      // Remove markdown code blocks more aggressively
+      cleanedText = cleanedText.replace(/```json\s*/gi, '').replace(/```\s*/g, '')
+      cleanedText = cleanedText.replace(/^```json$/gm, '').replace(/^```$/gm, '')
+      
+      // Find JSON object - look for the first complete JSON object
+      const jsonMatch = cleanedText.match(/\{[\s\S]*?\}(?=\s*$|\s*\{)/)
+      if (!jsonMatch) {
+        // Try alternative approach - find everything between first { and last }
+        const firstBrace = cleanedText.indexOf('{')
+        const lastBrace = cleanedText.lastIndexOf('}')
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          cleanedText = cleanedText.substring(firstBrace, lastBrace + 1)
+        } else {
+          throw new Error('No JSON object found in final report')
+        }
+      } else {
+        cleanedText = jsonMatch[0]
+      }
+      
+      // Clean up any remaining issues
+      cleanedText = cleanedText.trim()
+      
+      // Try to parse directly without additional escaping
+      const parsed = JSON.parse(cleanedText)
+      
+      // Validate required fields
+      if (!parsed.verdict || !parsed.report) {
+        throw new Error('Missing required fields in final report')
+      }
+      
+      return parsed
+      
+    } catch (parseError) {
+      console.error('Final report JSON parsing error:', parseError)
+      console.error('Raw response:', text)
+      
+      // Return a fallback response
+      return {
+        verdict: "misleading",
+        confidence: 0,
+        claim: "বিশ্লেষণ ব্যর্থ হয়েছে",
+        report: "দুঃখিত, এই নিউজ আর্টিকেলের চূড়ান্ত রিপোর্ট তৈরি করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+        sources: []
+      }
     }
-    
-    throw new Error('Failed to parse final report')
     
   } catch (error) {
     console.error('Final report generation error:', error)
@@ -269,13 +419,29 @@ export async function POST(request: NextRequest) {
     const { url } = await request.json()
     
     if (!url) {
-      return NextResponse.json({ error: 'URL is required' }, { status: 400 })
+      return NextResponse.json({ error: 'URL is required' }, { 
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      })
     }
     
     // Validate URL
     const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
     if (!urlPattern.test(url)) {
-      return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid URL format' }, { 
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      })
     }
     
     console.log('Starting news verification v2 for:', url)
@@ -286,8 +452,17 @@ export async function POST(request: NextRequest) {
     
     if (!newsContent || !newsContent.content) {
       return NextResponse.json({ 
-        error: 'Failed to fetch news content. The website might be blocking requests or the URL might be invalid.' 
-      }, { status: 500 })
+        error: 'Failed to fetch news content. The website might be blocking requests, have anti-bot protection, or the URL might be invalid. Please try with a different news website or check if the URL is accessible.',
+        details: 'This could be due to: 1) Website blocking automated requests, 2) Invalid or broken URL, 3) Network connectivity issues, 4) Website requiring JavaScript to load content'
+      }, { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      })
     }
     
     // Step 2: Analyze with Gemini
@@ -310,12 +485,27 @@ export async function POST(request: NextRequest) {
       originalUrl: url,
       scrapedTitle: newsContent.title,
       scrapedDomain: newsContent.domain
+    }, {
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
     })
     
   } catch (error) {
     console.error('News verification v2 error:', error)
     return NextResponse.json({ 
       error: 'News verification failed. Please try again with a different URL.' 
-    }, { status: 500 })
+    }, { 
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    })
   }
 }
