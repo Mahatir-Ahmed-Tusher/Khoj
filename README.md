@@ -519,7 +519,7 @@ Our mission is to:
 
 ## 📞 **Contact and Support**
 
-- **Email**: sysitech1971@gmail.com
+- **Email**: fact@khoj-bd.com
 - **GitHub Issues**: [Report bugs or request features](https://github.com/Mahatir-Ahmed-Tusher/Khoj/issues)
 - **Discussions**: [Join our community discussions](https://github.com/Mahatir-Ahmed-Tusher/Khoj/discussions)
 

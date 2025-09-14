@@ -1,5 +1,6 @@
 import Footer from '@/components/Footer'
 import RecommendationWidget from '@/components/RecommendationWidget'
+import ShareButtons from '@/components/ShareButtons'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { factCheckArticles } from '@/lib/data'
@@ -159,22 +160,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </div>
 
             {/* Share Section */}
-            <div className="card text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                এই নিবন্ধটি শেয়ার করুন
-              </h3>
-              <div className="flex justify-center space-x-4">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  Facebook
-                </button>
-                <button className="px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors">
-                  Twitter
-                </button>
-                <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                  WhatsApp
-                </button>
-              </div>
-            </div>
+            <ShareButtons 
+              title={article.title}
+              url={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://khoj-bd.com'}/factchecks/${article.slug}`}
+              description={article.summary}
+            />
           </div>
 
           {/* Recommendation Widget - Right Side */}

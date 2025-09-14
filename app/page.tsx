@@ -650,10 +650,10 @@ export default function HomePage() {
                         <div>
                           <p className="text-xs text-gray-600 font-tiro-bangla">ইমেইল ঠিকানা</p>
                           <a 
-                            href="mailto:sysitech1971@gmail.com" 
+                            href="mailto:fact@khoj-bd.com" 
                             className="text-blue-600 hover:text-blue-700 font-medium text-xs font-tiro-bangla transition-colors"
                           >
-                            sysitech1971@gmail.com
+                            fact@khoj-bd.com
                           </a>
                         </div>
                       </div>
@@ -676,7 +676,7 @@ export default function HomePage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-1 justify-center items-center">
                   <a 
-                    href="mailto:sysitech1971@gmail.com"
+                    href="mailto:fact@khoj-bd.com"
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-tiro-bangla"
                   >
                     এখনই ইমেইল করুন

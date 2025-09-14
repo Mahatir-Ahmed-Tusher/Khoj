@@ -234,10 +234,10 @@ export default function HowToWritePage() {
                   <div className="bg-white rounded-lg p-3 shadow-sm">
                     <h5 className="font-semibold text-gray-800 mb-1 text-sm font-tiro-bangla">ইমেইল ঠিকানা:</h5>
                     <a 
-                      href="mailto:sysitech1971@gmail.com"
+                      href="mailto:fact@khoj-bd.com"
                       className="text-blue-600 hover:text-blue-700 font-medium text-sm font-tiro-bangla"
                     >
-                      sysitech1971@gmail.com
+                      fact@khoj-bd.com
                     </a>
                   </div>
                   
@@ -300,7 +300,7 @@ export default function HowToWritePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a 
-              href="mailto:sysitech1971@gmail.com"
+              href="mailto:fact@khoj-bd.com"
               className="bg-white text-blue-600 hover:bg-gray-100 px-4 py-2 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg text-sm font-tiro-bangla"
             >
               রিপোর্ট পাঠান
