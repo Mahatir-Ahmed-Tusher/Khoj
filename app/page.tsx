@@ -700,7 +700,7 @@ export default function HomePage() {
           <div className="max-w-4xl mx-auto">
             <div className="aspect-video w-full">
               <iframe
-                src="https://www.youtube.com/embed/x0-DpUwmMm0?si=3KJIMnpYKidTqjh2"
+                src="https://www.youtube.com/embed/M89gdblo93w?si=whM3xGVaSCKyF3c9"
                 title="YouTube video player"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
