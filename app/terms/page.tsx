@@ -150,7 +150,7 @@ export default function Terms() {
               <div className="bg-gray-100 p-4 rounded-lg">
                 <p className="text-gray-700">
                   <strong>ইমেইল:</strong> fact@khoj-bd.com<br />
-                  <strong>ঠিকানা:</strong> Mirpur 12, Dhaka, Bangladesh
+                  <strong>ঠিকানা:</strong> E-14/X, ICT Tower, Agargaon, Dhaka-1207
                 </p>
               </div>
             </section>

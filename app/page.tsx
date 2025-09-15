@@ -2,12 +2,169 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import Image from 'next/image'
 import Footer from '@/components/Footer'
 import SearchBar from '@/components/SearchBar'
 import Link from 'next/link'
 import { getLatestArticles } from '@/lib/data'
 import { visitTracker, isFirstVisit, isNewSession, hasSeenTour, markTourAsSeen } from '@/lib/visit-tracker'
 import SiteTour from '@/components/SiteTour'
+import { ChevronUp, ChevronDown } from 'lucide-react'
+
+// Blog data
+interface BlogPost {
+  id: string
+  title: string
+  author: string
+  thumbnail: string
+  excerpt: string
+  tags: string[]
+  publishDate: string
+  readTime: string
+  slug: string
+}
+
+// All blog posts with proper date sorting
+const allBlogs: BlogPost[] = [
+  {
+    id: '6',
+    title: 'হ্যাকেলের সেকেলে মতবাদ দিয়ে প্রজাতির বিবর্তনকে প্রশ্নবিদ্ধ করা যায়?',
+    author: 'মাহাথির আহমেদ তুষার',
+    thumbnail: 'https://i.postimg.cc/7LQDP7Kn/image.png',
+    excerpt: 'আপনার হাতে সময় থাকলে চলুন, একটা ব্যাপার নিয়ে আলোচনা করি। ধরুন, আপনি কোয়ান্টাম মেকানিক্স নিয়ে একটা বই লিখতে চান। সেক্ষেত্রে আপনাকে প্রথমেই যে কাজটা করতে হবে—পাঠকদের এটা দেখাতে হবে যে, এই বৈজ্ঞানিক তত্ত্বটির দীর্ঘ যাত্রাপথে বিজ্ঞানীরা পরমাণুর অভ্যন্তরের ক্ষুদ্র জগতটিকে কিভাবে দেখেছেন।',
+    tags: ['বিবর্তন', 'হ্যাকেল', 'ভ্রূণতত্ত্ব', 'বিজ্ঞান', 'মিথবাস্টিং'],
+    publishDate: '১৭ এপ্রিল, ২০২৫',
+    readTime: '১৮ মিনিট',
+    slug: 'haeckel-evolution-theory-criticism'
+  },
+  {
+    id: '4',
+    title: 'খোঁজ, বাংলা ভাষার প্রথম এআই-চালিত ফ্যাক্টচেকারের অভিনব যাত্রা',
+    author: 'খোঁজ টিম',
+    thumbnail: 'https://i.postimg.cc/FFPY2NBX/image.png',
+    excerpt: 'আজকের এই প্রযুক্তির যুগে চারপাশে তথ্যের স্রোত বয়ে চলেছে। কিন্তু তার ভেতরে আসলটা কোথায়, মিথ্যাটা কোথায়, সে পার্থক্য করা কি সহজ? ফেসবুকের নিউজ ফিড, হোয়াটসঅ্যাপ-টেলিগ্রামের গ্রুপ চ্যাট, কিংবা নিউজ অ্যাপ। সব জায়গায় মিথ্যা খবর, গুজব আর অর্ধসত্য ভেসে বেড়ায়।',
+    tags: ['খোঁজ', 'এআই', 'ফ্যাক্টচেকিং', 'ডিজিটাল সাক্ষরতা'],
+    publishDate: '১৫ সেপ্টেম্বর, ২০২৫',
+    readTime: '১২ মিনিট',
+    slug: 'khoj-ai-factchecker-journey'
+  },
+  {
+    id: '2',
+    title: 'বাংলা ভাষায় প্রথম পূর্ণাঙ্গ এআই-ভিত্তিক ফ্যাক্টচেকিং প্ল্যাটফর্ম হিসেবে "খোঁজ" – একটি বিস্তারিত যাচাই',
+    author: 'খোঁজ টিম (মাহাথির আহমেদ তুষার, সাগর চন্দ্র দে, তানিয়া চৈতি)',
+    thumbnail: 'https://i.postimg.cc/jd1mpLff/Khoj-banner.png',
+    excerpt: 'খোঁজ টিম হিসেবে আমরা বাংলাদেশের ডিজিটাল ল্যান্ডস্কেপে মিথ্যা তথ্যের বিরুদ্ধে লড়াই করার জন্য প্রতিশ্রুতিবদ্ধ। বাংলা ভাষায় কনটেন্টের দ্রুত বৃদ্ধির সাথে সাথে, মিসইনফরমেশনও বাড়ছে – বিশেষ করে সোশ্যাল মিডিয়া, নিউজ পোর্টাল এবং ভাইরাল পোস্টগুলোতে।',
+    tags: ['খোঁজ', 'এআই', 'ফ্যাক্টচেকিং', 'যাচাই', 'বাংলা ভাষা', 'মিথ্যা তথ্য প্রতিরোধ', 'ওপেন সোর্স'],
+    publishDate: '৫ সেপ্টেম্বর, ২০২৫',
+    readTime: '১২ মিনিট',
+    slug: 'khoj-ai-factchecker-verification'
+  },
+  {
+    id: '3',
+    title: 'জলবায়ু পরিবর্তন: বৈজ্ঞানিক তথ্য বনাম ভুল ধারণা',
+    author: 'সালেহা ভুইয়া',
+    thumbnail: 'https://i.postimg.cc/zGV717ND/Your-paragraph-text-5.png',
+    excerpt: 'জলবায়ু পরিবর্তন শুধু বৈজ্ঞানিক ইস্যু নয়—এটি একসাথে রাজনৈতিক, অর্থনৈতিক, সামাজিক ও নৈতিক ইস্যু। পৃথিবীর প্রতিটি মানুষের জীবনে এর প্রভাব রয়েছে, অথচ এখনো অনেকেই একে অবহেলা করে বা ভুল বোঝে।',
+    tags: ['জলবায়ু পরিবর্তন', 'পরিবেশ', 'বিজ্ঞান', 'ভুল ধারণা'],
+    publishDate: '৫ আগস্ট, ২০২৫',
+    readTime: '১০ মিনিট',
+    slug: 'climate-change-science-vs-misconceptions'
+  },
+  {
+    id: '5',
+    title: 'অপবিজ্ঞানের যতো বই',
+    author: 'মাহাথির আহমেদ তুষার',
+    thumbnail: 'https://i.postimg.cc/kGM8vQvt/image.png',
+    excerpt: 'চলুন আজকে সিউডোসায়েন্স প্রচার করা কিছু বইয়ের সাথে আপনাদের পরিচয় করাই, যেগুলিতে বাংলা ভাষাভাষীদের মধ্যে প্রচলিত অনেক অপবিজ্ঞানের উৎস রয়েছে৷ অপবিজ্ঞানের উৎস সন্ধান করতে এ প্রবন্ধে আমরা বেছে নিয়েছি কিছু বইকে।',
+    tags: ['অপবিজ্ঞান', 'সিউডোসায়েন্স', 'বিজ্ঞান', 'বই রিভিউ', 'মিথবাস্টিং'],
+    publishDate: '২ ফেব্রুয়ারি, ২০২৫',
+    readTime: '১৫ মিনিট',
+    slug: 'pseudoscience-books-review'
+  }
+]
+
+// Function to parse Bengali date and convert to sortable format
+const parseBengaliDate = (dateStr: string): Date => {
+  // Convert Bengali date to JavaScript Date
+  const dateMap: { [key: string]: string } = {
+    'জানুয়ারি': 'January',
+    'ফেব্রুয়ারি': 'February', 
+    'মার্চ': 'March',
+    'এপ্রিল': 'April',
+    'মে': 'May',
+    'জুন': 'June',
+    'জুলাই': 'July',
+    'আগস্ট': 'August',
+    'সেপ্টেম্বর': 'September',
+    'অক্টোবর': 'October',
+    'নভেম্বর': 'November',
+    'ডিসেম্বর': 'December'
+  }
+  
+  // Convert Bengali numbers to English
+  const bengaliToEnglish: { [key: string]: string } = {
+    '০': '0', '১': '1', '২': '2', '৩': '3', '৪': '4',
+    '৫': '5', '৬': '6', '৭': '7', '৮': '8', '৯': '9'
+  }
+  
+  // Extract day, month, year from Bengali date
+  // Remove comma if present
+  const cleanDateStr = dateStr.replace(',', '')
+  const parts = cleanDateStr.split(' ')
+  const day = parts[0].split('').map(char => bengaliToEnglish[char] || char).join('')
+  const month = dateMap[parts[1]]
+  const year = parts[2].split('').map(char => bengaliToEnglish[char] || char).join('')
+  
+  // Debug: Log the parsed date
+  console.log(`Parsing: ${dateStr} -> ${month} ${day}, ${year}`)
+  
+  return new Date(`${month} ${day}, ${year}`)
+}
+
+// Get latest 4 blogs sorted by date (most recent first)
+const latestBlogs = allBlogs
+  .sort((a, b) => parseBengaliDate(b.publishDate).getTime() - parseBengaliDate(a.publishDate).getTime())
+  .slice(0, 4)
+
+// Custom Image component with error handling
+const SafeImage = ({ src, alt, className, fill, width, height, ...props }: any) => {
+  const [imgSrc, setImgSrc] = useState(src)
+  const [hasError, setHasError] = useState(false)
+
+  const handleError = () => {
+    if (!hasError) {
+      setHasError(true)
+      setImgSrc('/khoj.png') // Fallback to local image
+    }
+  }
+
+  // If fill is true, don't use width/height
+  if (fill) {
+    return (
+      <Image
+        src={imgSrc}
+        alt={alt}
+        className={className}
+        onError={handleError}
+        fill
+        {...props}
+      />
+    )
+  }
+
+  // Otherwise use width/height
+  return (
+    <Image
+      src={imgSrc}
+      alt={alt}
+      className={className}
+      onError={handleError}
+      width={width || 400}
+      height={height || 300}
+      {...props}
+    />
+  )
+}
 
 // Lazy load heavy components
 const FeatureWidget = dynamic(() => import('@/components/FeatureWidget'), {
@@ -32,6 +189,8 @@ export default function HomePage() {
   const [isAIImageCheckActive, setIsAIImageCheckActive] = useState(false)
   const [isImageSearchActive, setIsImageSearchActive] = useState(false)
   const [isTextCheckActive, setIsTextCheckActive] = useState(false)
+  const [scrollPosition, setScrollPosition] = useState(0)
+  const [isAtTop, setIsAtTop] = useState(true)
 
   // Track visit and check if first visit
   useEffect(() => {
@@ -56,6 +215,18 @@ export default function HomePage() {
     
     return () => window.removeEventListener('resize', checkMobile)
   }, [isMobile])
+
+  // Track scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentPosition = window.pageYOffset
+      setScrollPosition(currentPosition)
+      setIsAtTop(currentPosition < 100) // Consider "at top" if within 100px of top
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Auto-slide carousel - optimized with useCallback
   const nextSlide = useCallback(() => {
@@ -97,6 +268,24 @@ export default function HomePage() {
 
   const handleArticleClick = useCallback((slug: string) => {
     window.location.href = `/factchecks/${slug}`
+  }, [])
+
+  const handleBlogClick = useCallback((slug: string) => {
+    window.location.href = `/blog/${slug}`
+  }, [])
+
+  const handleScrollToTop = useCallback(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
+  }, [])
+
+  const handleScrollToBottom = useCallback(() => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth'
+    })
   }, [])
 
   const handleNewsCheckClick = useCallback(() => {
@@ -412,12 +601,11 @@ export default function HomePage() {
                       <article className="bg-gray-900 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 h-full border border-gray-800 w-80">
                         {/* Thumbnail with Title Overlay */}
                         <div className="relative h-48 overflow-hidden">
-                          <img 
+                          <SafeImage 
                             src={article.thumbnail || '/khoj.png'} 
                             alt={article.title}
                             className="w-full h-full object-cover"
-                            loading="lazy"
-                            decoding="async"
+                            fill
                           />
                           {/* Dark Gradient Overlay for Title */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
@@ -495,12 +683,11 @@ export default function HomePage() {
               <article key={article.id} className="article-card bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer rounded-xl" onClick={() => handleArticleClick(article.slug)}>
                 {/* Thumbnail */}
                 <div className="relative h-32 overflow-hidden">
-                  <img 
+                  <SafeImage 
                     src={article.thumbnail || '/khoj.png'} 
                     alt={article.title}
                     className="w-full h-full object-cover"
-                    loading="lazy"
-                    decoding="async"
+                    fill
                   />
                   {/* Verdict Badge - Top Right */}
                   <div className="absolute top-1 right-1">
@@ -574,6 +761,95 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Latest Blogs Section */}
+      <section className="py-6 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-2 font-tiro-bangla">
+              আমাদের সাম্প্রতিক ব্লগ সমূহ
+            </h2>
+            
+          </div>
+
+          {/* Blog Grid */}
+          <div className="grid grid-cols-2 gap-4 md:gap-6 max-w-6xl mx-auto">
+            {latestBlogs.map((blog) => (
+              <article key={blog.id} className="article-card bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer rounded-xl" onClick={() => handleBlogClick(blog.slug)}>
+                {/* Thumbnail */}
+                <div className="relative h-32 overflow-hidden">
+                  <SafeImage 
+                    src={blog.thumbnail} 
+                    alt={blog.title}
+                    className="w-full h-full object-cover"
+                    fill
+                  />
+                  {/* Blog Badge */}
+                  <div className="absolute top-1 right-1">
+                    <span className="inline-block px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded">
+                      ব্লগ
+                    </span>
+                  </div>
+                  {/* Read Time Badge */}
+                  <div className="absolute top-1 left-1">
+                    <span className="inline-block px-2 py-1 bg-black bg-opacity-70 text-white text-xs font-medium rounded">
+                      {blog.readTime}
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Content */}
+                <div className="p-2">
+                  {/* Title */}
+                  <h3 className="text-sm font-semibold text-gray-900 mb-1 font-tiro-bangla line-clamp-3 leading-tight">
+                    {blog.title}
+                  </h3>
+                  
+                  {/* Tags - Desktop Only */}
+                  {blog.tags && blog.tags.length > 0 && (
+                    <div className="flex space-x-1 mb-2 hidden md:flex">
+                      {blog.tags.slice(0, 2).map((tag, index) => (
+                        <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-tiro-bangla">
+                          {tag}
+                        </span>
+                      ))}
+                      {blog.tags.length > 2 && (
+                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-tiro-bangla">
+                          +{blog.tags.length - 2}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Preview - Desktop Only */}
+                  <p className="text-gray-600 mb-2 line-clamp-1 hidden md:block font-tiro-bangla text-sm">
+                    {blog.excerpt}
+                  </p>
+                  
+                  {/* Author and Date */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 font-tiro-bangla">
+                      {blog.author}
+                    </span>
+                    <span className="text-xs text-gray-500 font-tiro-bangla">
+                      {blog.publishDate}
+                    </span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+          
+          <div className="text-center mt-6">
+            <Link 
+              href="/blog"
+              className="btn-primary inline-flex items-center"
+            >
+              সব ব্লগ পড়ুন
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* User Invitation Section */}
       <section className="py-4 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 relative overflow-hidden">
         {/* Background Pattern */}
@@ -588,10 +864,12 @@ export default function HomePage() {
           <div className="flex flex-col lg:flex-row items-center gap-3">
             {/* Left Side - Image */}
             <div className="flex-shrink-0">
-              <img 
+              <SafeImage 
                 src="https://i.postimg.cc/VstfbHGq/Chat-GPT-Image-Sep-5-2025-08-04-10-PM.png" 
                 alt="Fact Check Illustration" 
                 className="w-40 h-40 object-contain"
+                width={160}
+                height={160}
               />
             </div>
             
@@ -711,6 +989,21 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      
+      {/* Scroll Button */}
+      <div className="fixed bottom-6 left-6 z-50">
+        <button
+          onClick={isAtTop ? handleScrollToBottom : handleScrollToTop}
+          className="bg-primary-600 hover:bg-primary-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 group"
+          title={isAtTop ? 'নিচে যান' : 'উপরে যান'}
+        >
+          {isAtTop ? (
+            <ChevronDown className="h-6 w-6" />
+          ) : (
+            <ChevronUp className="h-6 w-6" />
+          )}
+        </button>
+      </div>
       
       <Footer />
     </div>

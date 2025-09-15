@@ -93,11 +93,6 @@ export default function Footer() {
                   আমাদের সম্পর্কে
                 </a>
               </li>
-              <li>
-                <a href="https://onneshon-bd.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
-                  অন্বেষণ
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -141,7 +136,7 @@ export default function Footer() {
               <li className="text-gray-300 font-tiro-bangla">
                 <span className="block">ঠিকানা:</span>
                 <span className="text-primary-400">
-                  Mirpur 12, Dhaka, Bangladesh
+                  E-14/X, ICT Tower, Agargaon, Dhaka-1207
                 </span>
               </li>
             </ul>

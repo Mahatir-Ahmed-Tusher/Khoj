@@ -2596,6 +2596,273 @@ While this write-up delves into the tragic events of the 1971 Bangladesh genocid
       }
     ],
     thumbnail: 'https://i.postimg.cc/dtN565Zm/image.png'
+  },
+  {
+    id: '31',
+    slug: 'darwin-stamp-arif-azad-misinformation',
+    title: 'ডারউইন স্মারক ডাকটিকিট নিয়ে আরিফ আজাদের ভ্রান্ত দাবি',
+    claim: '১৯৮২ সালে যুক্তরাজ্যে প্রকাশিত ডারউইন স্মারক ডাকটিকিটে সরীসৃপরা "Uncle Darwin, we haven\'t changed..." বার্তা দিচ্ছে।',
+    verdict: 'false',
+    summary: 'আরিফ আজাদের দাবি অনুযায়ী ১৯৮২ সালের ডারউইন স্মারক ডাকটিকিটে সরীসৃপরা একটি বার্তা দিয়েছে। কিন্তু প্রকৃতপক্ষে সেই ডাকটিকিটে কোনো লিখিত ক্যাপশন ছিল না।',
+    content: `# ফ্যাক্টচেক রিপোর্ট
+
+প্রকাশনা: খোঁজ টিম
+তারিখ: ২ জুন, ২০২৪
+
+## প্রেক্ষাপট
+
+চার্লস ডারউইনের জন্মদিন উপলক্ষে সামাজিক যোগাযোগমাধ্যমে আবারও একটি পুরনো দাবি সামনে এসেছে। প্যারাডক্সিকাল সাজিদ বইয়ের লেখক আরিফ আজাদ একটি পোস্টে উল্লেখ করেছেন যে, ১৯৮২ সালে যুক্তরাজ্যে প্রকাশিত ডারউইন স্মারক ডাকটিকিটে নাকি সরীসৃপরা (Reptiles) একটি বার্তা দিচ্ছে:
+
+"Uncle Darwin, we haven't changed…"
+
+এমন দাবি জনসাধারণকে বিভ্রান্ত করার পাশাপাশি বিজ্ঞানের প্রতি বিদ্রূপ ছড়ানোর চেষ্টা বলে প্রতীয়মান হয়। যেহেতু এটি একজন লেখকের পক্ষ থেকে এসেছে, বিষয়টি যাচাই করা প্রয়োজন।
+
+## দাবি
+
+**সূত্র:** [আরিফ আজাদের ফেসবুক পোস্ট](https://www.facebook.com/100004835040654/posts/664186727085823/?app=fbl)। উল্লেখ্য যে, আরিফ আজাদ তাঁর পোস্ট ডিবাংকের পর সরিয়ে ফেললেও, ততোদিনে তাঁর সে পোস্ট ছড়িয়ে যায় দিগবিদিক।
+
+**বিষয়বস্তু:** ১৯৮২ সালের ডাকটিকিটে সরীসৃপরা নাকি ডারউইনকে উদ্দেশ্য করে লিখেছে "Uncle Darwin, we haven't changed…"
+
+## যাচাই-বাছাই
+
+### ১৯৮২ সালের ডাকটিকিটের প্রকৃত তথ্য
+
+১৯৮২ সালে চার্লস ডারউইনের মৃত্যুবার্ষিকীর ১০০ বছর পূর্তি উপলক্ষে যুক্তরাজ্য সরকার চারটি স্মারক ডাকটিকিট প্রকাশ করে।
+
+চারটি ডাকটিকিটে আলাদা আলাদা ছবি ছিলো:
+
+- জায়ান্ট কচ্ছপ
+- পাখি
+- প্রাচীন হোমিনিন (মানব পূর্বপুরুষ)
+- সরীসৃপ
+
+এই ডাকটিকিটগুলোর কোথাও কোনো লিখিত ক্যাপশন বা উক্তি ছিলো না। বিশেষ করে "Uncle Darwin, we haven't changed…" কথাটি কোথাও পাওয়া যায় না।
+
+**প্রমাণসূত্র:**
+
+- [The New York Times (২১ মার্চ ১৯৮২): Great Britain Pays Tribute to Charles Darwin](https://www.nytimes.com/1982/03/21/arts/great-britain-pays-tribute-to-charles-darwin.html)
+- [Collect GB Stamps Archive (যুক্তরাজ্যের সরকারি ডাকটিকিট আর্কাইভ)](https://www.collectgbstamps.co.uk/explore/years/?year=1982)
+
+### বিবর্তন বিষয়ে বৈজ্ঞানিক সত্য
+
+আরিফ আজাদের বক্তব্যের মূল ইঙ্গিত—সরীসৃপরা নাকি পরিবর্তিত হয়নি—এটি বৈজ্ঞানিকভাবে ভুল।
+
+সরীসৃপরা (যেমন: টিকটিকি, সাপ, কুমির, কচ্ছপ) কোটি কোটি বছরে ক্রমাগত বিবর্তিত হয়েছে।
+
+যদিও কিছু প্রজাতি (যেমন কুমির) দেখতে তাদের প্রাচীন আত্মীয়দের মতো মনে হতে পারে, কিন্তু জেনেটিক, শারীরবৃত্তীয় ও পরিবেশগত অভিযোজনের মাধ্যমে তারা পরিবর্তিত হয়েছে।
+
+**অধিক পড়াশোনার জন্য:**
+
+- [Encyclopedia Britannica: "Evolution and Paleontology of Reptiles"](https://www.britannica.com/animal/reptile/Evolution-and-paleontology)
+- [Wikipedia: "Evolution of Reptiles"](https://en.m.wikipedia.org/wiki/Evolution_of_reptiles)
+
+## বিশ্লেষণ
+
+- ডাকটিকিটের সাথে যুক্ত উক্তি সম্পূর্ণ মনগড়া। এটি সরকারি রেকর্ড বা আসল ডাকটিকিট কোথাও নেই।
+- বৈজ্ঞানিক সত্য বিকৃত করে এমন বক্তব্য জনসাধারণকে বিভ্রান্ত করতে পারে এবং ডারউইনের অবদানকে তুচ্ছ করার উদ্দেশ্যে ব্যবহার করা হচ্ছে।
+- একজন লেখক ও জনসাধারণের প্রভাবশালী ব্যক্তি হিসেবে আরিফ আজাদের উচিত ছিলো তথ্য যাচাই করে বক্তব্য প্রদান।
+
+## উপসংহার
+
+১৯৮২ সালের ডারউইন স্মারক ডাকটিকিটে "Uncle Darwin, we haven't changed…"—এমন কোনো উক্তি ছিলো না।
+
+আসল ডাকটিকিটগুলোতে শুধু চিত্র ছিলো, কোনো টেক্সট ছিলো না।
+
+বৈজ্ঞানিক গবেষণা প্রমাণ করে, সরীসৃপসহ সব প্রাণীরই বিবর্তন ঘটেছে।
+
+অতএব, এই দাবি মিথ্যা ও বিভ্রান্তিকর।
+
+## সূত্রসমূহ
+
+- [The New York Times (১৯৮২). Great Britain Pays Tribute to Charles Darwin.](https://www.nytimes.com/1982/03/21/arts/great-britain-pays-tribute-to-charles-darwin.html)
+- [Collect GB Stamps Archive (১৯৮২ সালের ডাকটিকিট)।](https://www.collectgbstamps.co.uk/explore/years/?year=1982)
+- [Encyclopedia Britannica. "Evolution and Paleontology of Reptiles."](https://www.britannica.com/animal/reptile/Evolution-and-paleontology)
+- [Wikipedia. "Evolution of Reptiles."](https://en.m.wikipedia.org/wiki/Evolution_of_reptiles)
+
+**মূল দাবি:** [আরিফ আজাদের ফেসবুক পোস্ট](https://www.facebook.com/100004835040654/posts/664186727085823/?app=fbl)
+
+ফেইসবুকে আরিফ আজাদের এ পোস্ট খন্ডন করার পর আরিফ আজাদ সাহেব পোস্টখানা সরিয়ে ফেললেও তাঁর ভক্তবৃন্দ প্রচুর ফুটপ্রিন্ট ছড়িয়ে ছিটিয়ে রেখেছে এই পোস্ট-টার।
+
+- [ফেসবুক পোস্ট ১](https://m.facebook.com/story.php?story_fbid=1779312265663386&id=100007538892499&mibextid=Nif5oz)
+- [ফেসবুক পোস্ট ২](https://m.facebook.com/story.php?story_fbid=1958343057680318&id=100005139286530&mibextid=Nif5oz)
+- [ফেসবুক পোস্ট ৩](https://m.facebook.com/story.php?story_fbid=1850711708542731&id=100008117591558&mibextid=Nif5oz)`,
+    publishedAt: '2024-06-02',
+    author: 'খোঁজ টিম',
+    tags: ['মিথবাস্টিং', 'বিজ্ঞান', 'ডারউইন', 'বিবর্তন তত্ত্ব', 'ভুয়া খবর'],
+    references: [
+      {
+        id: 1,
+        title: 'The New York Times: Great Britain Pays Tribute to Charles Darwin',
+        url: 'https://www.nytimes.com/1982/03/21/arts/great-britain-pays-tribute-to-charles-darwin.html',
+        snippet: 'Official report on 1982 Darwin commemorative stamps'
+      },
+      {
+        id: 2,
+        title: 'Collect GB Stamps Archive: 1982 Stamps',
+        url: 'https://www.collectgbstamps.co.uk/explore/years/?year=1982',
+        snippet: 'Official UK stamp archive showing 1982 Darwin stamps'
+      },
+      {
+        id: 3,
+        title: 'Encyclopedia Britannica: Evolution and Paleontology of Reptiles',
+        url: 'https://www.britannica.com/animal/reptile/Evolution-and-paleontology',
+        snippet: 'Scientific information about reptile evolution'
+      },
+      {
+        id: 4,
+        title: 'Wikipedia: Evolution of Reptiles',
+        url: 'https://en.m.wikipedia.org/wiki/Evolution_of_reptiles',
+        snippet: 'Comprehensive information about reptile evolution'
+      },
+      {
+        id: 5,
+        title: 'আরিফ আজাদের মূল ফেসবুক পোস্ট',
+        url: 'https://www.facebook.com/100004835040654/posts/664186727085823/?app=fbl',
+        snippet: 'Original Facebook post by Arif Azad making the false claim'
+      }
+    ],
+    thumbnail: 'https://i.postimg.cc/J4m2H0Hw/image.png'
+  },
+  {
+    id: '32',
+    slug: 'testing-salt-harmful-mythbusting',
+    title: 'টেস্টিং সল্ট ব্যবহারে জরিমানা পেলেন এক দোকানি; আসলেই কি টেস্টিং সল্ট ক্ষতিকর?',
+    claim: 'টেস্টিং সল্ট (MSG) ক্ষতিকর এবং স্বাস্থ্যের জন্য ঝুঁকিপূর্ণ।',
+    verdict: 'false',
+    summary: 'সম্প্রতি এক দোকানিকে টেস্টিং সল্ট ব্যবহারের জন্য জরিমানা দেওয়া হয়েছে। কিন্তু বৈজ্ঞানিক গবেষণা প্রমাণ করে যে সাধারণ পরিমাণে MSG নিরাপদ এবং কোনো গুরুতর স্বাস্থ্য ঝুঁকি নেই।',
+    content: `# ফ্যাক্টচেক রিপোর্ট
+
+প্রকাশনা: খোঁজ টিম
+তারিখ: ১৫ সেপ্টেম্বর, ২০২৫
+
+## প্রেক্ষাপট
+
+সম্প্রতি এক নিউজে দেখা যায় খবরে টেস্টিং সল্ট ব্যবহার করায় মোটা অংকের জরিমানার নোটিশ পেয়েছেন ঢাকা বিশ্ববিদ্যালয়ের জহুরুল হক হলের এক দোকানি। টেস্টিং সল্ট কি আসলেই ক্ষতিকর? চলুন দেখে নিই বৈজ্ঞানিক ব্যাখ্যার মাধ্যমে।
+
+এই ফ্যাক্টচেক রিপোর্টটি খোঁজ টিমের অনুসন্ধান এবং খোঁজ এআই ফ্যাক্টচেকিং ফিচার ব্যবহার করে তৈরি করা হয়েছে। আমরা বিভিন্ন বিজ্ঞানীয় জার্নাল, স্বাস্থ্য সংস্থার রিপোর্ট এবং নির্ভরযোগ্য সোর্স থেকে তথ্য সংগ্রহ করে বিশ্লেষণ করেছি।
+
+## দাবি
+
+টেস্টিং সল্ট (MSG) ক্ষতিকর এবং স্বাস্থ্যের জন্য ঝুঁকিপূর্ণ।
+
+## যাচাই-বাছাই
+
+### টেস্টিং সল্ট কী?
+
+টেস্টিং সল্ট, যা বাংলাদেশে প্রায়শই "টেস্টিং সল্ট" নামে পরিচিত, আসলে মোনোসোডিয়াম গ্লুটামেট (MSG) এর একটি লোকপ্রিয় নাম। এটি একটি ফ্লেভার এনহ্যান্সার যা খাবারের স্বাদ বাড়াতে ব্যবহৃত হয়, বিশেষ করে এশিয়ান রান্না এবং প্রসেসড ফুডে।
+
+MSG প্রাকৃতিকভাবে অনেক খাবারে (যেমন টম্যাটো, চিজ, মাশরুম) পাওয়া যায় এবং এটি L-গ্লুটামিক অ্যাসিড থেকে তৈরি। বাংলাদেশে এটি "টেস্টিং সল্ট" নামে বাজারজাত করা হয় কারণ এটি খাবারের স্বাদ "টেস্ট" বা উপাদানগুলোকে আরও সুস্বাদু করে তোলে।
+
+### বৈজ্ঞানিকভাবে টেস্টিং সল্ট কতটা নিরাপদ?
+
+বিশ্ব স্বাস্থ্য সংস্থা (WHO), ইউএস ফুড অ্যান্ড ড্রাগ অ্যাডমিনিস্ট্রেশন (FDA) এবং ইউরোপীয় ফুড সেফটি অথরিটি (EFSA) সকলেই MSG-কে "সাধারণত স্বীকৃত নিরাপদ" (GRAS) হিসেবে ঘোষণা করেছে।
+
+এর গ্রহণযোগ্য দৈনিক পরিমাণ (ADI) শরীরের ওজন প্রতি কিলোগ্রামে ৩০ মিলিগ্রাম, যা সাধারণ খাদ্য গ্রহণের চেয়ে অনেক বেশি। উদাহরণস্বরূপ, একটি সাধারণ খাবারে MSG-এর পরিমাণ ০.৫ গ্রামের কম থাকে, যা কোনো সমস্যা সৃষ্টি করে না।
+
+১৯৬০-এর দশকে "চাইনিজ রেস্তোরাঁ সিন্ড্রোম" (CRS) নামে একটি মিথ ছড়িয়েছিল, যেখানে MSG খাওয়ার পর মাথাব্যথা, ফ্লাশিং ইত্যাদি লক্ষণ দেখা যায় বলে দাবি করা হয়। কিন্তু পরবর্তী গবেষণায় দেখা গেছে যে এই স্টাডিগুলো ভুল এবং বর্তমানে কোনো শক্ত প্রমাণ নেই যে সাধারণ পরিমাণে MSG ক্ষতিকর।
+
+### স্বাস্থ্য ঝুঁকি: কী বলে গবেষণা?
+
+MSG-এর স্বাস্থ্য প্রভাব নিয়ে মিশ্র ফলাফল আছে, কিন্তু সামগ্রিকভাবে এটি নিরাপদ।
+
+**ইতিবাচক দিক:**
+- MSG খাদ্যের স্বাদ বাড়িয়ে কম লবণ ব্যবহার করতে সাহায্য করে, যা উচ্চ রক্তচাপের ঝুঁকি কমায়
+- কিছু স্টাডি দেখায় যে এটি অ্যাপেটাইট নিয়ন্ত্রণ করে ওজন কমাতে সাহায্য করতে পারে
+
+**সম্ভাব্য নেগেটিভ দিক:**
+- কম (১% এরও কম) লোকের মধ্যে "MSG সিম্পটম কমপ্লেক্স" দেখা যায়, যেমন মাথাব্যথা, বুকে চাপ বা পালপিটেশন – কিন্তু এগুলো খালি পেটে ৩ গ্রামের বেশি ডোজে হয় এবং অ্যালার্জি নয়
+- কিছু প্রাণী গবেষণায় MSG-কে ওবেসিটি, নিউরোটক্সিসিটি বা রিপ্রোডাকটিভ সমস্যার সাথে যুক্ত করা হয়েছে, কিন্তু এগুলো মানুষের উপর প্রযোজ্য নয় কারণ ডোজ অস্বাভাবিক
+- মানুষের উপর ক্লিনিকাল ট্রায়ালে কোনো দীর্ঘমেয়াদী ক্ষতি দেখা যায়নি
+
+### বাংলাদেশী প্রসঙ্গ
+
+স্থানীয় সোর্সে কিছু দাবি আছে যে MSG কেন্দ্রীয় স্নায়ুতন্ত্রকে প্রভাবিত করে ঘুমের সমস্যা বা উচ্চ রক্তচাপ সৃষ্টি করে, কিন্তু এগুলো বিজ্ঞানীয়ভাবে প্রমাণিত নয়। বরং, অতিরিক্ত লবণ (টেবিল সল্ট) এর চেয়ে MSG-এর ঝুঁকি কম।
+
+## বিশ্লেষণ
+
+নিউজে উল্লেখিত ঘটনায় দোকানিকে জরিমানা দেওয়া হয়েছে কারণ অ্যাডমিনিস্ট্রেশন MSG-কে "ক্ষতিকর" মনে করে, যা একটি সাধারণ মিথের উপর ভিত্তি করে।
+
+বৈজ্ঞানিক প্রমাণ দেখায় যে সাধারণ পরিমাণে (খাবারের সাথে) MSG নিরাপদ এবং কোনো গুরুতর স্বাস্থ্য ঝুঁকি নেই।
+
+## উপসংহার
+
+টেস্টিং সল্ট (MSG) সাধারণ পরিমাণে ব্যবহার করলে ক্ষতিকর নয়। এটি একটি মিথ যা ডিবাংক করা যায়।
+
+নিউজে উল্লেখিত ঘটনায় দোকানিকে জরিমানা দেওয়া হয়েছে কারণ অ্যাডমিনিস্ট্রেশন MSG-কে "ক্ষতিকর" মনে করে, যা একটি সাধারণ মিথের উপর ভিত্তি করে। বৈজ্ঞানিক প্রমাণ দেখায় যে সাধারণ পরিমাণে (খাবারের সাথে) MSG নিরাপদ এবং কোনো গুরুতর স্বাস্থ্য ঝুঁকি নেই।
+
+তবে, যদি কেউ সেন্সিটিভ হন, তাহলে লেবেল চেক করে এড়িয়ে চলা উচিত। এই ডিবাংকিংয়ের মাধ্যমে আমরা আশা করি মানুষ সঠিক তথ্যের ভিত্তিতে সিদ্ধান্ত নেবেন।
+
+## সূত্রসমূহ
+
+- [জাগো নিউজ: ঢাকা বিশ্ববিদ্যালয়ের দোকানিকে জরিমানা](https://www.jagonews24.com/m/campus/news/1052081)
+- [Healthline: MSG Good or Bad](https://www.healthline.com/nutrition/msg-good-or-bad)
+- [Mayo Clinic: Monosodium Glutamate FAQ](https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/expert-answers/monosodium-glutamate/faq-20058196)
+- [NCBI: MSG Research](https://pmc.ncbi.nlm.nih.gov/articles/PMC5938543/)
+- [Daily Sun: MSG Article](https://www.daily-sun.com/post/102236)
+- [Saudi Journal: MSG Study](https://www.saudijournals.com/media/articles/SJBR-25122-126.pdf)
+- [Rumor Scanner: MSG Fact Check](https://rumorscanner.com/en/fact-file-en/is-msg-really-harmful-to-health/21504)
+- [Reddit: MSG Discussion](https://www.reddit.com/r/UncleRoger/comments/mh2b5q/fuiyo_msg_from_bangladesh_we_call_it_tasting_salt/)
+- [Cox's Bazar Life: MSG Health Impact](https://coxsbazarlife.com/is-food-mixed-with-tasting-salt-harmful-to-health/)`,
+    publishedAt: '2025-09-15',
+    author: 'খোঁজ টিম',
+    tags: ['মিথবাস্টিং', 'টেস্টিং সল্ট', 'MSG', 'স্বাস্থ্য', 'খাদ্য নিরাপত্তা', 'বিজ্ঞান', 'ভুয়া খবর', 'খাদ্য সংযোজন'],
+    references: [
+      {
+        id: 1,
+        title: 'জাগো নিউজ: ঢাকা বিশ্ববিদ্যালয়ের দোকানিকে জরিমানা',
+        url: 'https://www.jagonews24.com/m/campus/news/1052081',
+        snippet: 'ঢাকা বিশ্ববিদ্যালয়ের জহুরুল হক হলের দোকানিকে টেস্টিং সল্ট ব্যবহারের জন্য জরিমানা'
+      },
+      {
+        id: 2,
+        title: 'Healthline: MSG Good or Bad',
+        url: 'https://www.healthline.com/nutrition/msg-good-or-bad',
+        snippet: 'MSG সম্পর্কে বৈজ্ঞানিক তথ্য এবং স্বাস্থ্য প্রভাব'
+      },
+      {
+        id: 3,
+        title: 'Mayo Clinic: Monosodium Glutamate FAQ',
+        url: 'https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/expert-answers/monosodium-glutamate/faq-20058196',
+        snippet: 'Mayo Clinic এর MSG সম্পর্কে FAQ'
+      },
+      {
+        id: 4,
+        title: 'NCBI: MSG Research',
+        url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC5938543/',
+        snippet: 'MSG এর বৈজ্ঞানিক গবেষণা'
+      },
+      {
+        id: 5,
+        title: 'Daily Sun: MSG Article',
+        url: 'https://www.daily-sun.com/post/102236',
+        snippet: 'বাংলাদেশী মিডিয়ায় MSG সম্পর্কে প্রতিবেদন'
+      },
+      {
+        id: 6,
+        title: 'Saudi Journal: MSG Study',
+        url: 'https://www.saudijournals.com/media/articles/SJBR-25122-126.pdf',
+        snippet: 'MSG এর স্বাস্থ্য প্রভাব নিয়ে গবেষণা'
+      },
+      {
+        id: 7,
+        title: 'Rumor Scanner: MSG Fact Check',
+        url: 'https://rumorscanner.com/en/fact-file-en/is-msg-really-harmful-to-health/21504',
+        snippet: 'MSG সম্পর্কে ফ্যাক্টচেক রিপোর্ট'
+      },
+      {
+        id: 8,
+        title: 'Reddit: MSG Discussion',
+        url: 'https://www.reddit.com/r/UncleRoger/comments/mh2b5q/fuiyo_msg_from_bangladesh_we_call_it_tasting_salt/',
+        snippet: 'বাংলাদেশে MSG কে টেস্টিং সল্ট বলা নিয়ে আলোচনা'
+      },
+      {
+        id: 9,
+        title: 'Cox\'s Bazar Life: MSG Health Impact',
+        url: 'https://coxsbazarlife.com/is-food-mixed-with-tasting-salt-harmful-to-health/',
+        snippet: 'টেস্টিং সল্টের স্বাস্থ্য প্রভাব নিয়ে স্থানীয় প্রতিবেদন'
+      }
+    ],
+    thumbnail: 'https://i.postimg.cc/pVYJ5ZtC/image.png'
   }
   
 ]

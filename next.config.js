@@ -10,6 +10,22 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'i.postimg.cc',
       },
+      {
+        protocol: 'http',
+        hostname: 'bigganblog.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'bigganblog.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn-icons-png.flaticon.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+      },
     ],
     // Performance optimizations
     formats: ['image/webp', 'image/avif'],

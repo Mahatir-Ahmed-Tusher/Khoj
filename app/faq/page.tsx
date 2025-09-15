@@ -96,7 +96,7 @@ export default function FAQ() {
               </p>
               <div className="space-y-2 text-gray-700 font-tiro-bangla">
                 <p><strong>ইমেইল:</strong> fact@khoj-bd.com</p>
-                <p><strong>ঠিকানা:</strong> Mirpur 12, Dhaka, Bangladesh</p>
+                <p><strong>ঠিকানা:</strong> E-14/X, ICT Tower, Agargaon, Dhaka-1207</p>
                 <p><strong>GitHub:</strong> <a href="https://github.com/Mahatir-Ahmed-Tusher/Khoj" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">https://github.com/Mahatir-Ahmed-Tusher/Khoj</a></p>
               </div>
             </div>

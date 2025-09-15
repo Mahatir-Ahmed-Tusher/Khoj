@@ -90,64 +90,6 @@ export default function AboutPage() {
             </div>
           </section>
 
-          {/* Our Team */}
-          <section className="card">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-tiro-bangla">
-              আমাদের দল
-            </h2>
-            <div className="text-center mb-6">
-              <p className="text-gray-600 font-tiro-bangla mb-6">
-                খোঁজের পিছনে রয়েছে একটি উদ্যমী দল যারা বিশ্বাস করে যে সঠিক তথ্য একটি সুস্থ সমাজের ভিত্তি।
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-2 border-primary-200">
-                  <img 
-                    src="/assets/founders-images/mahatir.png" 
-                    alt="মাহাথির আহমেদ তুষার" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">মাহাথির আহমেদ তুষার</h3>
-                <p className="text-sm text-gray-600 font-tiro-bangla">প্রতিষ্ঠাতা</p>
-                <p className="text-xs text-gray-500 mt-2 font-tiro-bangla">
-                  খোঁজের স্বপ্নদ্রষ্টা এবং মূল প্রেরণা
-                </p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-2 border-primary-200">
-                  <img 
-                    src="/assets/founders-images/sagar.png" 
-                    alt="সাগর চন্দ্র দে" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">সাগর চন্দ্র দে</h3>
-                <p className="text-sm text-gray-600 font-tiro-bangla">ফ্রন্টএন্ড ডিজাইনার ও লেখক</p>
-                <p className="text-xs text-gray-500 mt-2 font-tiro-bangla">
-                  ব্যবহারকারী অভিজ্ঞতা এবং বিষয়বস্তু
-                </p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-2 border-primary-200">
-                  <img 
-                    src="/assets/founders-images/tania.png" 
-                    alt="তানিয়া চৈতি" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">তানিয়া চৈতি</h3>
-                <p className="text-sm text-gray-600 font-tiro-bangla">ডেটা সংগ্রহকারী ও গবেষক</p>
-                <p className="text-xs text-gray-500 mt-2 font-tiro-bangla">
-                  তথ্য যাচাইকরণ এবং গবেষণা
-                </p>
-              </div>
-            </div>
-          </section>
-
           {/* Contact */}
           <section className="card text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-4 font-tiro-bangla">
@@ -163,7 +105,7 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">ঠিকানা:</h3>
                 <p className="text-gray-600 font-tiro-bangla">
-                  Mirpur 12, Dhaka, Bangladesh
+                  E-14/X, ICT Tower, Agargaon, Dhaka-1207
                 </p>
               </div>
             </div>

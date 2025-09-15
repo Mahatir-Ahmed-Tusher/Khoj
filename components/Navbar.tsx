@@ -2,15 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { useSearchLimit } from '@/lib/hooks/useSearchLimit'
-import { LogIn, LogOut, User } from 'lucide-react'
+import { LogIn, LogOut, User, ChevronDown } from 'lucide-react'
 
 export default function Navbar() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const { isLoggedIn, isLoading, loginWithGoogle, logout, remainingSearches, session } = useSearchLimit()
 
   const navItems = [
@@ -19,6 +20,7 @@ export default function Navbar() {
     { href: '/mukti-corner', label: 'মুক্তিযুদ্ধ কর্নার' },
     { href: '/mythbusting', label: 'মিথবাস্টিং' },
     { href: '/e-library', label: 'ই-গ্রন্থ সম্ভার' },
+    { href: '/blog', label: 'ব্লগ' },
     { href: '/about', label: 'আমাদের সম্পর্কে' },
   ]
 
@@ -33,6 +35,32 @@ export default function Navbar() {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen)
   }
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen)
+  }
+
+  const closeDropdown = () => {
+    setIsDropdownOpen(false)
+  }
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      if (!target.closest('.dropdown-container')) {
+        setIsDropdownOpen(false)
+      }
+    }
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isDropdownOpen])
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -64,6 +92,41 @@ export default function Navbar() {
                 {item.label}
               </Link>
             ))}
+            
+            {/* More Dropdown */}
+            <div className="relative dropdown-container">
+              <button
+                onClick={toggleDropdown}
+                className={cn(
+                  'flex items-center space-x-1 text-sm font-medium transition-colors duration-200 font-tiro-bangla',
+                  pathname === '/text-check' || pathname === '/source-search'
+                    ? 'text-primary-600 border-b-2 border-primary-600'
+                    : 'text-gray-600 hover:text-primary-600'
+                )}
+              >
+                <span>আরও</span>
+                <ChevronDown className={cn('h-4 w-4 transition-transform duration-200', isDropdownOpen && 'rotate-180')} />
+              </button>
+              
+              {isDropdownOpen && (
+                <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+                  <Link
+                    href="/text-check"
+                    onClick={closeDropdown}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600 transition-colors font-tiro-bangla"
+                  >
+                    লেখা যাচাই
+                  </Link>
+                  <Link
+                    href="/source-search"
+                    onClick={closeDropdown}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600 transition-colors font-tiro-bangla"
+                  >
+                    উৎস সন্ধান
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Auth Section */}
@@ -72,9 +135,16 @@ export default function Navbar() {
               <>
                 {!isLoggedIn ? (
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm text-gray-600 font-tiro-bangla">
-                      সার্চ: {remainingSearches === Infinity ? '∞' : remainingSearches}
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      <img 
+                        src="https://i.postimg.cc/fTMk2Gr4/image.png" 
+                        alt="Timer" 
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm text-gray-600 font-tiro-bangla">
+                        সার্চ: {remainingSearches === Infinity ? '∞' : remainingSearches}
+                      </span>
+                    </div>
                     <button
                       onClick={loginWithGoogle}
                       className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium font-tiro-bangla text-sm"
@@ -115,6 +185,11 @@ export default function Navbar() {
               <>
                 {!isLoggedIn ? (
                   <div className="flex items-center space-x-2">
+                    <img 
+                      src="https://i.postimg.cc/fTMk2Gr4/image.png" 
+                      alt="Timer" 
+                      className="w-3 h-3"
+                    />
                     <span className="text-xs text-gray-600 font-tiro-bangla">
                       {remainingSearches === Infinity ? '∞' : remainingSearches}
                     </span>
@@ -180,6 +255,32 @@ export default function Navbar() {
                   {item.label}
                 </Link>
               ))}
+              
+              {/* Mobile More Items */}
+              <Link
+                href="/text-check"
+                onClick={closeMobileMenu}
+                className={cn(
+                  'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 font-tiro-bangla',
+                  pathname === '/text-check'
+                    ? 'text-primary-600 bg-primary-50 border-l-4 border-primary-600'
+                    : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
+                )}
+              >
+                লেখা যাচাই
+              </Link>
+              <Link
+                href="/source-search"
+                onClick={closeMobileMenu}
+                className={cn(
+                  'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 font-tiro-bangla',
+                  pathname === '/source-search'
+                    ? 'text-primary-600 bg-primary-50 border-l-4 border-primary-600'
+                    : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
+                )}
+              >
+                উৎস সন্ধান
+              </Link>
             </div>
           </div>
         )}
