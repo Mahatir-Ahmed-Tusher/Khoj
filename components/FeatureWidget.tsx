@@ -22,6 +22,15 @@ const MythbustingIcon = ({ className }: { className?: string }) => (
   />
 )
 
+// Custom Blog Icon Component
+const BlogIcon = ({ className }: { className?: string }) => (
+  <img 
+    src="/blog-icon.png" 
+    alt="ব্লগ" 
+    className={className}
+  />
+)
+
 interface FeatureWidgetProps {
   className?: string
 }
@@ -47,6 +56,14 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
       color: 'bg-purple-500 hover:bg-purple-600'
     },
     {
+      id: 'blog',
+      title: 'ব্লগ',
+      description: 'বিজ্ঞান, গবেষণা ও বিশ্লেষণমূলক লেখা',
+      icon: BlogIcon,
+      href: '/blog',
+      color: 'bg-blue-500 hover:bg-blue-600'
+    },
+    {
       id: 'e-library',
       title: 'ই-গ্রন্থ সম্ভার',
       description: 'বই পর্যালোচনা ও ডাউনলোড লিংক',
@@ -70,17 +87,17 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
             আপনার সত্যান্বেষের এ যাত্রায় আরও রয়েছেঃ
           </h3>
           
-          <div className="space-y-4">
+          <div className="space-y-2">
             {features.map((feature) => (
               <Link
                 key={feature.id}
                 href={feature.href}
                 className="block group"
               >
-                <div className="bg-gray-50 hover:bg-gray-100 rounded-lg p-4 transition-all duration-300 border border-gray-200 hover:border-gray-300">
+                <div className="bg-gray-50 hover:bg-gray-100 rounded-lg p-3 transition-all duration-300 border border-gray-200 hover:border-gray-300">
                   <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-lg ${feature.id === 'mukti-corner' || feature.id === 'mythbusting' ? 'bg-transparent' : feature.color} transition-colors duration-300`}>
-                      {feature.id === 'mukti-corner' || feature.id === 'mythbusting' ? (
+                    <div className={`p-2 rounded-lg ${feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' ? 'bg-transparent' : feature.color} transition-colors duration-300`}>
+                      {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' ? (
                         <feature.icon className="h-9 w-9 object-contain" />
                       ) : (
                         <feature.icon className="h-5 w-5 text-white" />
@@ -90,9 +107,6 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
                       <h4 className="font-medium font-tiro-bangla text-gray-800 group-hover:text-gray-900 transition-colors">
                         {feature.title}
                       </h4>
-                      <p className="text-xs text-gray-600 font-tiro-bangla">
-                        {feature.description}
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -119,7 +133,7 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
                 }}
               >
                 <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-100">
-                  {feature.id === 'mukti-corner' || feature.id === 'mythbusting' ? (
+                  {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' ? (
                     <feature.icon className="h-8 w-8 object-contain" />
                   ) : (
                     <feature.icon className="h-6 w-6 text-gray-700" />

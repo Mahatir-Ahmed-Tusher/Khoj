@@ -204,25 +204,8 @@ export default function BlogPage() {
 
             {/* Tag Filter */}
             <div className="flex flex-wrap gap-2">
-              {/* Desktop Tags */}
-              <div className="hidden md:flex flex-wrap gap-2">
-                {allTags.map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => setSelectedTag(tag)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors font-tiro-bangla ${
-                      selectedTag === tag
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-              
-              {/* Mobile Dropdown */}
-              <div className="md:hidden relative dropdown-container">
+              {/* Desktop Dropdown */}
+              <div className="relative dropdown-container">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center space-x-2 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-tiro-bangla"

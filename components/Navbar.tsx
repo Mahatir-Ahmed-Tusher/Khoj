@@ -16,11 +16,9 @@ export default function Navbar() {
 
   const navItems = [
     { href: '/', label: 'হোম' },
+    { href: '/factcheck-view', label: 'সাম্প্রতিক সার্চ' },
     { href: '/factchecks', label: 'ফ্যাক্টচেক সমূহ' },
-    { href: '/mukti-corner', label: 'মুক্তিযুদ্ধ কর্নার' },
     { href: '/mythbusting', label: 'মিথবাস্টিং' },
-    { href: '/e-library', label: 'ই-গ্রন্থ সম্ভার' },
-    { href: '/blog', label: 'ব্লগ' },
     { href: '/about', label: 'আমাদের সম্পর্কে' },
   ]
 
@@ -110,6 +108,28 @@ export default function Navbar() {
               
               {isDropdownOpen && (
                 <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+                  <Link
+                    href="/blog"
+                    onClick={closeDropdown}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600 transition-colors font-tiro-bangla"
+                  >
+                    ব্লগ
+                  </Link>
+                  <Link
+                    href="/e-library"
+                    onClick={closeDropdown}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600 transition-colors font-tiro-bangla"
+                  >
+                    ই-গ্রন্থ সম্ভার
+                  </Link>
+                  <Link
+                    href="/mukti-corner"
+                    onClick={closeDropdown}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600 transition-colors font-tiro-bangla"
+                  >
+                    মুক্তিযুদ্ধ কর্নার
+                  </Link>
+                  <div className="border-t border-gray-200 my-1"></div>
                   <Link
                     href="/text-check"
                     onClick={closeDropdown}
@@ -257,6 +277,42 @@ export default function Navbar() {
               ))}
               
               {/* Mobile More Items */}
+              <Link
+                href="/blog"
+                onClick={closeMobileMenu}
+                className={cn(
+                  'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 font-tiro-bangla',
+                  pathname === '/blog'
+                    ? 'text-primary-600 bg-primary-50 border-l-4 border-primary-600'
+                    : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
+                )}
+              >
+                ব্লগ
+              </Link>
+              <Link
+                href="/e-library"
+                onClick={closeMobileMenu}
+                className={cn(
+                  'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 font-tiro-bangla',
+                  pathname === '/e-library'
+                    ? 'text-primary-600 bg-primary-50 border-l-4 border-primary-600'
+                    : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
+                )}
+              >
+                ই-গ্রন্থ সম্ভার
+              </Link>
+              <Link
+                href="/mukti-corner"
+                onClick={closeMobileMenu}
+                className={cn(
+                  'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 font-tiro-bangla',
+                  pathname === '/mukti-corner'
+                    ? 'text-primary-600 bg-primary-50 border-l-4 border-primary-600'
+                    : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
+                )}
+              >
+                মুক্তিযুদ্ধ কর্নার
+              </Link>
               <Link
                 href="/text-check"
                 onClick={closeMobileMenu}
