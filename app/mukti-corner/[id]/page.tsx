@@ -19,42 +19,42 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 
-export default function FactCheckViewPage() {
+export default function MuktiCornerDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
   // modal control state
   const [showShareModal, setShowShareModal] = useState(false);
 
-  // Query the database for the fact check by ID
-  const factCheckData = useQuery(api.factChecks.getByID, { 
+  // Query the database for the mukti corner report by ID
+  const muktiData = useQuery(api.factChecks.getByID, { 
     id: id as Id<"factChecks"> 
   });
 
   const downloadReport = () => {
-    if (!factCheckData) return;
+    if (!muktiData) return;
 
     const content = `
-Khoj ফ্যাক্ট চেকার রিপোর্ট
-========================
+Mukti Corner রিপোর্ট
+==================
 
-দাবি: ${factCheckData.query}
-তৈরির তারিখ: ${new Date(factCheckData.timestamp).toLocaleString("bn-BD")}
+প্রশ্ন: ${muktiData.query}
+তৈরির তারিখ: ${new Date(muktiData.timestamp).toLocaleString("bn-BD")}
 
-${factCheckData.result}
+${muktiData.result}
 
 উৎসসমূহ:
-${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`).join("\n")}
+${muktiData.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`).join("\n")}
 
 ---
-এই রিপোর্টটি Khoj ফ্যাক্ট চেকার দ্বারা তৈরি করা হয়েছে।
+এই রিপোর্টটি Mukti Corner দ্বারা তৈরি করা হয়েছে।
      `;
 
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `fact-check-${factCheckData.id}.txt`;
+    a.download = `mukti-corner-${muktiData.id}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -74,7 +74,7 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
     }
   };
 
-  if (factCheckData === undefined) {
+  if (muktiData === undefined) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
@@ -83,7 +83,7 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
             লোড হচ্ছে...
           </h1>
           <p className="text-gray-600">
-            ফ্যাক্ট চেক রিপোর্ট লোড করা হচ্ছে
+            Mukti Corner রিপোর্ট লোড করা হচ্ছে
           </p>
         </div>
         <Footer />
@@ -91,15 +91,15 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
     );
   }
 
-  if (factCheckData === null) {
+  if (muktiData === null) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            ফ্যাক্ট চেক পাওয়া যায়নি
+            রিপোর্ট পাওয়া যায়নি
           </h1>
           <p className="text-gray-600">
-            এই ফ্যাক্ট চেকটি আর পাওয়া যায় না। সম্ভবত এটি মুছে ফেলা হয়েছে।
+            এই রিপোর্টটি আর পাওয়া যায় না। সম্ভবত এটি মুছে ফেলা হয়েছে।
           </p>
         </div>
         <Footer />
@@ -112,26 +112,26 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            সংরক্ষিত ফ্যাক্ট চেকিং রিপোর্ট
+            Mukti Corner রিপোর্ট
           </h1>
           <p className="text-lg text-gray-600">
-            "{factCheckData.query}" এর জন্য পূর্বে তৈরি করা বিশ্লেষণ
+            "{muktiData.query}" এর জন্য পূর্বে তৈরি করা বিশ্লেষণ
           </p>
         </div>
 
         {/* Report */}
         <div className="space-y-8">
           {/* Report Header */}
-          <div className="card bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-primary-600">
+          <div className="card bg-gradient-to-r from-purple-50 to-indigo-50 border-l-4 border-purple-600">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
-                {getVerdictIcon(factCheckData.verdict)}
+                {getVerdictIcon(muktiData.verdict)}
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">
-                    ফ্যাক্ট চেকিং রিপোর্ট
+                    Mukti Corner বিশ্লেষণ
                   </h2>
                   <p className="text-gray-600 font-tiro-bangla">
-                    সংরক্ষিত AI চালিত বিশ্লেষণ
+                    সংরক্ষিত গবেষণা-ভিত্তিক বিশ্লেষণ
                   </p>
                 </div>
               </div>
@@ -157,10 +157,10 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
 
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                দাবি:
+                প্রশ্ন:
               </h3>
               <p className="text-gray-700 bg-white p-4 rounded-lg border border-gray-200 shadow-sm break-words overflow-hidden">
-                {factCheckData.query}
+                {muktiData.query}
               </p>
             </div>
 
@@ -169,7 +169,7 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
                 তৈরির তারিখ:
               </h3>
               <p className="text-gray-600 bg-white px-4 py-2 rounded-lg inline-block">
-                {new Date(factCheckData.timestamp).toLocaleString("bn-BD")}
+                {new Date(muktiData.timestamp).toLocaleString("bn-BD")}
               </p>
             </div>
           </div>
@@ -183,21 +183,21 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
               <div
                 className="text-gray-700 leading-relaxed text-base"
                 dangerouslySetInnerHTML={{
-                  __html: sanitizeHtml(parseMarkdown(factCheckData.result)),
+                  __html: sanitizeHtml(parseMarkdown(muktiData.result)),
                 }}
               />
             </div>
           </div>
 
           {/* Sources */}
-          {factCheckData.sources && factCheckData.sources.length > 0 && (
+          {muktiData.sources && muktiData.sources.length > 0 && (
             <div className="card bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-600">
               <h3 className="text-xl font-semibold text-gray-900 mb-6 border-b border-gray-200 pb-4">
                 উৎসসমূহ:
               </h3>
 
               {/* Source Info */}
-              {factCheckData.sourceInfo && (
+              {muktiData.sourceInfo && (
                 <div className="mb-6 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
                   <div className="flex items-center space-x-6 text-sm">
                     <div className="flex items-center space-x-2">
@@ -205,10 +205,10 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
                         মোট উৎস:
                       </span>
                       <span className="text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                        {factCheckData.sourceInfo.totalSources}টি
+                        {muktiData.sourceInfo.totalSources}টি
                       </span>
                     </div>
-                    {factCheckData.sourceInfo.hasBengaliSources && (
+                    {muktiData.sourceInfo.hasBengaliSources && (
                       <div className="flex items-center space-x-2">
                         <span className="text-green-700 font-medium">
                           বাংলা উৎস:
@@ -218,7 +218,7 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
                         </span>
                       </div>
                     )}
-                    {factCheckData.sourceInfo.hasEnglishSources && (
+                    {muktiData.sourceInfo.hasEnglishSources && (
                       <div className="flex items-center space-x-2">
                         <span className="text-orange-700 font-medium">
                           ইংরেজি উৎস:
@@ -229,7 +229,7 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
                       </div>
                     )}
                   </div>
-                  {factCheckData.sourceInfo.hasEnglishSources && (
+                  {muktiData.sourceInfo.hasEnglishSources && (
                     <p className="text-blue-600 text-sm mt-3 p-3 bg-blue-50 rounded-lg">
                       💡 বাংলায় পর্যাপ্ত তথ্য না থাকায় ইংরেজি উৎস থেকে তথ্য
                       সংগ্রহ করে বাংলায় অনুবাদ করা হয়েছে।
@@ -239,7 +239,7 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
               )}
 
               <div className="space-y-4">
-                {factCheckData.sources.map((source) => (
+                {muktiData.sources.map((source) => (
                   <div
                     key={source.id}
                     className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow max-w-full overflow-hidden"

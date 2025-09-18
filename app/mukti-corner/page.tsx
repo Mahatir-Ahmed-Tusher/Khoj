@@ -1,15 +1,19 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Footer from '@/components/Footer'
 import MuktiSidebar from '@/components/MuktiSidebar'
-import { Send, Loader2, Search, Copy, Download, ChevronDown, ChevronUp, Clock, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Send, Loader2, Search, Copy, Download, ChevronDown, ChevronUp, Clock, PanelLeftClose, PanelLeftOpen, Share2Icon } from 'lucide-react'
 import { parseMarkdown, sanitizeHtml } from '@/lib/markdown'
 import { SearchHistory, Source } from '@/lib/types'
 import { useSearchLimit } from '@/lib/hooks/useSearchLimit'
 import SearchLimitModal from '@/components/SearchLimitModal'
 import { useVoiceSearch } from '@/lib/hooks/useVoiceSearch'
 import Image from 'next/image'
+import ShareModal from '@/components/ShareModal'
+// Convex client for on-demand queries/mutations
+import { useConvex } from 'convex/react'
+import { api } from '@/convex/_generated/api'
 
 interface ChatMessage {
   id: string
@@ -52,6 +56,8 @@ export default function MuktiCornerPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true) // Default collapsed
   const [showLimitModal, setShowLimitModal] = useState(false)
   const [isClient, setIsClient] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [slugId, setSlugId] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   
   // Voice search functionality
@@ -65,6 +71,45 @@ export default function MuktiCornerPage() {
   } = useVoiceSearch()
   
   const { canSearch, recordSearch, loginWithGoogle, remainingSearches } = useSearchLimit()
+  
+  // Initialize Convex client
+  const convex = useConvex()
+
+  // Save to Convex database
+  const saveToConvex = useCallback(async (report: SearchHistory) => {
+    console.log('[Mukti Corner] saveToConvex called with id:', report.id)
+    try {
+      // Prepare payload in server schema shape (exactly like Mythbusting)
+      const payload = {
+        id: report.id,
+        query: report.query,
+        result: report.response,
+        timestamp: report.timestamp.getTime(),
+        verdict: (() => {
+          const verdict = report.verdict || 'unverified'
+          // Map unsupported verdicts to supported ones
+          if (verdict === 'partially_true' || verdict === 'context_dependent') {
+            return 'misleading' // Map to misleading as closest match
+          }
+          return verdict as 'true' | 'false' | 'misleading' | 'unverified'
+        })(),
+        sources: (report.sources || []).map((source: any) => ({
+          id: Number(source.id ?? 0),
+          title: source.book_title || source.title || '',
+          url: source.url || '',
+          snippet: source.content_preview || source.snippet || '',
+          language: source.language,
+        })),
+        generatedAt: report.timestamp.toISOString(),
+        pageUrl: typeof window !== 'undefined' ? window.location.href : ''
+      }
+      
+      await convex.mutation(api.factChecks.create, payload)
+      console.log('[Mukti Corner] Saved successfully')
+    } catch (error) {
+      console.error('[Mukti Corner] Error saving:', error)
+    }
+  }, [convex])
 
   // Initialize messages and fetch categories
   useEffect(() => {
@@ -153,7 +198,7 @@ export default function MuktiCornerPage() {
     scrollToBottom()
   }, [messages])
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = useCallback(async () => {
     if (!inputMessage.trim() || isLoading) return
 
     // Check if user can search
@@ -254,6 +299,12 @@ export default function MuktiCornerPage() {
       setSearchHistory(updatedHistory)
       saveSearchHistory(updatedHistory)
 
+      // Save to Convex database
+      await saveToConvex(newReport)
+      console.log('[Mukti Corner] Saved report to localStorage and Convex', newReport)
+      setSlugId(newReport.id)
+      console.log("slug id:", slugId)
+
     } catch (error) {
       console.error('Error sending message:', error)
       
@@ -269,24 +320,24 @@ export default function MuktiCornerPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [inputMessage, isLoading, canSearch, recordSearch, selectedCategory, selectedSubcategory, searchHistory, saveSearchHistory, saveToConvex])
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSendMessage()
     }
-  }
+  }, [handleSendMessage])
 
-  const handleMicClick = async () => {
+  const handleMicClick = useCallback(async () => {
     if (isRecording) {
       stopVoiceSearch()
     } else {
       await startVoiceSearch()
     }
-  }
+  }, [isRecording, stopVoiceSearch, startVoiceSearch])
 
-  const copyBotResponse = async (messageText: string) => {
+  const copyBotResponse = useCallback(async (messageText: string) => {
     try {
       await navigator.clipboard.writeText(messageText)
       alert('উত্তর কপি করা হয়েছে!')
@@ -294,9 +345,9 @@ export default function MuktiCornerPage() {
       console.error('Copy failed:', error)
       alert('কপি করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।')
     }
-  }
+  }, [])
 
-  const downloadBotResponse = (messageText: string) => {
+  const downloadBotResponse = useCallback((messageText: string) => {
     const textContent = `
 মুক্তিযুদ্ধ কর্নার - সার্চ ইঞ্জিনের উত্তর
 ==========================================
@@ -315,21 +366,21 @@ ${messageText}
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-  }
+  }, [])
 
-  const handleCategoryChange = (categoryId: string) => {
+  const handleCategoryChange = useCallback((categoryId: string) => {
     setSelectedCategory(categoryId)
     setSelectedSubcategory(null)
     setShowSubcategories(false)
-  }
+  }, [])
 
-  const handleSubcategoryChange = (subcategoryId: string) => {
+  const handleSubcategoryChange = useCallback((subcategoryId: string) => {
     setSelectedSubcategory(subcategoryId)
     setShowSubcategories(false)
-  }
+  }, [])
 
   // Load a report from history
-  const loadReportFromHistory = (report: SearchHistory) => {
+  const loadReportFromHistory = useCallback((report: SearchHistory) => {
     setCurrentReport(report)
     setMessages([
       {
@@ -351,32 +402,32 @@ ${messageText}
         ourSiteArticles: report.ourSiteArticles
       }
     ])
-  }
+  }, [])
 
   // Clear search history
-  const clearSearchHistory = () => {
+  const clearSearchHistory = useCallback(() => {
     setSearchHistory([])
     if (typeof window !== 'undefined') {
       localStorage.removeItem('muktiCornerHistory')
     }
-  }
+  }, [])
 
   // Clear current report
-  const clearCurrentReport = () => {
+  const clearCurrentReport = useCallback(() => {
     setMessages([])
     setCurrentReport(null)
-  }
+  }, [])
 
-  const getCategoryName = (categoryId: string) => {
+  const getCategoryName = useCallback((categoryId: string) => {
     const category = categories.find(cat => cat.id === categoryId)
     return category ? category.name : 'একাত্তোর'
-  }
+  }, [categories])
 
-  const getSubcategoryName = (categoryId: string, subcategoryId: string) => {
+  const getSubcategoryName = useCallback((categoryId: string, subcategoryId: string) => {
     const category = categories.find(cat => cat.id === categoryId)
     const subcategory = category?.subcategories?.find(sub => sub.id === subcategoryId)
     return subcategory ? subcategory.name : ''
-  }
+  }, [categories])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-green-50">
@@ -664,6 +715,13 @@ ${messageText}
                                   <Download className="h-4 w-4" />
                                   <span>ডাউনলোড</span>
                                 </button>
+                                <button
+                                  onClick={() => setShowShareModal(true)}
+                                  className="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition-colors duration-200 font-tiro-bangla text-sm"
+                                >
+                                  <Share2Icon className="h-4 w-4" />
+                                  <span>শেয়ার</span>
+                                </button>
                                      <button
                                        onClick={clearCurrentReport}
                                        className="flex items-center space-x-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded transition-colors duration-200 font-tiro-bangla text-sm"
@@ -905,6 +963,12 @@ ${messageText}
       </div>
       
       <Footer />
+      
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        url={`${typeof window !== "undefined" ? window.location.origin : ""}/mukti-corner/${slugId}`}
+      />
       
       <SearchLimitModal
         isOpen={showLimitModal}

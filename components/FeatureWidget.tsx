@@ -31,6 +31,15 @@ const BlogIcon = ({ className }: { className?: string }) => (
   />
 )
 
+// Custom Video Corner Icon Component
+const VideoCornerIcon = ({ className }: { className?: string }) => (
+  <img 
+    src="/video-corner.png" 
+    alt="ভিডিও কর্নার" 
+    className={className}
+  />
+)
+
 interface FeatureWidgetProps {
   className?: string
 }
@@ -70,6 +79,14 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
       icon: BookOpen,
       href: '/e-library',
       color: 'bg-green-500 hover:bg-green-600'
+    },
+    {
+      id: 'video-corner',
+      title: 'ভিডিও কর্নার',
+      description: 'খোঁজ সম্পর্কে জানুন ও টিউটোরিয়াল দেখুন',
+      icon: VideoCornerIcon,
+      href: '/video-corner',
+      color: 'bg-red-500 hover:bg-red-600'
     }
   ]
 
@@ -78,26 +95,26 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
       {/* Desktop Widget */}
       <div className={`hidden lg:block ${className}`}>
         <div 
-          className="bg-white rounded-xl p-6 text-gray-900 border border-gray-300"
+          className="bg-white rounded-xl p-4 text-gray-900 border border-gray-300"
           style={{
             background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'
           }}
         >
-          <h3 className="text-lg font-bold mb-4 font-tiro-bangla text-center text-gray-800">
+          <h3 className="text-base font-bold mb-3 font-tiro-bangla text-center text-gray-800">
             আপনার সত্যান্বেষের এ যাত্রায় আরও রয়েছেঃ
           </h3>
           
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {features.map((feature) => (
               <Link
                 key={feature.id}
                 href={feature.href}
                 className="block group"
               >
-                <div className="bg-gray-50 hover:bg-gray-100 rounded-lg p-3 transition-all duration-300 border border-gray-200 hover:border-gray-300">
-                  <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-lg ${feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' ? 'bg-transparent' : feature.color} transition-colors duration-300`}>
-                      {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' ? (
+                <div className="bg-gray-50 hover:bg-gray-100 rounded-lg p-2 transition-all duration-300 border border-gray-200 hover:border-gray-300">
+                  <div className="flex items-center space-x-2">
+                    <div className={`p-2 rounded-lg ${feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' || feature.id === 'video-corner' ? 'bg-transparent' : feature.color} transition-colors duration-300`}>
+                      {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' || feature.id === 'video-corner' ? (
                         <feature.icon className="h-9 w-9 object-contain" />
                       ) : (
                         <feature.icon className="h-5 w-5 text-white" />
@@ -133,7 +150,7 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
                 }}
               >
                 <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-100">
-                  {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' ? (
+                  {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' || feature.id === 'video-corner' ? (
                     <feature.icon className="h-8 w-8 object-contain" />
                   ) : (
                     <feature.icon className="h-6 w-6 text-gray-700" />

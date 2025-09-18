@@ -120,7 +120,14 @@ export default function Navbar() {
                     onClick={closeDropdown}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600 transition-colors font-tiro-bangla"
                   >
-                    ই-গ্রন্থ সম্ভার
+                    ই-গ্রন্থসম্ভার
+                  </Link>
+                  <Link
+                    href="/video-corner"
+                    onClick={closeDropdown}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600 transition-colors font-tiro-bangla"
+                  >
+                    ভিডিও কর্নার
                   </Link>
                   <Link
                     href="/mukti-corner"
@@ -300,6 +307,18 @@ export default function Navbar() {
                 )}
               >
                 ই-গ্রন্থ সম্ভার
+              </Link>
+              <Link
+                href="/video-corner"
+                onClick={closeMobileMenu}
+                className={cn(
+                  'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 font-tiro-bangla',
+                  pathname === '/video-corner'
+                    ? 'text-primary-600 bg-primary-50 border-l-4 border-primary-600'
+                    : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
+                )}
+              >
+                ভিডিও কর্নার
               </Link>
               <Link
                 href="/mukti-corner"

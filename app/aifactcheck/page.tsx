@@ -4,6 +4,9 @@ import { useState } from 'react'
 import Footer from '@/components/Footer'
 import SearchBar from '@/components/SearchBar'
 import { Loader2, Download, CheckCircle, XCircle, AlertTriangle, HelpCircle } from 'lucide-react'
+import { addAIFactCheck } from '@/lib/ai-factcheck-utils'
+import { useMutation } from 'convex/react'
+import { api } from '@/convex/_generated/api'
 
 interface FactCheckResult {
   claim: string
@@ -22,6 +25,9 @@ export default function AIFactCheckPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<FactCheckResult | null>(null)
   const [error, setError] = useState('')
+  
+  // Convex mutation for saving to database
+  const createFactCheck = useMutation(api.factChecks.create)
 
   const handleSearch = async (searchQuery: string) => {
     setQuery(searchQuery)
@@ -44,6 +50,18 @@ export default function AIFactCheckPage() {
 
       const data = await response.json()
       setResult(data)
+      
+      // Save to database
+      if (data.verdict) {
+        await addAIFactCheck(
+          searchQuery,
+          data.report,
+          data.verdict,
+          data.sources,
+          data.sourceInfo,
+          createFactCheck
+        )
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'একটি ত্রুটি ঘটেছে')
     } finally {

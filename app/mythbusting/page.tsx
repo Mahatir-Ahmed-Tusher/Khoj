@@ -4,13 +4,17 @@ import { useState, useRef, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Footer from '@/components/Footer'
 import MythbustingSidebar from '@/components/MythbustingSidebar'
-import { Send, Loader2, Search, Copy, Download, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Send, Loader2, Search, Copy, Download, PanelLeftClose, PanelLeftOpen, Share, Share2Icon } from 'lucide-react'
 import { parseMarkdown, sanitizeHtml } from '@/lib/markdown'
 import { SearchHistory, Source } from '@/lib/types'
 import { useSearchLimit } from '@/lib/hooks/useSearchLimit'
 import SearchLimitModal from '@/components/SearchLimitModal'
 import { useVoiceSearch } from '@/lib/hooks/useVoiceSearch'
 import Image from 'next/image'
+// Convex client for on-demand queries/mutations
+import { useConvex } from 'convex/react'
+import { api } from '@/convex/_generated/api'
+import ShareModal from '@/components/ShareModal'
 
 interface ChatMessage {
   id: string
@@ -41,6 +45,90 @@ function MythbustingContent() {
   const [isFromUrl, setIsFromUrl] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const searchParams = useSearchParams()
+  const convex = useConvex()
+
+  // Control show modal
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [slugId, setSlugId] = useState("");
+
+    // set the url
+    const [url, setUrl] = useState("");
+
+
+  // Save to Convex database
+  const saveToConvex = async (report: SearchHistory) => {
+    console.log('[Convex] saveToConvex called with id:', report.id)
+    // setSlugId(report.id)
+    try {
+      // Prepare payload in server schema shape
+      const payload = {
+        id: report.id,
+        query: report.query,
+        result: report.response,
+        timestamp: report.timestamp.getTime(),
+        verdict: (report.verdict as 'true' | 'false' | 'misleading' | 'unverified') || 'unverified',
+        sources: (report.sources || []).map((source: Source) => ({
+          id: Number(source.id ?? 0),
+          title: source.book_title || source.title || '',
+          url: source.url || '',
+          snippet: source.content_preview || source.snippet || '',
+          language: source.language,
+        })),
+        generatedAt: report.timestamp.toISOString(),
+        pageUrl: typeof window !== 'undefined' ? window.location.href : ''
+      }
+      await convex.mutation(api.factChecks.create, payload)
+      console.log('[Convex] Saved successfully')
+    } catch (error) {
+      console.error('[Convex] Error saving:', error)
+    }
+  }
+
+  // Check if data exists in localStorage or Convex
+  const checkExistingData = async (query: string): Promise<SearchHistory | null> => {
+    console.log('[Check] Checking existing data for query:', query)
+    // 1) Local cache first
+    const localHistory = searchHistory.find((item) => item.query.toLowerCase() === query.toLowerCase())
+    if (localHistory) {
+      console.log('[Check] Found in localStorage by query')
+      return localHistory
+    }
+    // 2) Convex database
+    try {
+      const convexResult = await convex.query(api.factChecks.getByQuery, { query })
+      if (convexResult) {
+        console.log('[Check] Found in Convex by query')
+        const mapped: SearchHistory = {
+          id: convexResult.id,
+          query: convexResult.query,
+          response: convexResult.result,
+          timestamp: new Date(convexResult.timestamp),
+          sources: (convexResult.sources || []).map((source: any) => ({
+            id: source.id,
+            title: source.title || '',
+            book_title: source.title,
+            page: 1,
+            category: 'mythbusting',
+            language: source.language || 'English',
+            snippet: source.snippet || '',
+            content_preview: source.snippet,
+            url: source.url,
+          } as Source)),
+          verdict: convexResult.verdict,
+          // Optional fields may not exist on DB record; keep undefined if missing
+          summary: (convexResult as any).summary,
+          conclusion: (convexResult as any).conclusion,
+          keyTakeaways: (convexResult as any).keyTakeaways,
+          ourSiteArticles: (convexResult as any).ourSiteArticles,
+        }
+        return mapped
+      }
+    } catch (error) {
+      console.error('[Convex] Error querying by query:', error)
+    }
+    console.log('[Check] No existing data found')
+    return null
+  }
   
   // Voice search functionality
   const { 
@@ -68,6 +156,37 @@ function MythbustingContent() {
     if (!inputMessage.trim() || isLoading) return
 
     console.log('handleSendMessage called, isFromUrl:', isFromUrl)
+
+    // First try: check localStorage + Convex by query
+    try {
+      const existingData = await checkExistingData(inputMessage)
+      if (existingData) {
+        console.log('[Flow] Using existing data (cache/db). Skipping generation.')
+        const userMessage: ChatMessage = {
+          id: Date.now().toString(),
+          text: inputMessage,
+          isUser: true,
+          timestamp: new Date(),
+        }
+        const botMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          text: existingData.response,
+          isUser: false,
+          timestamp: existingData.timestamp,
+          sources: existingData.sources,
+          verdict: existingData.verdict,
+          summary: existingData.summary,
+          conclusion: existingData.conclusion,
+          keyTakeaways: existingData.keyTakeaways,
+          ourSiteArticles: existingData.ourSiteArticles,
+        }
+        setMessages([userMessage, botMessage])
+        setCurrentReport(existingData)
+        return
+      }
+    } catch (e) {
+      console.warn('[Flow] Existing data check failed, proceeding to generate.', e)
+    }
 
     if (!isFromUrl) {
       console.log('Manual search - checking permissions')
@@ -122,10 +241,12 @@ function MythbustingContent() {
         timestamp: new Date(),
         sources: data.evidenceSources ? data.evidenceSources.map((source: any, index: number) => ({
           id: index + 1,
+          title: source.title || '',
           book_title: source.title,
           page: 1,
           category: 'mythbusting',
           language: 'English',
+          snippet: source.snippet || '',
           content_preview: source.snippet,
           url: source.url
         })) : [],
@@ -145,10 +266,12 @@ function MythbustingContent() {
         timestamp: new Date(),
         sources: data.evidenceSources ? data.evidenceSources.map((source: any, index: number) => ({
           id: index + 1,
+          title: source.title || '',
           book_title: source.title,
           page: 1,
           category: 'mythbusting',
           language: 'English',
+          snippet: source.snippet || '',
           content_preview: source.snippet,
           url: source.url
         })) : [],
@@ -164,6 +287,13 @@ function MythbustingContent() {
       const updatedHistory = [newReport, ...searchHistory].slice(0, 50)
       setSearchHistory(updatedHistory)
       saveSearchHistory(updatedHistory)
+
+      // Save to Convex as well
+      await saveToConvex(newReport)
+      console.log('[Flow] Saved report to localStorage and Convex', newReport)
+      setSlugId(newReport.id)
+      console.log("slug id:" , slugId)
+
 
     } catch (error) {
       console.error('Error sending message:', error)
@@ -218,6 +348,11 @@ function MythbustingContent() {
       window.removeEventListener('voiceSearchResult', handleVoiceResult as EventListener)
     }
   }, [])
+
+  // get window url
+  useEffect(() => {
+    setUrl(window.location.href);
+  }, []);
 
   // Load search history from localStorage
   const loadSearchHistory = () => {
@@ -292,25 +427,51 @@ ${messageText}
   }
 
   // Load a report from history
-  const loadReportFromHistory = (report: SearchHistory) => {
+  const loadReportFromHistory = async (report: SearchHistory) => {
+    console.log('[Flow] Loading report from history. Attempting Convex getByID for latest:', report.id)
+    try {
+      // Try to fetch the freshest version from Convex by id
+      const latest = await convex.query(api.factChecks.getByID, { id: report.id })
+      if (latest) {
+        console.log('[Convex] Found latest by id. Using DB version for render.')
+        const updated: SearchHistory = {
+          id: latest.id,
+          query: latest.query,
+          response: latest.result,
+          timestamp: new Date(latest.timestamp),
+          sources: (latest.sources || []).map((source: any) => ({
+            id: source.id,
+            title: source.title || '',
+            book_title: source.title,
+            page: 1,
+            category: 'mythbusting',
+            language: source.language || 'English',
+            snippet: source.snippet || '',
+            content_preview: source.snippet,
+            url: source.url,
+          } as Source)),
+          verdict: latest.verdict,
+          summary: (latest as any).summary,
+          conclusion: (latest as any).conclusion,
+          keyTakeaways: (latest as any).keyTakeaways,
+          ourSiteArticles: (latest as any).ourSiteArticles,
+        }
+        setCurrentReport(updated)
+        setMessages([
+          { id: updated.id + '-user', text: updated.query, isUser: true, timestamp: updated.timestamp },
+          { id: updated.id + '-bot', text: updated.response, isUser: false, timestamp: updated.timestamp, sources: updated.sources, verdict: updated.verdict, summary: updated.summary, ourSiteArticles: updated.ourSiteArticles }
+        ])
+        return
+      }
+      console.log('[Convex] No DB version found; falling back to local copy.')
+    } catch (error) {
+      console.warn('[Convex] getByID failed; using local copy.', error)
+    }
+    // Fallback to provided local report
     setCurrentReport(report)
     setMessages([
-      {
-        id: report.id + '-user',
-        text: report.query,
-        isUser: true,
-        timestamp: report.timestamp
-      },
-      {
-        id: report.id + '-bot',
-        text: report.response,
-        isUser: false,
-        timestamp: report.timestamp,
-        sources: report.sources,
-        verdict: report.verdict,
-        summary: report.summary,
-        ourSiteArticles: report.ourSiteArticles
-      }
+      { id: report.id + '-user', text: report.query, isUser: true, timestamp: report.timestamp },
+      { id: report.id + '-bot', text: report.response, isUser: false, timestamp: report.timestamp, sources: report.sources, verdict: report.verdict, summary: report.summary, ourSiteArticles: report.ourSiteArticles }
     ])
   }
 
@@ -580,6 +741,14 @@ ${messageText}
                                       <Download className="h-4 w-4" />
                                       <span>ডাউনলোড</span>
                                     </button>
+                    <button
+                      id="share-button"
+                      onClick={() => setShowShareModal(true)}
+                      className="flex items-center space-x-2 bg-gray-100 text-black px-6 py-3 rounded-lg hover:bg-gray-300 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      <Share2Icon />
+                      <span className="font-medium">শেয়ার করুন</span>
+                    </button>
                                     <button
                                       onClick={clearCurrentReport}
                                       className="flex items-center space-x-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded transition-colors duration-200 font-tiro-bangla text-sm"
@@ -857,6 +1026,11 @@ ${messageText}
       </div>
       
       <Footer />
+       <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          url={`${url}/${slugId}`}
+        />
       
       <SearchLimitModal
         isOpen={showLimitModal}

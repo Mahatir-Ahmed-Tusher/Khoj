@@ -128,19 +128,19 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
         ) : (
           <div className="space-y-3">
             {aiFactChecks.slice(0, 3).map((check) => (
-              <div key={check.id} className="bg-gray-50 hover:bg-gray-100 rounded-lg p-3 transition-all duration-300 border border-gray-200 hover:border-gray-300">
-                <div className="flex items-center space-x-3">
+              <div key={check.id} className="bg-gray-50 hover:bg-gray-100 rounded-lg p-3 transition-all duration-300 border border-gray-200 hover:border-gray-300 max-w-full">
+                <div className="flex items-center space-x-3 min-w-0">
                   <div className="p-1.5 rounded-lg bg-transparent">
                     <div className="w-4 h-4 bg-primary-600 rounded-full flex items-center justify-center">
                       <span className="text-white text-xs font-bold">AI</span>
                     </div>
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-1">
                       <span className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-medium ${getVerdictColor(check.verdict)}`}>
                         {getVerdictText(check.verdict)}
                       </span>
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-1 flex-shrink-0">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -173,9 +173,12 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
                         </button>
                       </div>
                     </div>
-                    <h4 className="font-medium font-tiro-bangla text-gray-800 line-clamp-1 text-sm cursor-pointer hover:text-primary-600 transition-colors"
-                        onClick={() => window.location.href = `/factcheck-view/${check.id}`}>
-                      {check.query}
+                    <h4 className="font-medium font-tiro-bangla text-gray-800 text-sm cursor-pointer hover:text-primary-600 transition-colors overflow-hidden"
+                        onClick={() => window.location.href = `/factcheck-view/${check.id}`}
+                        title={check.query}>
+                      <span className="block truncate max-w-full">
+                        {check.query.length > 45 ? `${check.query.substring(0, 45)}...` : check.query}
+                      </span>
                     </h4>
                     <p className="text-xs text-gray-600 font-tiro-bangla">
                       {new Date(check.timestamp).toLocaleDateString('bn-BD')}
@@ -294,12 +297,15 @@ ${check.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).j
                         </button>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-900 font-tiro-bangla line-clamp-3 mb-1 cursor-pointer hover:text-primary-600 transition-colors break-words"
+                    <p className="text-sm text-gray-900 font-tiro-bangla mb-1 cursor-pointer hover:text-primary-600 transition-colors overflow-hidden"
                        onClick={() => {
                          setIsOpen(false);
                          window.location.href = `/factcheck-view/${check.id}`;
-                       }}>
-                      {check.query}
+                       }}
+                       title={check.query}>
+                      <span className="block truncate max-w-full">
+                        {check.query.length > 60 ? `${check.query.substring(0, 60)}...` : check.query}
+                      </span>
                     </p>
                     <p className="text-xs text-gray-500 font-tiro-bangla">
                       {new Date(check.timestamp).toLocaleDateString('bn-BD')}

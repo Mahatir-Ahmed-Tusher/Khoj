@@ -2863,6 +2863,120 @@ MSG-এর স্বাস্থ্য প্রভাব নিয়ে মি
       }
     ],
     thumbnail: 'https://i.postimg.cc/pVYJ5ZtC/image.png'
+  },
+  {
+    id: '33',
+    slug: 'amar-desher-abu-saeed-postmortem-rumor',
+    title: "'আমার দেশ' পত্রিকায় দাবি করা- আবু সাইদের পোস্টমর্টেম বদলিয়ে এসপি আবু বকরের পদন্নোতি পাওয়ার তথ্যটি গুজব",
+    claim: 'জুলাই আন্দোলনে শহীদ ও বেগম রোকেয়া বিশ্ববিদ্যালয়ের ছাত্র আবু সাঈদের পোস্টমর্টেম রিপোর্ট বদলানোর জন্য তৎকালীন এসপি আবু বক্কর সিদ্দিক চিকিৎসককে ভয়ভীতি দেখান এবং এর পরও তিনি শাস্তি না পেয়ে পদোন্নতি লাভ করেন।',
+    verdict: 'false',
+    summary: 'আমার দেশ পত্রিকায় প্রকাশিত দাবি অনুযায়ী, আবু সাঈদের পোস্টমর্টেম রিপোর্ট বদলিয়ে এসপি আবু বক্কর সিদ্দিক পদোন্নতি পেয়েছেন। কিন্তু খোঁজ টিমের অনুসন্ধানে দেখা যায়, আবু বক্কর সিদ্দিকের পদোন্নতি হয়েছিল ২০২৩ সালের নভেম্বরে, আর আবু সাঈদের মৃত্যু ঘটে ২০২৪ সালের জুলাইয়ে। ফলে এই দাবি মিথ্যা।',
+    content: `## দাবি
+
+আমার দেশ পত্রিকায় ১৬ সেপ্টেম্বর ২০২৫ তারিখে প্রকাশিত এক প্রতিবেদনে দাবি করা হয় যে, জুলাই আন্দোলনে শহীদ ও বেগম রোকেয়া বিশ্ববিদ্যালয়ের ছাত্র আবু সাঈদের পোস্টমর্টেম রিপোর্ট বদলানোর জন্য তৎকালীন এসপি আবু বক্কর সিদ্দিক চিকিৎসককে ভয়ভীতি দেখান। প্রতিবেদনে আরও বলা হয়, এর পরও তিনি শাস্তি না পেয়ে পদোন্নতি লাভ করেন এবং বর্তমানে অতিরিক্ত ডিআইজি হিসেবে কর্মরত রয়েছেন [১](https://www.dailyamardesh.com/bangladesh/rangpur/amdsgvxi3iqis?fbclid=IwZXh0bgNhZW0CMTEAAR4Lr1z92cnmQos8tNaLuDK07h-2FZntcMGCQokEURPsyuFguNVo7-ZvWtTkxA_aem_58FGav3t8o_gGp_UeAnlvQ)। তাছাড়াও এ দাবিটি এসেছে [২](https://www.justnewsbd.com/crime/news/65942), [৩](https://alfirdaws.org/2025/09/13/87307/) এবং [৪](https://www.facebook.com/100076260184113/posts/pfbid02EjzUtjH5ezJrbo6X7pn2qs9x7qGhw47Vzeppp6T4PLcVgSEGvQmc1cY2EprJG87Kl/?app=fbl)।
+
+## Verdict: মিথ্যা
+
+## সরকারি প্রজ্ঞাপনে তথ্য
+
+পুলিশ সদর দপ্তরের ওয়েবসাইটে ২০২৩ সালের ৬ নভেম্বর তারিখে প্রকাশিত একটি প্রজ্ঞাপনে (police.gov.bd) এসপি থেকে অতিরিক্ত ডিআইজি পদে পদোন্নতির তালিকা প্রকাশ করা হয় [৫](https://www.police.gov.bd/storage/upload/announcement/HGvGWVY1CAncEXHnBnI6B0tniAbjnAaoheNWSxUr.pdf)। উক্ত তালিকায় মোঃ আবু বকর সিদ্দিকের নাম অন্তর্ভুক্ত রয়েছে। 
+
+এরপর ২০২৩ সালের ১২ নভেম্বর রংপুর মেট্রোপলিটন পুলিশের অফিশিয়াল ফেসবুক পেজ থেকে একটি পোস্টে উল্লেখ করা হয় যে রংপুর মেট্রোপলিটন পুলিশ কমিশনার কার্যালয়ে আবু বকর সিদ্দিকসহ কয়েকজন কর্মকর্তাকে পদোন্নতির পর র্যাংক ব্যাজ পরানো হয়েছে [৬](https://www.ajkerbangladesh.com.bd/country-news/2023/11/12/149411)। পোস্টে তার স্ত্রীসহ অন্যান্য কর্মকর্তাদের উপস্থিতির কথাও বলা হয়েছে।
+
+একই সাথে, ২০২৩ সালের ১২ নভেম্বর "আজকের বাংলাদেশ" নামের একটি সংবাদমাধ্যমেও একই খবর প্রকাশিত হয়। সেখানে একই কর্মকর্তাদের নাম ও পদোন্নতির তথ্য এসেছে। অর্থাৎ, সরকারি প্রজ্ঞাপনের সঙ্গে মূলধারার সংবাদ প্রতিবেদনও সামঞ্জস্যপূর্ণ [৭](https://www.facebook.com/100069016126294/posts/pfbid08gSo7ZgifWzATJuXKXef4FaChqhD34Yxgxe96AV7aPLdvHykKtJEvitWGk1NtBn6l/?app=fbl)।
+
+আরও একটি উল্লেখযোগ্য তথ্য পাওয়া যায় রংপুর মেট্রোপলিটন পুলিশের অফিসিয়াল ওয়েবসাইটে। ৪ জুন ২০২৪ তারিখে প্রকাশিত এক সংবাদ বিজ্ঞপ্তিতে নবযোগদানকারী এক কর্মকর্তাকে ফুলেল শুভেচ্ছা জানানোর বর্ণনায় উপস্থিত কর্মকর্তাদের নাম তালিকাভুক্ত করা হয় [৮](https://rpmp.gov.bd/index.php/home/news_details/283)। সেখানে লেখা আছে:
+
+"উপ-পুলিশ কমিশনার (হেডকোয়ার্টার্স) (অ্যাডিশনাল ডিআইজি পদে পদোন্নতিপ্রাপ্ত) জনাব মোঃ আবু বকর সিদ্দীক …"
+
+যা নির্দেশ করে যে জুলাই ২০২৪-এর আবু সাঈদ হত্যাকাণ্ডের ঘটনার আগেই আবু বকর সিদ্দিক পদোন্নতি প্রাপ্ত ছিলেন এবং পদোন্নতির পরিচয়ে দায়িত্ব পালন করছিলেন।
+
+## সময়রেখার অসঙ্গতি
+
+অন্যদিকে, বেগম রোকেয়া বিশ্ববিদ্যালয়ের ছাত্র আবু সাঈদের মৃত্যুর ঘটনা ঘটে ২০২৪ সালের ১৬ জুলাই। পুলিশ গুলিতে নিহত হওয়ার পর তার ময়নাতদন্ত রিপোর্ট নিয়ে জটিলতা তৈরি হয় এবং ফরেনসিক চিকিৎসক ডা. রাজিবুল ইসলাম পরবর্তীতে আন্তর্জাতিক অপরাধ ট্রাইব্যুনালে সাক্ষ্য দেন। অর্থাৎ, এই ঘটনা পদোন্নতির অন্তত আট মাস পরে সংঘটিত হয়।
+
+এই সময়রেখা নির্দেশ করছে, আবু বকর সিদ্দিকের পদোন্নতি আবু সাঈদের ঘটনার সঙ্গে যুক্ত নয়। বরং, পদোন্নতি ঘটেছিল ঘটনার অনেক আগেই।
+
+## উপসংহার
+
+সব যাচাইয়ের পর খোঁজ টিমের মূল্যায়ন হলো, আবু বকর সিদ্দিক সত্যিই অতিরিক্ত ডিআইজি পদে পদোন্নতি পেয়েছিলেন। তবে, সেই পদোন্নতি হয়েছিল ২০২৩ সালের নভেম্বর মাসে, আর আবু সাঈদের মৃত্যু ঘটে ২০২৪ সালের জুলাই মাসে। ফলে "আবু সাঈদের পোস্টমর্টেম রিপোর্ট বদলিয়ে পদোন্নতি পান এসপি আবু বক্কর"—এই শিরোনামটি তথ্যগতভাবে ভুল এবং বিভ্রান্তিকর।
+
+আসল সত্য হলো, পদোন্নতি ঘটেছিল ঘটনার অনেক আগেই এবং তা সরকারের স্বাভাবিক প্রশাসনিক প্রক্রিয়ার অংশ ছিল।
+
+## রিপোর্ট প্রস্তুতকারক: খোঁজ টিম
+## তারিখ: ১৭ সেপ্টেম্বর ২০২৫
+
+## তথ্যসূত্র:
+
+[১] [আমার দেশ পত্রিকার প্রতিবেদন](https://www.dailyamardesh.com/bangladesh/rangpur/amdsgvxi3iqis?fbclid=IwZXh0bgNhZW0CMTEAAR4Lr1z92cnmQos8tNaLuDK07h-2FZntcMGCQokEURPsyuFguNVo7-ZvWtTkxA_aem_58FGav3t8o_gGp_UeAnlvQ)
+
+[২] [Just News BD প্রতিবেদন](https://www.justnewsbd.com/crime/news/65942)
+
+[৩] [Al Firdaws প্রতিবেদন](https://alfirdaws.org/2025/09/13/87307/)
+
+[৪] [Facebook পোস্ট](https://www.facebook.com/100076260184113/posts/pfbid02EjzUtjH5ezJrbo6X7pn2qs9x7qGhw47Vzeppp6T4PLcVgSEGvQmc1cY2EprJG87Kl/?app=fbl)
+
+[৫] [প্রজ্ঞাপন লিংক, police.gov.bd, ৬ নভেম্বর ২০২৩](https://www.police.gov.bd/storage/upload/announcement/HGvGWVY1CAncEXHnBnI6B0tniAbjnAaoheNWSxUr.pdf)
+
+[৬] [আজকের বাংলাদেশ প্রতিবেদন, ১২ নভেম্বর ২০২৩](https://www.ajkerbangladesh.com.bd/country-news/2023/11/12/149411)
+
+[৭] [Rangpur Metropolitan Police ফেইসবুক পোস্ট, ১২ নভেম্বর, ২০২৩](https://www.facebook.com/100069016126294/posts/pfbid08gSo7ZgifWzATJuXKXef4FaChqhD34Yxgxe96AV7aPLdvHykKtJEvitWGk1NtBn6l/?app=fbl)
+
+[৮] [রংপুর মেট্রোপলিটন পুলিশ ওয়েবসাইট, ৪ জুন ২০২৪](https://rpmp.gov.bd/index.php/home/news_details/283)`,
+    publishedAt: '2025-09-18',
+    author: 'খোঁজ টিম',
+    tags: ['গুজব', 'পুলিশ', 'পদোন্নতি', 'আবু সাঈদ', 'জুলাই আন্দোলন', 'বেগম রোকেয়া বিশ্ববিদ্যালয়', 'পোস্টমর্টেম', 'রংপুর'],
+    references: [
+      {
+        id: 1,
+        title: 'আমার দেশ পত্রিকার প্রতিবেদন',
+        url: 'https://www.dailyamardesh.com/bangladesh/rangpur/amdsgvxi3iqis?fbclid=IwZXh0bgNhZW0CMTEAAR4Lr1z92cnmQos8tNaLuDK07h-2FZntcMGCQokEURPsyuFguNVo7-ZvWtTkxA_aem_58FGav3t8o_gGp_UeAnlvQ',
+        snippet: 'আবু সাঈদের পোস্টমর্টেম রিপোর্ট বদলিয়ে পদোন্নতি পাওয়ার দাবি'
+      },
+      {
+        id: 2,
+        title: 'Just News BD প্রতিবেদন',
+        url: 'https://www.justnewsbd.com/crime/news/65942',
+        snippet: 'আবু সাঈদ হত্যাকাণ্ড নিয়ে প্রতিবেদন'
+      },
+      {
+        id: 3,
+        title: 'Al Firdaws প্রতিবেদন',
+        url: 'https://alfirdaws.org/2025/09/13/87307/',
+        snippet: 'আবু সাঈদ ঘটনা নিয়ে প্রতিবেদন'
+      },
+      {
+        id: 4,
+        title: 'Facebook পোস্ট',
+        url: 'https://www.facebook.com/100076260184113/posts/pfbid02EjzUtjH5ezJrbo6X7pn2qs9x7qGhw47Vzeppp6T4PLcVgSEGvQmc1cY2EprJG87Kl/?app=fbl',
+        snippet: 'সামাজিক যোগাযোগমাধ্যমে প্রচারিত দাবি'
+      },
+      {
+        id: 5,
+        title: 'পুলিশ সদর দপ্তরের প্রজ্ঞাপন',
+        url: 'https://www.police.gov.bd/storage/upload/announcement/HGvGWVY1CAncEXHnBnI6B0tniAbjnAaoheNWSxUr.pdf',
+        snippet: '২০২৩ সালের ৬ নভেম্বর পদোন্নতির প্রজ্ঞাপন'
+      },
+      {
+        id: 6,
+        title: 'আজকের বাংলাদেশ প্রতিবেদন',
+        url: 'https://www.ajkerbangladesh.com.bd/country-news/2023/11/12/149411',
+        snippet: 'পদোন্নতির পর র্যাংক ব্যাজ পরানোর খবর'
+      },
+      {
+        id: 7,
+        title: 'রংপুর মেট্রোপলিটন পুলিশ ফেসবুক পোস্ট',
+        url: 'https://www.facebook.com/100069016126294/posts/pfbid08gSo7ZgifWzATJuXKXef4FaChqhD34Yxgxe96AV7aPLdvHykKtJEvitWGk1NtBn6l/?app=fbl',
+        snippet: 'পদোন্নতির পর কর্মকর্তাদের র্যাংক ব্যাজ পরানো'
+      },
+      {
+        id: 8,
+        title: 'রংপুর মেট্রোপলিটন পুলিশ ওয়েবসাইট',
+        url: 'https://rpmp.gov.bd/index.php/home/news_details/283',
+        snippet: '৪ জুন ২০২৪ তারিখের সংবাদ বিজ্ঞপ্তি'
+      }
+    ],
+    thumbnail: 'https://i.postimg.cc/J791Hrnm/image.png'
   }
   
 ]
