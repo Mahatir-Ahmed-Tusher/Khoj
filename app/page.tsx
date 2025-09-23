@@ -459,68 +459,69 @@ export default function HomePage() {
               isImageSearchMode={isImageSearchActive}
               onSearch={handleSearch}
             />
-            <p className="text-white text-sm mb-6">
-              সত্যের সন্ধান, তথ্যের শুদ্ধি
-            </p>
             
             {/* Floating Feature Buttons - All in same line even on mobile */}
             <div className="flex justify-center space-x-1 md:space-x-3 flex-nowrap overflow-x-auto">
               <button 
                 onClick={handleAIImageCheckClick}
-                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0 ${
+                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 flex-shrink-0 ${
                   isAIImageCheckActive 
-                    ? 'bg-green-500 bg-opacity-80 hover:bg-opacity-90 shadow-green-500/50' 
-                    : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                    ? 'bg-gradient-to-b from-green-300 to-green-700 shadow-[0_8px_16px_rgba(34,197,94,0.6)]' 
+                    : 'bg-gradient-to-b from-white/30 to-white/10 shadow-[0_4px_8px_rgba(0,0,0,0.2)]'
                 }`} 
                 data-tour="image-check"
               >
-                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap">AI ছবি যাচাই</span>
+                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap drop-shadow-sm">AI ছবি যাচাই</span>
               </button>
               <button 
                 onClick={handleMythbustingClick}
-                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0 ${
+                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 flex-shrink-0 ${
                   isMythbustingActive 
-                    ? 'bg-blue-500 bg-opacity-80 hover:bg-opacity-90 shadow-blue-500/50' 
-                    : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                    ? 'bg-gradient-to-b from-blue-300 to-blue-700 shadow-[0_8px_16px_rgba(59,130,246,0.6)]' 
+                    : 'bg-gradient-to-b from-white/30 to-white/10 shadow-[0_4px_8px_rgba(0,0,0,0.2)]'
                 }`} 
                 data-tour="mythbusting"
               >
-                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap">মিথবাস্টিং</span>
+                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap drop-shadow-sm">মিথবাস্টিং</span>
               </button>
               <button 
                 onClick={handleNewsCheckClick}
-                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0 ${
+                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 flex-shrink-0 ${
                   isNewsCheckActive 
-                    ? 'bg-blue-500 bg-opacity-80 hover:bg-opacity-90 shadow-blue-500/50' 
-                    : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                    ? 'bg-gradient-to-b from-indigo-300 to-indigo-700 shadow-[0_8px_16px_rgba(99,102,241,0.6)]' 
+                    : 'bg-gradient-to-b from-white/30 to-white/10 shadow-[0_4px_8px_rgba(0,0,0,0.2)]'
                 }`} 
                 data-tour="news-check"
               >
-                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap">খবর যাচাই</span>
+                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap drop-shadow-sm">খবর যাচাই</span>
               </button>
               <button 
                 onClick={handleImageSearchClick}
-                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0 ${
+                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 flex-shrink-0 ${
                   isImageSearchActive 
-                    ? 'bg-orange-500 bg-opacity-80 hover:bg-opacity-90 shadow-orange-500/50' 
-                    : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                    ? 'bg-gradient-to-b from-orange-300 to-orange-700 shadow-[0_8px_16px_rgba(251,146,60,0.6)]' 
+                    : 'bg-gradient-to-b from-white/30 to-white/10 shadow-[0_4px_8px_rgba(0,0,0,0.2)]'
                 }`} 
                 data-tour="source-search"
               >
-                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap">ছবি সার্চ</span>
+                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap drop-shadow-sm">ছবি সার্চ</span>
               </button>
               <button 
                 onClick={handleTextCheckClick}
-                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 shadow-lg flex-shrink-0 ${
+                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 flex-shrink-0 ${
                   isTextCheckActive 
-                    ? 'bg-red-500 bg-opacity-80 hover:bg-opacity-90 shadow-red-500/50' 
-                    : 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                    ? 'bg-gradient-to-b from-red-300 to-red-700 shadow-[0_8px_16px_rgba(239,68,68,0.6)]' 
+                    : 'bg-gradient-to-b from-white/30 to-white/10 shadow-[0_4px_8px_rgba(0,0,0,0.2)]'
                 }`} 
                 data-tour="text-check"
               >
-                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap">লেখা যাচাই</span>
+                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap drop-shadow-sm">লেখা যাচাই</span>
               </button>
             </div>
+            
+            <p className="text-white text-sm mt-6 text-center">
+              সত্যের সন্ধান, তথ্যের শুদ্ধি
+            </p>
           </div>
         </div>
       </section>
