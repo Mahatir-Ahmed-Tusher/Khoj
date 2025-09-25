@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         })
 
         // Format the response with sources
-        const sources = searchResults.results?.map(result => ({
+        const sources = searchResults.results?.map((result: any) => ({
           title: result.title || 'No title',
           url: result.url || '',
           snippet: result.content || result.snippet || ''
@@ -65,7 +65,7 @@ Question/Claim: ${query}
 Sources found: ${searchResults.results?.length || 0}
 
 Source details:
-${searchResults.results?.map((result, index) => `
+${searchResults.results?.map((result: any, index: number) => `
 [${index + 1}] ${result.title}
 URL: ${result.url}
 Content: ${result.content || result.snippet || 'No detailed content available'}
