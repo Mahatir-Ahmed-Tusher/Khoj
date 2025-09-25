@@ -11,22 +11,27 @@
     "convex:deploy": "convex deploy"
   },
   "dependencies": {
+    "@genkit-ai/googleai": "^1.19.3",
+    "@google-cloud/text-to-speech": "^6.3.0",
     "@google/generative-ai": "^0.2.1",
     "@tavily/core": "^0.5.11",
     "axios": "^1.6.2",
     "clsx": "^2.0.0",
     "convex": "^1.27.0",
     "form-data": "^4.0.0",
+    "genkit": "^1.19.3",
     "groq-sdk": "^0.3.3",
     "lucide-react": "^0.542.0",
+    "marked": "^16.3.0",
     "next": "^15.5.2",
     "next-auth": "^4.24.11",
     "playwright": "^1.55.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "recharts": "^3.1.2",
     "sanitize-html": "^2.17.0",
-    "tailwind-merge": "^2.0.0"
+    "tailwind-merge": "^2.0.0",
+    "wav": "^1.0.2"
   },
   "devDependencies": {
     "@types/node": "^20",

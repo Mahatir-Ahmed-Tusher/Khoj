@@ -16,6 +16,7 @@ export default function Navbar() {
 
   const navItems = [
     { href: '/', label: 'হোম' },
+    { href: '/khoj-chat', label: 'খোঁজ চ্যাট' },
     { href: '/factcheck-view', label: 'সাম্প্রতিক সার্চ' },
     { href: '/factchecks', label: 'ফ্যাক্টচেক সমূহ' },
     { href: '/mythbusting', label: 'মিথবাস্টিং' },
@@ -65,13 +66,12 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Title */}
-          <Link href="/" className="flex items-center space-x-3" onClick={closeMobileMenu}>
+          <Link href="/" className="flex items-center" onClick={closeMobileMenu}>
             <img 
-              src="/khoj-logo.png" 
+              src="/khoj-logo-update.png" 
               alt="খোঁজ লোগো" 
-              className="w-8 h-8 object-contain"
+              className="h-8 object-contain"
             />
-            <span className="text-xl font-bold text-gray-900 font-tiro-bangla">খোঁজ</span>
           </Link>
 
           {/* Desktop Navigation Links */}

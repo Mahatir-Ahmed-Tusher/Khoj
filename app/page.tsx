@@ -519,15 +519,29 @@ export default function HomePage() {
               </button>
             </div>
             
-            <p className="text-white text-sm mt-6 text-center">
-              সত্যের সন্ধান, তথ্যের শুদ্ধি
-            </p>
+            <div className="mt-2 text-center">
+              <Link href="/khoj-chat" className="inline-block hover:opacity-90 transition-opacity duration-300">
+                <div className="inline-block p-2">
+                  <Image 
+                    src="/khoj-chat-logo.png" 
+                    alt="খোঁজ চ্যাট" 
+                    width={80} 
+                    height={26}
+                    className="mx-auto drop-shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:drop-shadow-[0_0_30px_rgba(59,130,246,0.8)] transition-all duration-300 animate-bounce"
+                    style={{
+                      filter: 'drop-shadow(0 0 15px rgba(59, 130, 246, 0.5)) drop-shadow(0 0 25px rgba(59, 130, 246, 0.3))',
+                      animation: 'float 3s ease-in-out infinite'
+                    }}
+                  />
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Recent Fact Checks */}
-      <section className="py-6 bg-gray-50">
+      <section className="pt-2 pb-6 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           {/* AI FactCheck Widget - Left Side */}
           <div className="hidden lg:block absolute -left-12 top-16 w-80">
