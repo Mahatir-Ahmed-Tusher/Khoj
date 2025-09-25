@@ -40,6 +40,15 @@ const VideoCornerIcon = ({ className }: { className?: string }) => (
   />
 )
 
+// Custom Khoj Chat Icon Component
+const KhojChatIcon = ({ className }: { className?: string }) => (
+  <img 
+    src="/khoj-chat-icon.png" 
+    alt="খোঁজ চ্যাট" 
+    className={className}
+  />
+)
+
 interface FeatureWidgetProps {
   className?: string
 }
@@ -49,12 +58,12 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
 
   const features = [
     {
-      id: 'mukti-corner',
-      title: 'মুক্তিযুদ্ধ কর্নার',
-      description: '১৯৭১ সালের মুক্তিযুদ্ধ সম্পর্কে প্রশ্ন করুন',
-      icon: MuktiIcon,
-      href: '/mukti-corner',
-      color: 'bg-red-500 hover:bg-red-600'
+      id: 'khoj-chat',
+      title: 'খোঁজ চ্যাট',
+      description: 'এআই-চালিত প্রশ্নোত্তর ও তথ্য যাচাই',
+      icon: KhojChatIcon,
+      href: '/khoj-chat',
+      color: 'bg-blue-500 hover:bg-blue-600'
     },
     {
       id: 'mythbusting',
@@ -65,20 +74,20 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
       color: 'bg-purple-500 hover:bg-purple-600'
     },
     {
+      id: 'mukti-corner',
+      title: 'মুক্তিযুদ্ধ কর্নার',
+      description: '১৯৭১ সালের মুক্তিযুদ্ধ সম্পর্কে প্রশ্ন করুন',
+      icon: MuktiIcon,
+      href: '/mukti-corner',
+      color: 'bg-red-500 hover:bg-red-600'
+    },
+    {
       id: 'blog',
       title: 'ব্লগ',
       description: 'বিজ্ঞান, গবেষণা ও বিশ্লেষণমূলক লেখা',
       icon: BlogIcon,
       href: '/blog',
       color: 'bg-blue-500 hover:bg-blue-600'
-    },
-    {
-      id: 'e-library',
-      title: 'ই-গ্রন্থ সম্ভার',
-      description: 'বই পর্যালোচনা ও ডাউনলোড লিংক',
-      icon: BookOpen,
-      href: '/e-library',
-      color: 'bg-green-500 hover:bg-green-600'
     },
     {
       id: 'video-corner',
@@ -113,8 +122,8 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
               >
                 <div className="bg-gray-50 hover:bg-gray-100 rounded-lg p-2 transition-all duration-300 border border-gray-200 hover:border-gray-300">
                   <div className="flex items-center space-x-2">
-                    <div className={`p-2 rounded-lg ${feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' || feature.id === 'video-corner' ? 'bg-transparent' : feature.color} transition-colors duration-300`}>
-                      {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' || feature.id === 'video-corner' ? (
+                    <div className={`p-2 rounded-lg ${feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' || feature.id === 'video-corner' || feature.id === 'khoj-chat' ? 'bg-transparent' : feature.color} transition-colors duration-300`}>
+                      {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' || feature.id === 'video-corner' || feature.id === 'khoj-chat' ? (
                         <feature.icon className="h-9 w-9 object-contain" />
                       ) : (
                         <feature.icon className="h-5 w-5 text-white" />
@@ -150,7 +159,7 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
                 }}
               >
                 <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-100">
-                  {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' || feature.id === 'video-corner' ? (
+                  {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' || feature.id === 'video-corner' || feature.id === 'khoj-chat' ? (
                     <feature.icon className="h-8 w-8 object-contain" />
                   ) : (
                     <feature.icon className="h-6 w-6 text-gray-700" />
