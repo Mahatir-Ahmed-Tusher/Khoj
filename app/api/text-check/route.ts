@@ -4,7 +4,7 @@ import { Groq } from 'groq-sdk'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" })
-const fallbackModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+const fallbackModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash-002" })
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
 
 // Winston AI API function for AI detection
@@ -326,7 +326,7 @@ async function generateAIReport(text: string, type: string, maxRetries: number =
   
   // Try Gemini fallback model
   try {
-    console.log('🔄 Trying fallback model (gemini-1.5-flash)...')
+    console.log('🔄 Trying fallback model (gemini-1.5-flash-002)...')
     const result = await fallbackModel.generateContent(geminiPrompt)
     const response = await result.response
     return response.text()

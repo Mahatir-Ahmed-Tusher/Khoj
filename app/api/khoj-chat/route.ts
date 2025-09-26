@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { tavilyManager } from '@/lib/tavily-manager'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { Groq } from 'groq-sdk'
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,9 +39,10 @@ export async function POST(request: NextRequest) {
           snippet: result.content || result.snippet || ''
         })) || []
 
-        // Use Gemini to create a professional fact-check response
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+        // Use Groq to create a professional fact-check response
+        const groq = new Groq({
+          apiKey: process.env.GROQ_API_KEY
+        })
 
         const systemPrompt = `You are a professional fact-checker and journalist named খোঁজ সহযোগী, created by the Khoj team. Your task is to analyze search results and provide a comprehensive, detailed fact-check report in Bengali. Follow this structure:
 
@@ -73,8 +74,22 @@ Content: ${result.content || result.snippet || 'No detailed content available'}
 
 Please provide a comprehensive fact-check report in Bengali following the structure above.`
 
-        const result = await model.generateContent(systemPrompt)
-        const factCheckResponse = result.response.text()
+        const chatCompletion = await groq.chat.completions.create({
+          messages: [
+            {
+              role: "user",
+              content: systemPrompt
+            }
+          ],
+          model: "openai/gpt-oss-20b",
+          temperature: 1,
+          max_tokens: 8192,
+          top_p: 1,
+          stream: false,
+          stop: null
+        })
+
+        const factCheckResponse = chatCompletion.choices[0]?.message?.content || ''
 
         return NextResponse.json({
           response: factCheckResponse,
@@ -90,10 +105,11 @@ Please provide a comprehensive fact-check report in Bengali following the struct
       }
 
     } else if (type === 'general') {
-      // Use Gemini free model for general questions
+      // Use Groq for general questions
       try {
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+        const groq = new Groq({
+          apiKey: process.env.GROQ_API_KEY
+        })
 
         const prompt = `You are a helpful AI assistant. Provide comprehensive, accurate, and well-structured answers in Bengali. Follow these guidelines:
 
@@ -108,15 +124,29 @@ Question: ${query}
 
 Please provide a detailed and well-formatted answer in Bengali.`
 
-        const result = await model.generateContent(prompt)
-        const response = result.response.text()
+        const chatCompletion = await groq.chat.completions.create({
+          messages: [
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          model: "openai/gpt-oss-20b",
+          temperature: 1,
+          max_tokens: 8192,
+          top_p: 1,
+          stream: false,
+          stop: null
+        })
+
+        const response = chatCompletion.choices[0]?.message?.content || ''
 
         return NextResponse.json({
           response: response
         })
 
       } catch (error) {
-        console.error('Gemini API error:', error)
+        console.error('Groq API error:', error)
         return NextResponse.json({
           response: `দুঃখিত, "${query}" বিষয়ে উত্তর দিতে পারিনি। অনুগ্রহ করে আবার চেষ্টা করুন।`
         })

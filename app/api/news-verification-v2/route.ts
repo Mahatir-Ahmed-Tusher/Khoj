@@ -200,7 +200,7 @@ async function fetchNewsContent(url: string): Promise<NewsAnalysis | null> {
 
 async function analyzeWithGemini(newsContent: NewsAnalysis): Promise<any> {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-002" })
     
     const prompt = `
 আপনি একজন অভিজ্ঞ সাংবাদিক এবং ফ্যাক্ট চেকার। নিম্নলিখিত নিউজ আর্টিকেলটি বিশ্লেষণ করে একটি বিস্তারিত রিপোর্ট তৈরি করুন:
@@ -315,7 +315,7 @@ async function searchWithTavily(searchQueries: string[]): Promise<any[]> {
 
 async function generateFinalReport(newsContent: NewsAnalysis, analysis: any, searchResults: any[]): Promise<any> {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-002" })
     
     const sourcesText = searchResults.map((source, index) => 
       `${index + 1}. ${source.title} - ${source.url}`

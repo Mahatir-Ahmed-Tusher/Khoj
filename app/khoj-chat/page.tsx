@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { Search, MessageCircle, Loader2, ExternalLink, Bot, User, Trash2, Send, Copy, Check, Lightbulb, Globe, Code, PanelLeftClose, PanelLeftOpen, Clock, X, Plus, Download, ChevronDown } from 'lucide-react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { Search, MessageCircle, Loader2, ExternalLink, Bot, User, Trash2, Send, Copy, Check, Lightbulb, Globe, Code, PanelLeftClose, PanelLeftOpen, Clock, X, Plus, Download } from 'lucide-react'
 import Image from 'next/image'
 import { parseMarkdown, sanitizeHtml } from '@/lib/markdown'
+import { useVoiceSearch } from '@/lib/hooks/useVoiceSearch'
 
 interface Message {
   id: string
@@ -34,10 +35,20 @@ export default function KhojChatPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([])
   const [selectedMode, setSelectedMode] = useState<'khoj-chat' | 'citizen-service' | 'fact-check'>('khoj-chat')
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
+  const [isClient, setIsClient] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Voice search functionality
+  const { 
+    isRecording, 
+    isListening, 
+    error: voiceError, 
+    startVoiceSearch, 
+    stopVoiceSearch, 
+    isSupported 
+  } = useVoiceSearch()
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -187,27 +198,34 @@ export default function KhojChatPage() {
     ]
   }
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement
-      if (!target.closest('.dropdown-container')) {
-        setIsDropdownOpen(false)
-      }
-    }
-
-    if (isDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isDropdownOpen])
 
   useEffect(() => {
     scrollToBottom()
   }, [messages, scrollToBottom])
+
+  // Randomize suggestions on page load - only on client side
+  useEffect(() => {
+    setSuggestions(getRandomSuggestions())
+    setIsSuggestionsLoaded(true)
+  }, [])
+
+  // Ensure client-side rendering to prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Listen for voice search results
+  useEffect(() => {
+    const handleVoiceResult = (event: CustomEvent) => {
+      const transcript = event.detail.transcript
+      setInput(transcript)
+    }
+
+    window.addEventListener('voiceSearchResult', handleVoiceResult as EventListener)
+    return () => {
+      window.removeEventListener('voiceSearchResult', handleVoiceResult as EventListener)
+    }
+  }, [])
 
   // Load chat history from localStorage
   useEffect(() => {
@@ -473,31 +491,99 @@ export default function KhojChatPage() {
     URL.revokeObjectURL(url)
   }
 
-  const suggestions = [
+  const allSuggestions = [
     {
       text: "বাংলাদেশের সাম্প্রতিক রাজনৈতিক খবর যাচাই করুন",
       icon: Globe,
-      type: "fact-check"
+      type: "fact-check",
+      category: "যাচাই",
+      color: "from-purple-500 to-pink-500"
     },
     {
       text: "কৃত্রিম বুদ্ধিমত্তা সম্পর্কে জানুন",
       icon: Lightbulb,
-      type: "general"
+      type: "general",
+      category: "শিক্ষা",
+      color: "from-blue-500 to-cyan-500"
     },
     {
       text: "জলবায়ু পরিবর্তনের প্রভাব যাচাই করুন",
       icon: Globe,
-      type: "fact-check"
+      type: "fact-check",
+      category: "যাচাই",
+      color: "from-green-500 to-emerald-500"
     },
     {
       text: "প্রোগ্রামিং শেখার উপায়",
       icon: Code,
-      type: "general"
+      type: "general",
+      category: "শিক্ষা",
+      color: "from-orange-500 to-red-500"
+    },
+    {
+      text: "নাগরিক সেবা সম্পর্কে জানুন",
+      icon: User,
+      type: "citizen-service",
+      category: "সেবা",
+      color: "from-indigo-500 to-purple-500"
+    },
+    {
+      text: "স্বাস্থ্য সম্পর্কিত তথ্য যাচাই করুন",
+      icon: MessageCircle,
+      type: "fact-check",
+      category: "যাচাই",
+      color: "from-teal-500 to-blue-500"
+    },
+    {
+      text: "অর্থনীতি সম্পর্কিত খবর যাচাই করুন",
+      icon: Search,
+      type: "fact-check",
+      category: "যাচাই",
+      color: "from-yellow-500 to-orange-500"
+    },
+    {
+      text: "শিক্ষা নীতি সম্পর্কে জানুন",
+      icon: Lightbulb,
+      type: "general",
+      category: "শিক্ষা",
+      color: "from-pink-500 to-rose-500"
+    },
+    {
+      text: "ভিসা ও পাসপোর্ট সেবা",
+      icon: User,
+      type: "citizen-service",
+      category: "সেবা",
+      color: "from-cyan-500 to-blue-500"
+    },
+    {
+      text: "খেলাধুলা সম্পর্কিত খবর যাচাই করুন",
+      icon: Globe,
+      type: "fact-check",
+      category: "যাচাই",
+      color: "from-emerald-500 to-teal-500"
     }
   ]
 
+  // Function to get random suggestions
+  const getRandomSuggestions = () => {
+    const shuffled = [...allSuggestions].sort(() => 0.5 - Math.random())
+    return shuffled.slice(0, 3)
+  }
+
+  // State for random suggestions - start with empty array to prevent hydration mismatch
+  const [suggestions, setSuggestions] = useState<typeof allSuggestions>([])
+  const [isSuggestionsLoaded, setIsSuggestionsLoaded] = useState(false)
+
   const handleSuggestionClick = (suggestion: string) => {
     setInput(suggestion)
+  }
+
+  const handleMicClick = async () => {
+    if (isRecording) {
+      stopVoiceSearch()
+    } else {
+      await startVoiceSearch()
+    }
   }
 
   // Function to format text with hyperlinks and markdown formatting
@@ -644,35 +730,173 @@ export default function KhojChatPage() {
             </p>
           </div>
 
-          {/* Suggestions */}
-          <div className="mt-4">
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth">
-              {suggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSuggestionClick(suggestion.text)}
-                  className={`flex-shrink-0 w-36 p-2 rounded-lg transition-all duration-200 hover:scale-105 ${
-                    isDarkMode 
-                      ? 'bg-gray-800 hover:bg-gray-700' 
-                      : 'bg-gray-100 hover:bg-gray-200'
-                  }`}
-                >
-                  <div className="flex flex-col items-end justify-between h-full">
-                    <h4 className={`text-xs font-medium text-left w-full ${
-                      isDarkMode ? 'text-gray-200' : 'text-gray-800'
-                    } font-tiro-bangla leading-tight`}>
-                      {suggestion.text}
-                    </h4>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-2 ${
-                      isDarkMode ? 'bg-gray-900' : 'bg-white'
-                    }`}>
-                      <suggestion.icon className={`w-3 h-3 ${
+          {/* Enhanced Suggestions - Single Line Layout */}
+          <div className="mt-6">
+            <div className="text-center mb-4">
+              <h3 className={`text-sm font-medium font-tiro-bangla ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-600'
+              }`}>
+                জনপ্রিয় প্রশ্নসমূহ
+              </h3>
+            </div>
+            
+            {/* Single Line Layout: 2 side-by-side, 1 below */}
+            <div className="flex flex-col items-center gap-3 max-w-2xl mx-auto">
+              {!isSuggestionsLoaded ? (
+                // Loading skeleton
+                <>
+                  <div className="flex gap-3 w-full">
+                    {[1, 2].map((index) => (
+                      <div
+                        key={index}
+                        className={`flex-1 rounded-xl p-3 animate-pulse ${
+                          isDarkMode ? 'bg-gray-800' : 'bg-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className={`w-16 h-5 rounded-full ${
+                            isDarkMode ? 'bg-gray-700' : 'bg-gray-300'
+                          }`}></div>
+                          <div className={`w-6 h-6 rounded-full ${
+                            isDarkMode ? 'bg-gray-700' : 'bg-gray-300'
+                          }`}></div>
+                        </div>
+                        <div className={`w-full h-4 rounded ${
+                          isDarkMode ? 'bg-gray-700' : 'bg-gray-300'
+                        }`}></div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="w-full max-w-md">
+                    <div
+                      className={`rounded-xl p-3 animate-pulse ${
+                        isDarkMode ? 'bg-gray-800' : 'bg-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className={`w-16 h-5 rounded-full ${
+                          isDarkMode ? 'bg-gray-700' : 'bg-gray-300'
+                        }`}></div>
+                        <div className={`w-6 h-6 rounded-full ${
+                          isDarkMode ? 'bg-gray-700' : 'bg-gray-300'
+                        }`}></div>
+                      </div>
+                      <div className={`w-full h-4 rounded ${
+                        isDarkMode ? 'bg-gray-700' : 'bg-gray-300'
+                      }`}></div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* First Row - 2 suggestions side by side */}
+                  <div className="flex gap-3 w-full">
+                    {suggestions.slice(0, 2).map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSuggestionClick(suggestion.text)}
+                    className={`group relative overflow-hidden rounded-xl p-3 flex-1 transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                      isDarkMode 
+                        ? 'bg-gray-800 hover:bg-gray-700 border border-gray-700' 
+                        : 'bg-white hover:bg-gray-50 border border-gray-200 shadow-sm'
+                    }`}
+                    style={{
+                      animationDelay: `${index * 100}ms`
+                    }}
+                  >
+                    {/* Gradient Background */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${suggestion.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                    
+                    {/* Content */}
+                    <div className="relative z-10">
+                      {/* Category Badge and Icon */}
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium font-tiro-bangla ${
+                          suggestion.type === 'fact-check'
+                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
+                            : suggestion.type === 'citizen-service'
+                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300'
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                        }`}>
+                          {suggestion.category}
+                        </span>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                          isDarkMode ? 'bg-gray-700 group-hover:bg-gray-600' : 'bg-gray-100 group-hover:bg-gray-200'
+                        } transition-colors duration-300`}>
+                          {React.createElement(suggestion.icon, {
+                            className: `w-3 h-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`
+                          })}
+                        </div>
+                      </div>
+                      
+                      {/* Suggestion Text */}
+                      <h4 className={`text-xs font-medium text-left leading-relaxed ${
                         isDarkMode ? 'text-gray-200' : 'text-gray-800'
-                      }`} />
+                      } font-tiro-bangla group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300`}>
+                        {suggestion.text}
+                      </h4>
+                    </div>
+                    
+                    {/* Shine Effect */}
+                    <div className="absolute inset-0 -top-1 -left-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 group-hover:animate-shine transition-opacity duration-500"></div>
+                  </button>
+                ))}
               </div>
-              </div>
-                </button>
-              ))}
+              
+              {/* Second Row - 1 suggestion centered */}
+              {suggestions[2] && (
+                <div className="w-full max-w-md">
+                  <button
+                    onClick={() => handleSuggestionClick(suggestions[2].text)}
+                    className={`group relative overflow-hidden rounded-xl p-3 w-full transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                      isDarkMode 
+                        ? 'bg-gray-800 hover:bg-gray-700 border border-gray-700' 
+                        : 'bg-white hover:bg-gray-50 border border-gray-200 shadow-sm'
+                    }`}
+                    style={{
+                      animationDelay: '200ms'
+                    }}
+                  >
+                    {/* Gradient Background */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${suggestions[2].color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                    
+                    {/* Content */}
+                    <div className="relative z-10">
+                      {/* Category Badge and Icon */}
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium font-tiro-bangla ${
+                          suggestions[2].type === 'fact-check'
+                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
+                            : suggestions[2].type === 'citizen-service'
+                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300'
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                        }`}>
+                          {suggestions[2].category}
+                        </span>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                          isDarkMode ? 'bg-gray-700 group-hover:bg-gray-600' : 'bg-gray-100 group-hover:bg-gray-200'
+                        } transition-colors duration-300`}>
+                          {React.createElement(suggestions[2].icon, {
+                            className: `w-3 h-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`
+                          })}
+                        </div>
+                      </div>
+                      
+                      {/* Suggestion Text */}
+                      <h4 className={`text-xs font-medium text-left leading-relaxed ${
+                        isDarkMode ? 'text-gray-200' : 'text-gray-800'
+                      } font-tiro-bangla group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300`}>
+                        {suggestions[2].text}
+                      </h4>
+                    </div>
+                    
+                    {/* Shine Effect */}
+                    <div className="absolute inset-0 -top-1 -left-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 group-hover:animate-shine transition-opacity duration-500"></div>
+                  </button>
+                </div>
+              )}
+                </>
+              )}
             </div>
           </div>
                 </div>
@@ -847,7 +1071,7 @@ export default function KhojChatPage() {
           </div>
 
       {/* Typing Area */}
-      <div className={`fixed bottom-0 left-0 right-0 pt-1 pb-2 px-2 transition-colors duration-300 ${
+      <div className={`fixed bottom-0 left-0 right-0 pt-1 pb-2 px-2 transition-colors duration-300 z-40 ${
         isDarkMode ? 'bg-gray-900' : 'bg-white'
       }`}>
         <div className="max-w-3xl mx-auto">
@@ -859,114 +1083,114 @@ export default function KhojChatPage() {
                   ? 'bg-gray-800 focus-within:bg-gray-700' 
                   : 'bg-gray-100 focus-within:bg-gray-200'
               }`}>
-                {/* Mode Dropdown - Inside Input Box at Right Bottom */}
-                <div className="absolute right-14 bottom-2 z-10 dropdown-container">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      setIsDropdownOpen(!isDropdownOpen)
-                    }}
-                    className={`flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-tiro-bangla transition-all duration-300 shadow-md ${
-                      isDarkMode 
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border border-blue-400' 
-                        : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border border-blue-400'
-                    }`}
-                  >
-                    <span className="text-xs">{modeConfig[selectedMode].label}</span>
-                    <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                  
-                  {isDropdownOpen && (
-                      <div className={`absolute bottom-full right-0 mb-1 w-36 rounded-lg shadow-xl border-2 z-50 backdrop-blur-sm ${
-                        isDarkMode 
-                          ? 'bg-gradient-to-b from-gray-800 to-gray-900 border-blue-400' 
-                          : 'bg-gradient-to-b from-white to-blue-50 border-blue-300'
-                      }`}>
-                      {Object.entries(modeConfig).map(([key, config]) => (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            setSelectedMode(key as 'khoj-chat' | 'citizen-service' | 'fact-check')
-                            setIsDropdownOpen(false)
-                          }}
-                          className={`w-full text-left px-3 py-2 text-xs font-tiro-bangla transition-all duration-300 first:rounded-t-lg last:rounded-b-lg ${
-                            selectedMode === key 
-                              ? key === 'khoj-chat'
-                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
-                                : key === 'citizen-service'
-                                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                                : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
-                              : key === 'khoj-chat'
-                                ? isDarkMode 
-                                  ? 'hover:bg-gradient-to-r hover:from-green-600 hover:to-emerald-700 text-gray-200 hover:text-white' 
-                                  : 'hover:bg-gradient-to-r hover:from-green-500 hover:to-emerald-600 text-gray-800 hover:text-white'
-                                : key === 'citizen-service'
-                                ? isDarkMode 
-                                  ? 'hover:bg-gradient-to-r hover:from-orange-600 hover:to-red-600 text-gray-200 hover:text-white' 
-                                  : 'hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 text-gray-800 hover:text-white'
-                                : isDarkMode 
-                                  ? 'hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 text-gray-200 hover:text-white' 
-                                  : 'hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 text-gray-800 hover:text-white'
-                          }`}
-                        >
-                          {config.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
 
                 {/* Input Field */}
-                <input
-                  type="text"
+                <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={getPlaceholder()}
-                  className={`w-full h-16 px-4 pr-32 pb-8 py-4 rounded-xl border-0 outline-none transition-colors duration-200 font-tiro-bangla text-sm ${
+                  className={`w-full min-h-12 max-h-32 px-4 pr-24 py-3 rounded-xl border-0 outline-none transition-all duration-200 font-tiro-bangla text-base placeholder:text-xs resize-none overflow-y-auto ${
                     isDarkMode 
                       ? 'bg-transparent text-gray-200 placeholder-gray-400' 
                       : 'bg-transparent text-gray-800 placeholder-gray-500'
                   }`}
+                  style={{
+                    height: 'auto',
+                    minHeight: '48px',
+                    maxHeight: '128px'
+                  }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement
+                    target.style.height = 'auto'
+                    target.style.height = Math.min(target.scrollHeight, 128) + 'px'
+                  }}
                   required
                 />
                 
+                {/* Voice Input Button */}
+                <button
+                  type="button"
+                  onClick={handleMicClick}
+                  className={`absolute right-12 top-2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    isRecording 
+                      ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse shadow-lg' 
+                      : isDarkMode 
+                        ? 'bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white' 
+                        : 'bg-gray-200 hover:bg-gray-300 text-gray-600 hover:text-gray-800'
+                  }`}
+                  title={isRecording ? "Recording... Click to stop" : "Voice Input"}
+                  disabled={!isClient || !isSupported || isLoading}
+                >
+                  {!isClient ? (
+                    // Server-side fallback
+                    <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
+                  ) : isSupported ? (
+                    <Image
+                      src="/mic.png"
+                      alt="Voice Input"
+                      width={16}
+                      height={16}
+                      className={`w-4 h-4 transition-all duration-200 ${
+                        isRecording 
+                          ? 'filter-none' 
+                          : 'filter grayscale hover:grayscale-0'
+                      }`}
+                    />
+                  ) : (
+                    <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
+                  )}
+                </button>
+
                 {/* Send Button */}
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className={`absolute right-2 top-2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                  className={`absolute right-2 top-2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group ${
                     input.trim() && !isLoading
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95' 
                       : isDarkMode 
-                        ? 'bg-gray-700 text-gray-500' 
-                        : 'bg-gray-300 text-gray-400'
+                        ? 'bg-gray-700 text-gray-500 cursor-not-allowed' 
+                        : 'bg-gray-300 text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  <Send className="w-4 h-4" />
+                  <Send className={`w-4 h-4 transition-all duration-300 ${
+                    input.trim() && !isLoading 
+                      ? 'group-hover:translate-x-0.5 group-hover:-translate-y-0.5' 
+                      : ''
+                  }`} />
                 </button>
               </div>
             </div>
-            
-            <button
-              type="button"
-              onClick={clearChat}
-              className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 relative hover:bg-gray-100 dark:hover:bg-gray-800"
-              title="নতুন চ্যাট শুরু করুন"
-            >
-              <Image 
-                src="https://i.postimg.cc/j53QNRf7/image.png" 
-                alt="নতুন চ্যাট" 
-                width={20} 
-                height={20}
-                className="w-5 h-5"
-              />
-            </button>
           </form>
+          
+          {/* Mode Selection Buttons */}
+          <div className="mt-3 flex justify-center gap-2 relative z-50">
+            {Object.entries(modeConfig).map(([key, config]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  console.log('Button clicked:', key)
+                  setSelectedMode(key as 'khoj-chat' | 'citizen-service' | 'fact-check')
+                }}
+                className={`px-4 py-2 rounded-lg text-xs font-tiro-bangla transition-all duration-300 cursor-pointer ${
+                  selectedMode === key 
+                    ? key === 'khoj-chat'
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
+                      : key === 'citizen-service'
+                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                      : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                    : isDarkMode 
+                      ? 'bg-gray-700 text-gray-400 hover:text-gray-300 hover:bg-gray-600' 
+                      : 'bg-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {config.label}
+              </button>
+            ))}
+          </div>
           
           <div className="mt-3">
             <p className={`text-center text-xs font-tiro-bangla ${

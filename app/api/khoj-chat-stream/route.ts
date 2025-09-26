@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { tavilyManager } from '@/lib/tavily-manager'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { Groq } from 'groq-sdk'
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,29 +45,41 @@ export async function POST(request: NextRequest) {
               // Send sources first
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'sources', data: sources })}\n\n`))
 
-              // Use Gemini to create a professional fact-check response
-              const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-              const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+              // Use Groq to create a professional fact-check response
+              const groq = new Groq({
+                apiKey: process.env.GROQ_API_KEY
+              })
 
-              const systemPrompt = `You are খোঁজ এআই, a professional fact-checker and journalist created by the Khoj team. When asked about your identity, always introduce yourself as "খোঁজ এআই". Your task is to analyze search results and provide a comprehensive, detailed fact-check report in Bengali. Follow this structure:
+              const systemPrompt = `You are খোঁজ এআই, a professional fact-checker and journalist created by the Khoj team. When asked about your identity, always introduce yourself as "খোঁজ এআই". Your task is to analyze search results and provide a comprehensive, detailed fact-check report in Bengali.
 
-1. **Title**: Create a clear, descriptive title for the fact-check
-2. **Claim Analysis**: Analyze the claim/question thoroughly
-3. **Evidence Review**: Review all provided sources systematically
-4. **Verdict**: Provide a clear verdict (True/False/Misleading/Unverified)
-5. **Detailed Analysis**: Explain your reasoning with specific evidence
-6. **Source Citations**: Reference sources with proper numbering [1], [2], etc.
+CRITICAL INSTRUCTIONS:
+- NEVER create tables, charts, or structured data formats
+- ALWAYS write in analytical paragraphs with detailed explanations
+- Focus on connecting all dots from the search results
+- Provide thorough analysis of all available information
+- Do NOT hallucinate or make up information not found in sources
+- Base your response ONLY on the provided search results
+
+Structure your response as:
+1. **Title**: Clear, descriptive title for the fact-check
+2. **Claim Analysis**: Thorough analysis of the claim/question in paragraph form
+3. **Evidence Review**: Systematic review of all sources in analytical paragraphs
+4. **Verdict**: Clear verdict (True/False/Misleading/Unverified) with reasoning
+5. **Detailed Analysis**: Comprehensive explanation connecting all evidence
+6. **Source Citations**: Reference sources with numbered citations [1], [2], etc.
 
 Guidelines:
-- Be objective and evidence-based
+- Write in analytical paragraphs, not bullet points or tables
+- Connect all information from sources to provide comprehensive analysis
 - Use professional journalistic language in Bengali
 - Cite sources with numbered references [1], [2], [3]
 - Provide detailed analysis, not just summaries
-- Be thorough and comprehensive
+- Be thorough and comprehensive in connecting all dots
 - Maintain journalistic integrity
-- IMPORTANT: Format ALL URLs as clickable markdown links using [text](url) format
-- When mentioning sources, always create clickable links like [Source Name](https://example.com)
-- Make sure users can click on links to visit the actual websites
+- Format ALL URLs as clickable markdown links [text](url)
+- When mentioning sources, create clickable links like [Source Name](https://example.com)
+- If information is insufficient, clearly state this limitation
+- Do NOT create tables, charts, or structured formats
 
 Question/Claim: ${query}
 
@@ -80,15 +92,30 @@ URL: ${result.url}
 Content: ${result.content || result.snippet || 'No detailed content available'}
 `).join('\n') || 'No sources found'}
 
-Please provide a comprehensive fact-check report in Bengali following the structure above.`
+Provide a comprehensive fact-check report in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats.`
 
-              const result = await model.generateContent(systemPrompt)
-              const factCheckResponse = result.response.text()
+              const chatCompletion = await groq.chat.completions.create({
+                messages: [
+                  {
+                    role: "user",
+                    content: systemPrompt
+                  }
+                ],
+                model: "openai/gpt-oss-20b",
+                temperature: 1,
+                max_tokens: 8192,
+                top_p: 1,
+                stream: true,
+                stop: null
+              })
 
-              // Stream the response character by character
-              for (let i = 0; i < factCheckResponse.length; i++) {
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: factCheckResponse[i] })}\n\n`))
-                await new Promise(resolve => setTimeout(resolve, 7)) // 3x faster (20/3 ≈ 7ms)
+              // Stream the response from Groq
+              for await (const chunk of chatCompletion) {
+                const content = chunk.choices[0]?.delta?.content || ''
+                if (content) {
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: content })}\n\n`))
+                  await new Promise(resolve => setTimeout(resolve, 7)) // 3x faster (20/3 ≈ 7ms)
+                }
               }
 
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`))
@@ -153,23 +180,35 @@ Please provide a comprehensive fact-check report in Bengali following the struct
               // Send sources first
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'sources', data: sources })}\n\n`))
 
-              // Use Gemini to create a comprehensive citizen service response
-              const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-              const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+              // Use Groq to create a comprehensive citizen service response
+              const groq = new Groq({
+                apiKey: process.env.GROQ_API_KEY
+              })
 
               const systemPrompt = `You are খোঁজ এআই, a helpful government service assistant created by the Khoj team. When asked about your identity, always introduce yourself as "খোঁজ এআই". Your task is to provide comprehensive information about Bangladeshi government services based on search results.
 
+CRITICAL INSTRUCTIONS:
+- NEVER create tables, charts, or structured data formats
+- ALWAYS write in analytical paragraphs with detailed explanations
+- Focus on connecting all dots from the search results
+- Provide thorough analysis of all available information
+- Do NOT hallucinate or make up information not found in sources
+- Base your response ONLY on the provided search results
+
 Guidelines:
+- Write in analytical paragraphs, not bullet points or tables
+- Connect all information from sources to provide comprehensive analysis
 - Provide detailed, accurate information about government services
 - Use clear, professional Bengali language
 - Structure your response with proper headings and formatting
-- Include step-by-step procedures when applicable
+- Include step-by-step procedures when applicable in paragraph form
 - Mention relevant websites and contact information
 - Be helpful and informative
 - Use markdown formatting for better readability
-- IMPORTANT: Format ALL URLs as clickable markdown links using [text](url) format
-- When mentioning websites, always create clickable links like [Website Name](https://example.com)
+- Format ALL URLs as clickable markdown links using [text](url) format
+- When mentioning websites, create clickable links like [Website Name](https://example.com)
 - Make sure users can click on links to visit the actual websites
+- Do NOT create tables, charts, or structured formats
 
 Question: ${query}
 
@@ -182,15 +221,30 @@ URL: ${result.url}
 Content: ${result.content || result.snippet || 'No detailed content available'}
 `).join('\n') || 'No sources found'}
 
-Please provide a comprehensive answer about the government service in Bengali, including relevant procedures, requirements, and contact information. Make sure to format all URLs as clickable markdown links [text](url) so users can click and visit the websites directly.`
+Provide a comprehensive answer about the government service in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats. Include relevant procedures, requirements, and contact information. Make sure to format all URLs as clickable markdown links [text](url) so users can click and visit the websites directly.`
 
-              const result = await model.generateContent(systemPrompt)
-              const citizenServiceResponse = result.response.text()
+              const chatCompletion = await groq.chat.completions.create({
+                messages: [
+                  {
+                    role: "user",
+                    content: systemPrompt
+                  }
+                ],
+                model: "openai/gpt-oss-20b",
+                temperature: 1,
+                max_tokens: 8192,
+                top_p: 1,
+                stream: true,
+                stop: null
+              })
 
-              // Stream the response character by character
-              for (let i = 0; i < citizenServiceResponse.length; i++) {
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: citizenServiceResponse[i] })}\n\n`))
-                await new Promise(resolve => setTimeout(resolve, 7))
+              // Stream the response from Groq
+              for await (const chunk of chatCompletion) {
+                const content = chunk.choices[0]?.delta?.content || ''
+                if (content) {
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: content })}\n\n`))
+                  await new Promise(resolve => setTimeout(resolve, 7))
+                }
               }
 
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`))
@@ -208,41 +262,110 @@ Please provide a comprehensive answer about the government service in Bengali, i
             }
 
           } else if (type === 'general') {
-            // Use Gemini free model for general questions
+            // Use Tavily search for general questions to prevent hallucination
             try {
-              const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-              const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+              // First, try to get web search results for factual information
+              const searchResults = await tavilyManager.search(query, {
+                max_results: 5,
+                include_domains: [
+                  'bbc.com',
+                  'reuters.com',
+                  'ap.org',
+                  'prothomalo.com',
+                  'bdnews24.com',
+                  'jugantor.com',
+                  'kalerkantho.com',
+                  'ittefaq.com.bd',
+                  'samakal.com',
+                  'banglatribune.com',
+                  'wikipedia.org',
+                  'britannica.com',
+                  'who.int',
+                  'un.org',
+                  'worldbank.org'
+                ]
+              })
 
-              const prompt = `You are খোঁজ এআই, a helpful AI assistant created by the Khoj team. When asked about your identity, always introduce yourself as "খোঁজ এআই". Provide comprehensive, accurate, and well-structured answers in Bengali. Follow these guidelines:
+              // Format the response with sources
+              const sources = searchResults.results?.map((result: any) => ({
+                title: result.title || 'No title',
+                url: result.url || '',
+                snippet: result.content || result.snippet || ''
+              })) || []
 
+              // Send sources first
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'sources', data: sources })}\n\n`))
+
+              const groq = new Groq({
+                apiKey: process.env.GROQ_API_KEY
+              })
+
+              const prompt = `You are খোঁজ এআই, a helpful AI assistant created by the Khoj team. When asked about your identity, always introduce yourself as "খোঁজ এআই".
+
+CRITICAL INSTRUCTIONS:
+- NEVER create tables, charts, or structured data formats
+- ALWAYS write in analytical paragraphs with detailed explanations
+- Focus on connecting all dots from the search results
+- Provide thorough analysis of all available information
+- Do NOT hallucinate or make up information not found in sources
+- Base your response ONLY on the provided search results
+
+Guidelines:
+- Write in analytical paragraphs, not bullet points or tables
+- Connect all information from sources to provide comprehensive analysis
 - Use clear, professional Bengali language
 - Structure your response with proper headings and formatting
-- Provide detailed explanations when appropriate
-- Use markdown formatting for better readability
-- Be informative and helpful
+- Base your answer on the provided search results
+- Cite sources with numbered references [1], [2], [3]
 - If you're unsure about something, mention it
-- IMPORTANT: Format ALL URLs as clickable markdown links using [text](url) format
-- When mentioning websites, always create clickable links like [Website Name](https://example.com)
+- Format ALL URLs as clickable markdown links using [text](url) format
+- When mentioning sources, create clickable links like [Source Name](https://example.com)
 - Make sure users can click on links to visit the actual websites
+- If search results are insufficient, clearly state this limitation
+- Do NOT create tables, charts, or structured formats
 
 Question: ${query}
 
-Please provide a detailed and well-formatted answer in Bengali. Make sure to format all URLs as clickable markdown links [text](url) so users can click and visit the websites directly.`
+Search results found: ${searchResults.results?.length || 0}
 
-              const result = await model.generateContent(prompt)
-              const response = result.response.text()
+Source details:
+${searchResults.results?.map((result: any, index: number) => `
+[${index + 1}] ${result.title}
+URL: ${result.url}
+Content: ${result.content || result.snippet || 'No detailed content available'}
+`).join('\n') || 'No sources found'}
 
-              // Stream the response character by character
-              for (let i = 0; i < response.length; i++) {
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: response[i] })}\n\n`))
-                await new Promise(resolve => setTimeout(resolve, 7)) // 3x faster
+Provide a detailed and well-formatted answer in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats. Make sure to cite sources with numbered references and format all URLs as clickable markdown links [text](url) so users can click and visit the websites directly.`
+
+              const chatCompletion = await groq.chat.completions.create({
+                messages: [
+                  {
+                    role: "user",
+                    content: prompt
+                  }
+                ],
+                model: "openai/gpt-oss-20b",
+                temperature: 1,
+                max_tokens: 8192,
+                top_p: 1,
+                stream: true,
+                stop: null
+              })
+
+              // Stream the response from Groq
+              for await (const chunk of chatCompletion) {
+                const content = chunk.choices[0]?.delta?.content || ''
+                if (content) {
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: content })}\n\n`))
+                  await new Promise(resolve => setTimeout(resolve, 7)) // 3x faster
+                }
               }
 
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`))
 
             } catch (error) {
-              console.error('Gemini API error:', error)
-              const errorResponse = `দুঃখিত, "${query}" বিষয়ে উত্তর দিতে পারিনি। অনুগ্রহ করে আবার চেষ্টা করুন।`
+              console.error('General search error:', error)
+              const errorResponse = `দুঃখিত, "${query}" বিষয়ে তথ্য খুঁজে পাওয়া যায়নি। অনুগ্রহ করে ভিন্নভাবে প্রশ্ন করুন অথবা অন্য কোনো বিষয়ে জানতে চান।`
               
               for (let i = 0; i < errorResponse.length; i++) {
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: errorResponse[i] })}\n\n`))

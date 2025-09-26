@@ -6,7 +6,7 @@ import { PRIORITY_SITES } from '@/lib/utils'
 import { findRelatedArticles } from '@/lib/data'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-002" })
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
 
 // Helper function to create model-specific prompts
@@ -113,15 +113,15 @@ You MUST write an EXTENSIVE, DETAILED, and COMPREHENSIVE report. Do NOT be conci
 
 // Helper function to generate AI report with three-tier fallback: Gemini → GROQ → DeepSeek
 async function generateAIReport(query: string, crawledContent: any[], maxRetries: number = 3): Promise<string> {
-  // Step 1: Try Gemini first (gemini-1.5-flash)
-  console.log('🤖 Trying Gemini (gemini-1.5-flash) first...')
+  // Step 1: Try Gemini first (gemini-1.5-flash-002)
+  console.log('🤖 Trying Gemini (gemini-1.5-flash-002) first...')
   
   const geminiPrompt = createModelSpecificPrompt(query, crawledContent, 'gemini')
   
   // Try Gemini model with retries
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`🤖 Generating AI report with gemini-1.5-flash (attempt ${attempt}/${maxRetries})...`)
+      console.log(`🤖 Generating AI report with gemini-1.5-flash-002 (attempt ${attempt}/${maxRetries})...`)
       const result = await model.generateContent(geminiPrompt)
       const response = await result.response
       return response.text()
@@ -148,7 +148,7 @@ async function generateAIReport(query: string, crawledContent: any[], maxRetries
   }
 
   // Step 2: Fallback to GROQ (GPT-OSS-120B)
-  console.log('🔄 Gemini (gemini-1.5-flash) failed, falling back to GROQ...')
+  console.log('🔄 Gemini (gemini-1.5-flash-002) failed, falling back to GROQ...')
   
   try {
     console.log('🤖 Trying GROQ (openai/gpt-oss-120b)...')
