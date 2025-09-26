@@ -188,11 +188,15 @@ export default function MythbustingSidebar({ className = '', searchHistory = [],
                           report.verdict === 'true' ? 'bg-green-100 text-green-800' :
                           report.verdict === 'false' ? 'bg-red-100 text-red-800' :
                           report.verdict === 'misleading' ? 'bg-yellow-100 text-yellow-800' :
+                          report.verdict === 'partially_true' ? 'bg-blue-100 text-blue-800' :
+                          report.verdict === 'context_dependent' ? 'bg-purple-100 text-purple-800' :
                           'bg-gray-100 text-gray-800'
                         }`}>
                           {report.verdict === 'true' ? 'সত্য' :
                            report.verdict === 'false' ? 'মিথ্যা' :
                            report.verdict === 'misleading' ? 'ভ্রান্তিমূলক' :
+                           report.verdict === 'partially_true' ? 'আংশিক সত্য' :
+                           report.verdict === 'context_dependent' ? 'প্রসঙ্গনির্ভর' :
                            'অযাচাইকৃত'}
                         </span>
                       </div>

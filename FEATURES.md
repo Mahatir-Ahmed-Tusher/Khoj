@@ -42,7 +42,20 @@
 - **File Preview**: Image preview before processing
 - **Future Expansion**: Audio and video search capabilities
 
-### 4. **Mukti Corner - Liberation War Engine**
+### 4. **Khoj Chat - AI Assistant**
+- **Intelligent Q&A**: AI-powered question answering system
+- **Dual Mode Operation**:
+  - **Fact-Check Mode**: Professional fact-checking with source citations
+  - **General Mode**: Conversational AI for general questions
+- **GROQ Integration**: Fast inference using GPT-OSS-20B model
+- **Tavily Search**: Real-time web search for current information
+- **Source Citations**: Numbered references [1], [2], [3] with proper attribution
+- **Bengali Interface**: Native Bengali language support
+- **Professional Formatting**: Structured responses with clear sections
+- **Search Integration**: Prioritizes Bangladeshi news sources
+- **Export Options**: Copy responses and download functionality
+
+### 5. **Mukti Corner - Liberation War Engine**
 - **Specialized Knowledge**: Focused on Bangladesh Liberation War 1971
 - **Python Backend**: Advanced RAG (Retrieval-Augmented Generation)
 - **Knowledge Categories**:
@@ -60,7 +73,7 @@
   - Statistical analysis of casualties
 - **Export Features**: Copy and download responses
 
-### 5. **User Interface & Experience**
+### 6. **User Interface & Experience**
 - **Bengali Typography**: Solaiman Lipi font for authentic experience
 - **Color Theme**: Red and green representing Bangladesh flag
 - **Responsive Layout**: Works on all devices and screen sizes

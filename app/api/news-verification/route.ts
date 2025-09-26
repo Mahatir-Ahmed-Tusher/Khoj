@@ -122,7 +122,7 @@ async function scrapeNewsArticle(url: string): Promise<ScrapedContent | null> {
 }
 
 async function analyzeWithGemini(scrapedContent: ScrapedContent): Promise<any> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-002' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
   
   const prompt = `
 আপনি একজন অভিজ্ঞ ফ্যাক্ট-চেকার। নিচের নিউজ আর্টিকেলটি বিশ্লেষণ করুন এবং এর সত্যতা যাচাই করার জন্য প্রয়োজনীয় সার্চ কোয়েরি তৈরি করুন।
@@ -281,7 +281,7 @@ async function searchWithTavily(queries: string[]): Promise<any[]> {
 }
 
 async function generateFinalReport(scrapedContent: ScrapedContent, analysis: any, searchResults: any[]): Promise<any> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-002' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
   
   const prompt = `
 আপনি একজন অভিজ্ঞ ফ্যাক্ট-চেকার। নিচের তথ্যগুলো বিশ্লেষণ করে একটি পেশাদার ফ্যাক্ট-চেকিং রিপোর্ট তৈরি করুন।

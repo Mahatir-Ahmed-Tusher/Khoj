@@ -66,7 +66,7 @@ function MythbustingContent() {
         query: report.query,
         result: report.response,
         timestamp: report.timestamp.getTime(),
-        verdict: (report.verdict as 'true' | 'false' | 'misleading' | 'unverified') || 'unverified',
+        verdict: (report.verdict as 'true' | 'false' | 'misleading' | 'unverified' | 'partially_true' | 'context_dependent') || 'unverified',
         sources: (report.sources || []).map((source: Source) => ({
           id: Number(source.id ?? 0),
           title: source.book_title || source.title || '',
@@ -499,6 +499,8 @@ ${messageText}
         return 'ভ্রান্তিমূলক'
       case 'partially_true':
         return 'আংশিক সত্য'
+      case 'context_dependent':
+        return 'প্রসঙ্গনির্ভর'
       default:
         return 'অযাচাইকৃত'
     }
@@ -514,6 +516,8 @@ ${messageText}
         return 'bg-yellow-100 text-yellow-800'
       case 'partially_true':
         return 'bg-blue-100 text-blue-800'
+      case 'context_dependent':
+        return 'bg-purple-100 text-purple-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }

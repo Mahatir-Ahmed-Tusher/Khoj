@@ -493,70 +493,70 @@ export default function KhojChatPage() {
 
   const allSuggestions = [
     {
-      text: "বাংলাদেশের সাম্প্রতিক রাজনৈতিক খবর যাচাই করুন",
+      text: "সেন্ট মার্টিন দ্বীপ কী আমেরিকা নিয়ে যাচ্ছে? তা যাচাই করা যাক",
       icon: Globe,
       type: "fact-check",
       category: "যাচাই",
       color: "from-purple-500 to-pink-500"
     },
     {
-      text: "কৃত্রিম বুদ্ধিমত্তা সম্পর্কে জানুন",
+      text: "কৃত্রিম বুদ্ধিমত্তা কীভাবে কাজ করে?",
       icon: Lightbulb,
       type: "general",
       category: "শিক্ষা",
       color: "from-blue-500 to-cyan-500"
     },
     {
-      text: "জলবায়ু পরিবর্তনের প্রভাব যাচাই করুন",
+      text: "টেস্টিং সল্ট কী ক্ষতিকর?",
       icon: Globe,
       type: "fact-check",
       category: "যাচাই",
       color: "from-green-500 to-emerald-500"
     },
     {
-      text: "প্রোগ্রামিং শেখার উপায়",
+      text: "নন টেকি ব্যাকগ্রাউন্ড থেকে প্রগ্রামিং শেখা যাবে কীভাবে?",
       icon: Code,
       type: "general",
       category: "শিক্ষা",
       color: "from-orange-500 to-red-500"
     },
     {
-      text: "নাগরিক সেবা সম্পর্কে জানুন",
+      text: "NID তে নাম ভুল আসলে কী করতে হবে?",
       icon: User,
       type: "citizen-service",
       category: "সেবা",
       color: "from-indigo-500 to-purple-500"
     },
     {
-      text: "স্বাস্থ্য সম্পর্কিত তথ্য যাচাই করুন",
+      text: "আনারস আর দুধ একসঙ্গে কী বিষক্রিয়া হয়?",
       icon: MessageCircle,
       type: "fact-check",
       category: "যাচাই",
       color: "from-teal-500 to-blue-500"
     },
     {
-      text: "অর্থনীতি সম্পর্কিত খবর যাচাই করুন",
+      text: "আফগানিস্তানের মূদ্রার মূল্য বাংলাদেশের চেয়ে বেশি, এর মানে ওরা কী আমাদের চেয়ে বেশি স্বচ্ছল?",
       icon: Search,
       type: "fact-check",
       category: "যাচাই",
       color: "from-yellow-500 to-orange-500"
     },
     {
-      text: "শিক্ষা নীতি সম্পর্কে জানুন",
+      text: "গণিতে কীভাবে দক্ষ হওয়া যায়?",
       icon: Lightbulb,
       type: "general",
       category: "শিক্ষা",
       color: "from-pink-500 to-rose-500"
     },
     {
-      text: "ভিসা ও পাসপোর্ট সেবা",
+      text: "পাসপোর্ট আর আর এনআইডিতে ভিন্ন নাম থাকলে পাসপোর্টে নাম কীভাবে পালটানো যায়?",
       icon: User,
       type: "citizen-service",
       category: "সেবা",
       color: "from-cyan-500 to-blue-500"
     },
     {
-      text: "খেলাধুলা সম্পর্কিত খবর যাচাই করুন",
+      text: "গ্রীন হাউজ গ্যাস কী ওয়েস্টার্ন প্রোপাগান্ডা? যাচাই করা যাক",
       icon: Globe,
       type: "fact-check",
       category: "যাচাই",

@@ -111,6 +111,18 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Mythbusting request received:', query)
+    
+    // Check environment variables first
+    const apiKey = process.env.GEMINI_API_KEY_2
+    if (!apiKey) {
+      console.error('GEMINI_API_KEY_2 not configured in environment')
+      return NextResponse.json({ 
+        error: 'GEMINI_API_KEY_2 not configured',
+        details: 'Please check your environment variables in Vercel deployment settings'
+      }, { status: 500 })
+    }
+    
+    console.log('Environment check passed - GEMINI_API_KEY_2 is configured')
 
     // Step 1: Search for evidence using RapidAPI with fallback
     let searchResults = null
@@ -120,12 +132,25 @@ export async function POST(request: NextRequest) {
       snippet: string
     }> = []
     
-    // Try primary RapidAPI search with fallback
-    searchResults = await searchWithRapidAPIFallback(query, 20)
-    
-    // If primary fails, try alternative with fallback
-    if (!searchResults) {
-      searchResults = await searchWithRapidAPIFallbackAlternative(query, 10)
+    try {
+      console.log('Starting RapidAPI search...')
+      // Try primary RapidAPI search with fallback
+      searchResults = await searchWithRapidAPIFallback(query, 20)
+      
+      // If primary fails, try alternative with fallback
+      if (!searchResults) {
+        console.log('Primary RapidAPI search failed, trying alternative...')
+        searchResults = await searchWithRapidAPIFallbackAlternative(query, 10)
+      }
+      
+      if (searchResults) {
+        console.log('RapidAPI search successful')
+      } else {
+        console.log('All RapidAPI searches failed, will use fallback references')
+      }
+    } catch (searchError) {
+      console.error('RapidAPI search error:', searchError)
+      console.log('Continuing with fallback references...')
     }
     
     // Extract sources from search results
@@ -148,29 +173,35 @@ export async function POST(request: NextRequest) {
 
     console.log(`📚 Found ${evidenceSources.length} evidence sources`)
 
-    // Use the second Gemini API key for this specific feature
-    const apiKey = process.env.GEMINI_API_KEY_2
-    if (!apiKey) {
-      console.error('GEMINI_API_KEY_2 not configured')
-      return NextResponse.json({ error: 'GEMINI_API_KEY_2 not configured' }, { status: 500 })
-    }
-
     console.log('Initializing Gemini AI...')
     const genAI = new GoogleGenerativeAI(apiKey)
     
     // Try different model names in case gemini-pro is not available
     let model
     try {
-      model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-002' })
+      console.log('Trying gemini-2.5-flash model...')
+      model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+      console.log('Successfully initialized gemini-2.5-flash model')
     } catch (error) {
+      console.error('gemini-2.5-flash failed:', error)
       try {
+        console.log('Trying gemini-1.5-pro model...')
         model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+        console.log('Successfully initialized gemini-1.5-pro model')
       } catch (error2) {
+        console.error('gemini-1.5-pro failed:', error2)
         try {
+          console.log('Trying gemini-pro model...')
           model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+          console.log('Successfully initialized gemini-pro model')
         } catch (fallbackError) {
           console.error('All Gemini models failed:', fallbackError)
-          return NextResponse.json({ error: 'No compatible Gemini model found. Please check your API key and model availability.' }, { status: 500 })
+          return NextResponse.json({ 
+            error: 'No compatible Gemini model found', 
+            details: 'Please check your API key and model availability',
+            models_tried: ['gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-pro'],
+            last_error: fallbackError instanceof Error ? fallbackError.message : 'Unknown error'
+          }, { status: 500 })
         }
       }
     }
@@ -278,13 +309,24 @@ Write: "আপনি হয়তো ভাবছেন এটা সত্য�
 Write at least 5-7 detailed paragraphs in DETAILED_ANALYSIS and provide your own expert conclusion in CONCLUSION section.`
 
     console.log('Sending request to Gemini AI with evidence...')
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    const text = response.text()
+    let text: string
+    try {
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      text = response.text()
 
-    if (!text) {
-      console.error('Empty response from Gemini AI')
-      return NextResponse.json({ error: 'Empty response from AI model' }, { status: 500 })
+      if (!text) {
+        console.error('Empty response from Gemini AI')
+        return NextResponse.json({ error: 'Empty response from AI model' }, { status: 500 })
+      }
+      
+      console.log('Successfully received response from Gemini AI')
+    } catch (geminiError) {
+      console.error('Gemini AI request failed:', geminiError)
+      return NextResponse.json({ 
+        error: 'Failed to generate content with Gemini AI',
+        details: geminiError instanceof Error ? geminiError.message : 'Unknown error'
+      }, { status: 500 })
     }
 
     console.log('Received response from Gemini AI, parsing...')

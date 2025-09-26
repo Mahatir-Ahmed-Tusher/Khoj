@@ -7,7 +7,7 @@ import { ALLOWED_SITES, normalizeUrl, extractDomain, isAllowedSite } from '@/lib
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" })
-const fallbackModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash-002" })
+const fallbackModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
 
 interface SearchResult {
@@ -544,7 +544,7 @@ async function generateAIReport(query: string, crawledContent: any[], maxRetries
   
   // Try Gemini fallback model
   try {
-    console.log('🔄 Trying fallback model (gemini-1.5-flash-002)...')
+    console.log('🔄 Trying fallback model (gemini-2.5-flash)...')
     const result = await fallbackModel.generateContent(geminiPrompt)
     const response = await result.response
     return response.text()

@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
     // Try different model names in case gemini-pro is not available
     let model
     try {
-      model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-002' })
+      model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
     } catch (error) {
       try {
         model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
