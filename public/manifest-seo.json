@@ -1,0 +1,27 @@
+{
+  "name": "খোঁজ - বাংলা ভাষার প্রথম AI-চালিত ফ্যাক্টচেকিং প্ল্যাটফর্ম",
+  "short_name": "খোঁজ",
+  "description": "বাংলা ভাষায় সত্যতা যাচাইয়ের জন্য AI-চালিত প্ল্যাটফর্ম",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f2937",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/khoj-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/khoj-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "education", "news"],
+  "lang": "bn-BD",
+  "dir": "ltr"
+}
