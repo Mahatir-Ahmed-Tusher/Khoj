@@ -12,7 +12,9 @@ export const create = mutation({
       v.literal("true"),
       v.literal("false"),
       v.literal("misleading"),
-      v.literal("unverified")
+      v.literal("unverified"),
+      v.literal("partially_true"),
+      v.literal("context_dependent")
     ),
     sources: v.array(
       v.object({
