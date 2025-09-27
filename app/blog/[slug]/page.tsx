@@ -22,6 +22,159 @@ interface BlogPost {
 
 const blogPosts: BlogPost[] = [
   {
+    id: '6',
+    title: 'কী কী আছে এই খোঁজ-এ?',
+    author: 'সাগর চন্দ্র দে',
+    thumbnail: 'https://i.postimg.cc/TwF5YmsF/Khoj-features.png',
+    excerpt: 'আজকের এই প্রযুক্তির যুগে চারপাশে তথ্যের অবিরাম স্রোত। কিন্তু সেই স্রোতের ভেতরে আসল তথ্য আর মিথ্যা আলাদা করা কি এত সহজ? ফেসবুকের নিউজফিড, হোয়াটসঅ্যাপ-টেলিগ্রামের গ্রুপ চ্যাট কিংবা বিভিন্ন নিউজ অ্যাপ—সবখানেই ভেসে বেড়ায় মিথ্যা খবর, গুজব আর অর্ধসত্য।',
+    content: `
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <p style="margin: 0 0 10px 0;"><strong>লেখক:</strong> সাগর চন্দ্র দে</p>
+        <p style="margin: 0 0 10px 0;"><strong>প্রকাশ তারিখ:</strong> ২৭ সেপ্টেম্বর, ২০২৫</p>
+        <p style="margin: 0;"><strong>ক্যাটাগরি:</strong> প্রযুক্তি এবং এআই</p>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <span style="background-color: #e3f2fd; color: #1976d2; padding: 6px 12px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; display: inline-block;">খোঁজ</span>
+        <span style="background-color: #e8f5e8; color: #2e7d32; padding: 6px 12px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; display: inline-block;">এআই</span>
+        <span style="background-color: #fff3e0; color: #f57c00; padding: 6px 12px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; display: inline-block;">ফ্যাক্টচেকিং</span>
+        <span style="background-color: #fce4ec; color: #c2185b; padding: 6px 12px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; display: inline-block;">মিথবাস্টিং</span>
+        <span style="background-color: #f3e5f5; color: #7b1fa2; padding: 6px 12px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; display: inline-block;">মুক্তিযুদ্ধ কর্নার</span>
+      </div>
+
+      <p style="margin-bottom: 20px; line-height: 1.8; font-size: 18px; font-weight: 500;">
+        আজকের এই প্রযুক্তির যুগে চারপাশে তথ্যের অবিরাম স্রোত। কিন্তু সেই স্রোতের ভেতরে আসল তথ্য আর মিথ্যা আলাদা করা কি এত সহজ?
+      </p>
+
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        ফেসবুকের নিউজফিড, হোয়াটসঅ্যাপ-টেলিগ্রামের গ্রুপ চ্যাট কিংবা বিভিন্ন নিউজ অ্যাপ—সবখানেই ভেসে বেড়ায় মিথ্যা খবর, গুজব আর অর্ধসত্য।
+      </p>
+
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        বাংলা ভাষাভাষী কোটি মানুষের জন্য এটি এক বিশাল চ্যালেঞ্জ। কারণ, সত্য যাচাইয়ের নির্ভরযোগ্য ব্যবস্থা না থাকলে তার সামাজিক, রাজনৈতিক এবং ব্যক্তিগত ক্ষতি হতে পারে ভয়াবহ।
+      </p>
+
+      <p style="margin-bottom: 30px; line-height: 1.8;">
+        এই জটিল ও বিভ্রান্তিকর সময়েই জন্ম নিয়েছে <strong>"খোঁজ"</strong>—বাংলা ভাষার প্রথম এবং সবচেয়ে পূর্ণাঙ্গ এআই-ভিত্তিক ফ্যাক্টচেকিং প্ল্যাটফর্ম <a href="https://www.khoj-bd.com/blog/khoj-ai-factchecker-verification" style="color: #007cba; text-decoration: underline;">[১]</a>।
+      </p>
+
+      <h2 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">প্ল্যাটফর্মটির প্রধান বৈশিষ্ট্যসমূহ</h2>
+
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        খোঁজ শুধু একটি ফ্যাক্ট-চেকিং ওয়েবসাইট নয়, বরং এটি একটি সমন্বিত প্ল্যাটফর্ম যা বিভিন্ন উন্নত প্রযুক্তির মাধ্যমে ব্যবহারকারীদের তথ্য যাচাইয়ের সুবিধা দেয়। এর প্রধান বৈশিষ্ট্যগুলো হলো:
+      </p>
+
+      <h3 style="color: #34495e; margin-top: 30px; margin-bottom: 15px; font-size: 20px;">এআই ফ্যাক্টচেকিং</h3>
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        ধরুন, আপনি আজ ইন্টারনেটে ঢুকেই শুনলেন যে, <strong>"বাংলাদেশের সেন্ট মার্টিন দ্বীপ আমেরিকানদের দখলে এবং সেখানে একটা নতুন রাষ্ট্র প্রতিষ্ঠা করা হচ্ছে"</strong>। কোনো মেইনস্ট্রিম মিডিয়ায় না আসলেও নানান অনলাইন মিডিয়ায় এসব নিউজে সয়লাভ। সেক্ষেত্রে, খোঁজ হতে পারে আপনার সত্যান্বেষের বিশেষ সঙ্গী। তেমন কঠিন কোনো কাজ না। আপনাকে কেবল <a href="https://www.khoj-bd.com/" style="color: #007cba; text-decoration: underline;">khoj-bd.com</a> এ গিয়ে কেবল সে দাবিটুকু লিখবেন। বাকি কাজটা করবে খোঁজ।
+      </p>
+
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        কয়েক সেকেন্ডের মধ্যেই এআই ঘেঁটে আনবে আসল উৎস, তুলনা করবে তথ্যের নির্ভরযোগ্যতা, আর আপনাকে দেখাবে একটি পূর্ণাঙ্গ ফ্যাক্টচেক রিপোর্ট। বলে দেবে কী দেখে বিশ্বাসযোগ্য, কোন তথ্য কোথা থেকে এসেছে আর কোথায় সন্দেহ থাকতে পারে। এই ফ্যাক্টচেকিং ভোজবাজির মতো উদয় হয় না। কিংবা এআই সর্বজান্তা তাই আপনাকে ফ্যাক্টচেক করে দিচ্ছে৷ ব্যাপারটা এমনও না। এর পেছনে রয়েছে প্রযুক্তির ঝলক। এ নিয়ে বিস্তারিত জানতে ঘুরে আসুন <a href="https://bigganblog.org/2025/09/khoj-first-bengali-ai-factchecker/" style="color: #007cba; text-decoration: underline;">এখান থেকে</a> <a href="https://bigganblog.org/2025/09/khoj-first-bengali-ai-factchecker/" style="color: #007cba; text-decoration: underline;">[২]</a>।
+      </p>
+
+      <h3 style="color: #34495e; margin-top: 30px; margin-bottom: 15px; font-size: 20px;">এআই মিথবাস্টিং</h3>
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        ডিজিটাল যুগে ভুয়া খবর আর গুজব আমাদের প্রতিদিনের বাস্তবতা হয়ে দাঁড়িয়েছে। বেশিরভাগ সময় মানুষ শুধু "কোনো দাবি সত্য নাকি মিথ্যা", এই উত্তরেই থেমে যায়। কিন্তু খোঁজ একটু ভিন্ন পথে হেঁটেছে।
+      </p>
+
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        খোঁজের অন্যতম অনন্য ফিচার হলো, এটি শুধু তথ্য দেয় না; বরং কথোপকথনের ভঙ্গিতে বিষয়টি ব্যাখ্যা করে। ধরুন, আপনি কোনো কুসংস্কার বা বৈজ্ঞানিক দাবি শুনলেন। এআই তখন এক বন্ধুর মতো আপনাকে বোঝাবে। এটার জন্যে আপনাকে কেবল খোঁজের মূল পাতায় থাকা সার্চবারের নীচে <strong>"মিথবাস্টিং"</strong> বাটনটিতে ক্লিক করে তারপর সেই সার্চবারে লিখে ফেলতে হবে আপনার শোনা মিথটি। খোঁজ প্রস্তুত করে দেবে একটা বিস্তারিত গুজব খন্ডন রিপোর্ট। প্রথমে প্রেক্ষাপট তুলে ধরবে, তারপর বৈজ্ঞানিক প্রমাণ হাজির করবে, আর সবশেষে গল্পের মতো করে বিষয়টির ভ্রান্তি পরিষ্কার করবে।
+      </p>
+
+      <p style="margin-bottom: 30px; line-height: 1.8;">
+        এই বৈশিষ্ট্যের সবচেয়ে বড় শক্তি হলো, এটি মানুষকে শুধু গুজব থেকে রক্ষা করে না, বরং দীর্ঘমেয়াদে ক্রিটিক্যাল থিঙ্কিং শেখায়। আর সেই দক্ষতাই তৈরি করে এক ধরনের ডিজিটাল সুরক্ষা, যা ভবিষ্যতের তথ্যযুদ্ধে অত্যন্ত কার্যকর।
+      </p>
+
+      <h3 style="color: #34495e; margin-top: 30px; margin-bottom: 15px; font-size: 20px;">ম্যানুয়াল ফ্যাক্টচেকিং</h3>
+      <p style="margin-bottom: 30px; line-height: 1.8;">
+        এআই-ভিত্তিক ফিচারের পাশাপাশি খোঁজ টিম নিয়মিতভাবে অনলাইনে ছড়িয়ে থাকা নানা গুজব ম্যানুয়ালভাবে ফ্যাক্টচেক করে। উদ্দেশ্য একটাই, যাতে কোনো বিভ্রান্তিকর বা ভুয়া সংবাদ সহজে ছড়িয়ে পড়তে না পারে। এভাবে কৃত্রিম বুদ্ধিমত্তার গতি আর মানুষের বিশ্লেষণী ক্ষমতা একত্রিত হয়ে খোঁজকে সত্য যাচাইয়ের একটি নির্ভরযোগ্য মানদণ্ডে পরিণত করেছে। খোঁজ এর মূল পাতাতেই পেয়ে যাবেন সাম্প্রতিক কালে ছড়িয়ে পড়া নানান গুজবের খন্ডন।
+      </p>
+
+      <h3 style="color: #34495e; margin-top: 30px; margin-bottom: 15px; font-size: 20px;">রিভার্স মিডিয়া সার্চ</h3>
+      <p style="margin-bottom: 30px; line-height: 1.8;">
+        এ ফিচারটা অনেকটা গুগল লেন্সের মতো। তবে আরেকটু বেটার। ছবি আপলোড করে জানতে পারবেন আপনার আপলোডকৃত ছবিটি ইন্টারনেটে আর কোথায় কোথায় আছে। এতে করে কোনো নির্দিষ্ট ছবি নিয়ে গুজব ছড়ালেও খোঁজের সাহায্যে আপনি বের করে ফেলতে পারবেন, মূল ছবিটি আসলে কীসের ছিলো, কোন প্রেক্ষাপটে ছিলো। ফাইল আপলোডের জন্য রয়েছে সহজ ড্র্যাগ-এন্ড-ডপ ইন্টারফেস এবং সার্চের অগ্রগতি সরাসরি দেখার সুযোগ।
+      </p>
+
+      <h3 style="color: #34495e; margin-top: 30px; margin-bottom: 15px; font-size: 20px;">লেখা যাচাই</h3>
+      <p style="margin-bottom: 30px; line-height: 1.8;">
+        এই টুলের সাহায্যে যেকোনো বাংলা লেখা সহজেই বিশ্লেষণ করা যায়। এটি ডুপ্লিকেট কনটেন্ট বা প্লেজিয়ারিজম শনাক্ত করতে সক্ষম এবং কোনো লেখা মানুষের লেখা নাকি কৃত্রিম বুদ্ধিমত্তার তৈরি—তা নির্ভুলভাবে নির্ধারণ করতে পারে। পাশাপাশি লেখার পাঠযোগ্যতা এবং এর মূল উৎস সম্পর্কেও বিস্তারিত তথ্য প্রদান করে।
+      </p>
+
+      <h3 style="color: #34495e; margin-top: 30px; margin-bottom: 15px; font-size: 20px;">খোঁজ চ্যাট: সত্য যাচাইয়ে আপনার এআই অ্যাসিস্ট্যান্ট</h3>
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        খোঁজ চ্যাটে রয়েছে বিশেষায়িত ৩ টি ফিচার। প্রথমটা হচ্ছে, <strong>জেনারেল মোড</strong>, যেটায় আপনি চাইলে নানান ব্যাপারে আলোচনা এমনকী, তথ্য যাচাই করতে পারবেন।
+      </p>
+
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        তবে, তথ্য যাচাইয়ের জন্য বিশেষায়িত অপশন হচ্ছে <strong>"যাচাই"</strong>। ব্যবহারকারী চাইলে তার সাথে চ্যাট করতে করতে ফ্যাক্টচেকিং করতে পারবেন, "যাচাই" অপশনটি বেছে নিয়ে। চ্যাটবটটি উত্তরের সাথে নির্ভরযোগ্য সূত্রের লিংকও উল্লেখ করে দেয়।
+      </p>
+
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        একই সাথে <strong>"নাগরিক সেবা"</strong> অপশনটি বেছে নিয়ে জেনে নিতে পারেন সরকারি সেবার নানান তথ্য। যে কাজটা আগে আপনাকে করতে হতো গুগল, ইউটিউব ঘেটে ঘণ্টার পর ঘণ্টা ব্যয় করে। খোঁজ চ্যাট কে NID, জন্মনিবন্ধন, পাসপোর্ট, আইনী নানান প্রশ্ন করলে মুহুর্তেই ব্যবহারকারীকে সমাধান বলে দেবে।
+      </p>
+
+      <p style="margin-bottom: 30px; line-height: 1.8;">
+        সাথে দিয়ে দেবে সম্পর্কিত সব লিংক। বেঁচে যাবে ব্যবহারকারীর মূল্যবান সময়। ফিচারটি ব্যবহার করতে চাইলে: <a href="https://www.khoj-bd.com/khoj-chat" style="color: #007cba; text-decoration: underline;">https://www.khoj-bd.com/khoj-chat</a>
+      </p>
+
+      <h3 style="color: #34495e; margin-top: 30px; margin-bottom: 15px; font-size: 20px;">মুক্তিযুদ্ধ কর্নার - লিবারেশন ওয়ার ইঞ্জিন</h3>
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        মুক্তিযুদ্ধ নিয়ে ইন্টারনেটে নানান গুজব রটে প্রায়ই। একই সাথে বিভিন্ন রাজনৈতিক দলের নিজস্ব ন্যারেটিভে বিকৃত হয়ে যায় নানান ঐতিহাসিক ঘটনা। সেসবই মানুষের মুখে মুখে ঘুরে বেড়ায়। এটা থেকে উত্তরণে আছে আমাদের <strong>"মুক্তিযুদ্ধ কর্নার"</strong>।
+      </p>
+
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        গুগল থেকে কেন এটা আলাদা, সেটা বলা যাক। গুগলে কোনো নির্দিষ্ট ব্যাপারে জানতে চাইলে ঠিক-ভুল, সবই রেজাল্ট আকারে সামনে আসবে। কিন্তু খোঁজ-এর এই মুক্তিযুদ্ধ কর্নার একটু ভিন্ন। এটা আপনাকে সবচেয়ে অথেন্টিক আর পক্ষপাতহীন ফলাফল এনে দেবে। একাত্তরে সংঘটিত হওয়া গণহত্যা, ধর্ষণ, যুদ্ধাপরাধ ইত্যাদি সম্পর্কে জানতে এই ফিচারটা বেশ কাজের।
+      </p>
+
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        খোঁজ টিমের ভবিষ্যৎ পরিকল্পনা হচ্ছে, এ অংশটিতে পূর্ণরূপে <strong>Retrieval Augmented Generation</strong> প্রযুক্তির প্রয়োগ করা। এ পদ্ধতিতে, মুক্তিযুদ্ধ সম্পর্কিত যেকোনো প্রশ্নের উত্তর দেয়া হবে মুক্তিযুদ্ধের দলিল, গবেষণামূলক গ্রন্থ, ঐতিহাসিকগণদের লিখা বইপত্র থেকে। যেসব ডেটার উপর বৃহৎ ভাষা মডেলগুলো ট্রেইনড না বা যেসব তথ্য গুগল করেও জানা সম্ভব না, বইপত্র পড়া ছাড়া, সেসব তথ্যই আপনাকে খোঁজ এনে দেবে কেবল আপনার একটা প্রশ্নে।
+      </p>
+
+      <h2 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">ভবিষ্যৎ পরিকল্পনা</h2>
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        খোঁজ টিম প্ল্যাটফর্মটিকে ভবিষ্যতে আরও উন্নত করার পরিকল্পনা হাতে নিয়েছে। এর মধ্যে রয়েছে:
+      </p>
+
+      <ul style="margin-bottom: 25px; padding-left: 20px;">
+        <li style="margin-bottom: 10px; line-height: 1.6;"><strong>অডিও এবং ভিডিও সার্চ:</strong> ছবি ছাড়াও অডিও এবং ভিডিও ফাইল দিয়ে অনুসন্ধান করার সুবিধা।</li>
+        <li style="margin-bottom: 10px; line-height: 1.6;"><strong>কমিউনিটি ফিচার:</strong> ব্যবহারকারীরা নিজেরা কোনো তথ্য যাচাইয়ের জন্য জমা দিতে পারবেন।</li>
+        <li style="margin-bottom: 10px; line-height: 1.6;"><strong>মোবাইল অ্যাপ:</strong> প্ল্যাটফর্মটিকে আরও সহজলভ্য করতে অ্যান্ড্রয়েড ও আইওএস অ্যাপ চালু করা হবে।</li>
+        <li style="margin-bottom: 10px; line-height: 1.6;"><strong>মুক্তি কর্নারের সমৃদ্ধিকরণ:</strong> মুক্তিযুদ্ধের আরও দুর্লভ ও প্রামাণ্য নথি যুক্ত করে এই বিভাগটিকে আরও তথ্যবহুল করা হবে।</li>
+      </ul>
+
+      <h2 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">উদ্ভাবনের নেপথ্যে যারা</h2>
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        এই অসাধারণ প্ল্যাটফর্মটি গড়ে তোলার পেছনে রয়েছি আমরা একদল সত্যান্বেষী:
+      </p>
+
+      <ul style="margin-bottom: 25px; padding-left: 20px;">
+        <li style="margin-bottom: 10px; line-height: 1.6;"><strong>মাহাথির আহমেদ তুষার:</strong> প্রতিষ্ঠাতা ও লিড ডেভেলপার, যিনি প্ল্যাটফর্মটির এআই আর্কিটেকচার ডিজাইন করেছেন।</li>
+        <li style="margin-bottom: 10px; line-height: 1.6;"><strong>সাগর চন্দ্র দে:</strong> ইউআই/ইউএক্স ডিজাইনার, যিনি এর চমৎকার বাংলা ইন্টারফেস তৈরি করেছেন।</li>
+        <li style="margin-bottom: 10px; line-height: 1.6;"><strong>তানিয়া চৈতি:</strong> ডেটা সায়েন্টিস্ট, যিনি এর তথ্যভান্ডার তৈরিতে কাজ করেছেন।</li>
+        <li style="margin-bottom: 10px; line-height: 1.6;"><strong>আবু কাউসার:</strong> উপদেষ্টা, যিনি "খোঁজ" ধারণাটির উদ্ভাবন করেছেন এবং কৌশলগত নির্দেশনা দিয়েছেন।</li>
+      </ul>
+
+      <p style="margin-bottom: 20px; line-height: 1.8;">
+        খোঁজ শুধু একটি প্ল্যাটফর্ম নয়, এটা বাংলা ভাষায় ডিজিটাল সাক্ষরতা বাড়ানো এবং মিথ্যা তথ্য শনাক্ত করার এক নতুন অধ্যায়। এর হাইব্রিড পাইপলাইন—এআই-চালিত অনুসন্ধান, উৎসের বাছাই এবং তথ্যের সারাংশ—প্রমাণ করে যে সত্য যাচাই করা হতে পারে আরও দ্রুত, আরও সহজ।
+      </p>
+
+      <p style="margin-bottom: 30px; line-height: 1.8;">
+        আমাদের বিশ্বাস, খোঁজ শুধু ব্যবহারকারীদের সহায়তাই করবে না, বরং ধীরে ধীরে সমাজে ইতিবাচক প্রভাব ফেলবে। কারণ সত্যের সন্ধান শুধু একটি প্রয়োজন নয়, এটি একটি দায়িত্ব। আর সেই দায়িত্ব পালনের প্রতিটি মুহূর্তে খোঁজ থাকবে আপনার পাশে।
+      </p>
+
+      <h2 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">তথ্যসূত্রঃ</h2>
+      <ol style="padding-left: 20px; margin-bottom: 30px;">
+        <li style="margin-bottom: 8px; line-height: 1.6;"><a href="https://www.khoj-bd.com/blog/khoj-ai-factchecker-verification" style="color: #3498db; text-decoration: none;">KHOJ - AI-Powered Bengali Fact Checking Platform. (n.d.). https://www.khoj-bd.com/blog/khoj-ai-factchecker-verification</a></li>
+        <li style="margin-bottom: 8px; line-height: 1.6;"><a href="https://bigganblog.org/2025/09/khoj-first-bengali-ai-factchecker/" style="color: #3498db; text-decoration: none;">তুষার. আ. (2025, September 16). খোঁজ, বাংলা ভাষার প্রথম এআই-চালিত ফ্যাক্টচেকারের অভিনব যাত্রা - বিজ্ঞান ব্লগ. বিজ্ঞান ব্লগ. https://bigganblog.org/2025/09/khoj-first-bengali-ai-factchecker/</a></li>
+      </ol>
+    `,
+    tags: ['খোঁজ', 'এআই', 'ফ্যাক্টচেকিং', 'মিথবাস্টিং', 'মুক্তিযুদ্ধ কর্নার'],
+    publishDate: '২৭ সেপ্টেম্বর, ২০২৫',
+    readTime: '১০ মিনিট',
+    slug: 'khoj-features-overview'
+  },
+  {
     id: '5',
     title: 'অপবিজ্ঞানের যতো বই',
     author: 'মাহাথির আহমেদ তুষার',
