@@ -159,16 +159,47 @@ Please provide a comprehensive fact-check report in Bengali following the struct
       }
 
     } else if (type === 'general') {
-      // Try Gemini first, fallback to Groq
-      let response = ''
-      const apiKey = process.env.GEMINI_API_KEY_2
-      
-      if (apiKey) {
-        try {
-          console.log('🤖 Trying Gemini (gemini-2.5-flash) for general chat...')
-          const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
-          
+      try {
+        // Try Gemini first, fallback to Groq
+        let response = ''
+        const apiKey = process.env.GEMINI_API_KEY_2
+        
+        if (apiKey) {
+          try {
+            console.log('🤖 Trying Gemini (gemini-2.5-flash) for general chat...')
+            const genAI = new GoogleGenerativeAI(apiKey)
+            const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+            
+            const prompt = `You are a helpful AI assistant. Provide comprehensive, accurate, and well-structured answers in Bengali. Follow these guidelines:
+
+- Use clear, professional Bengali language
+- Structure your response with proper headings and formatting
+- Provide detailed explanations when appropriate
+- Use markdown formatting for better readability
+- Be informative and helpful
+- If you're unsure about something, mention it
+
+Question: ${query}
+
+Please provide a detailed and well-formatted answer in Bengali.`
+
+            const result = await model.generateContent(prompt)
+            response = result.response.text()
+            console.log('✅ Gemini general chat successful')
+          } catch (geminiError) {
+            console.error('❌ Gemini general chat failed:', geminiError)
+            console.log('🔄 Falling back to Groq for general chat...')
+          }
+        } else {
+          console.log('⚠️ GEMINI_API_KEY_2 not configured, using Groq for general chat...')
+        }
+        
+        // Fallback to Groq if Gemini fails or is not configured
+        if (!response) {
+          const groq = new Groq({
+            apiKey: process.env.GROQ_API_KEY
+          })
+
           const prompt = `You are a helpful AI assistant. Provide comprehensive, accurate, and well-structured answers in Bengali. Follow these guidelines:
 
 - Use clear, professional Bengali language
@@ -182,60 +213,30 @@ Question: ${query}
 
 Please provide a detailed and well-formatted answer in Bengali.`
 
-          const result = await model.generateContent(prompt)
-          response = result.response.text()
-          console.log('✅ Gemini general chat successful')
-        } catch (geminiError) {
-          console.error('❌ Gemini general chat failed:', geminiError)
-          console.log('🔄 Falling back to Groq for general chat...')
+          const chatCompletion = await groq.chat.completions.create({
+            messages: [
+              {
+                role: "user",
+                content: prompt
+              }
+            ],
+            model: "openai/gpt-oss-20b",
+            temperature: 1,
+            max_tokens: 8192,
+            top_p: 1,
+            stream: false,
+            stop: null
+          })
+
+          response = chatCompletion.choices[0]?.message?.content || ''
         }
-      } else {
-        console.log('⚠️ GEMINI_API_KEY_2 not configured, using Groq for general chat...')
-      }
-      
-      // Fallback to Groq if Gemini fails or is not configured
-      if (!response) {
-        const groq = new Groq({
-          apiKey: process.env.GROQ_API_KEY
+
+        return NextResponse.json({
+          response: response
         })
-
-        const prompt = `You are a helpful AI assistant. Provide comprehensive, accurate, and well-structured answers in Bengali. Follow these guidelines:
-
-- Use clear, professional Bengali language
-- Structure your response with proper headings and formatting
-- Provide detailed explanations when appropriate
-- Use markdown formatting for better readability
-- Be informative and helpful
-- If you're unsure about something, mention it
-
-Question: ${query}
-
-Please provide a detailed and well-formatted answer in Bengali.`
-
-        const chatCompletion = await groq.chat.completions.create({
-          messages: [
-            {
-              role: "user",
-              content: prompt
-            }
-          ],
-          model: "openai/gpt-oss-20b",
-          temperature: 1,
-          max_tokens: 8192,
-          top_p: 1,
-          stream: false,
-          stop: null
-        })
-
-        response = chatCompletion.choices[0]?.message?.content || ''
-      }
-
-      return NextResponse.json({
-        response: response
-      })
 
       } catch (error) {
-        console.error('Groq API error:', error)
+        console.error('General chat error:', error)
         return NextResponse.json({
           response: `দুঃখিত, "${query}" বিষয়ে উত্তর দিতে পারিনি। অনুগ্রহ করে আবার চেষ্টা করুন।`
         })
