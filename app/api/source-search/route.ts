@@ -1,16 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { tavilyManager } from '@/lib/tavily-manager'
+import { GoogleGenerativeAI } from '@google/generative-ai'
+
+interface EnrichedSource {
+  url: string
+  title: string
+  description?: string
+  similarity: number
+  publishedDate?: string
+  source: string
+  // Tavily enrichment data
+  tavilyData?: {
+    content: string
+    published_date?: string
+    author?: string
+    image_context?: string
+    surrounding_text?: string
+    page_title?: string
+    excerpt?: string
+  }
+}
 
 interface SearchResponse {
   success: boolean
   type: 'image' | 'audio' | 'video'
-  sources: Array<{
-    url: string
-    title: string
-    description?: string
-    similarity: number
-    publishedDate?: string
-    source: string
-  }>
+  sources: EnrichedSource[]
   metadata?: {
     originalSource?: string
     creationDate?: string
@@ -21,6 +35,142 @@ interface SearchResponse {
     totalSources: number
     confidence: number
     processingTime: number
+  }
+  // Gemini-generated report
+  factCheckReport?: {
+    title: string
+    originalUploadSource: string
+    earliestTimestamp: string
+    contextualAnalysis: string
+    usageDescription: string
+    sources: Array<{
+      url: string
+      title: string
+      context: string
+      timestamp?: string
+    }>
+    conclusion: string
+  }
+  message?: string
+}
+
+// Function to enrich sources with Tavily data
+async function enrichSourcesWithTavily(sources: EnrichedSource[]): Promise<EnrichedSource[]> {
+  console.log(`🔍 Enriching ${sources.length} sources with Tavily...`)
+  
+  const enrichedSources: EnrichedSource[] = []
+  
+  for (const source of sources) {
+    try {
+      console.log(`📄 Processing: ${source.url}`)
+      
+      // Use Tavily to scrape the page content
+      const tavilyResult = await tavilyManager.search('', {
+        sites: [source.url],
+        max_results: 1,
+        search_depth: 'advanced'
+      })
+      
+      if (tavilyResult.results && tavilyResult.results.length > 0) {
+        const tavilyData = tavilyResult.results[0]
+        source.tavilyData = {
+          content: tavilyData.content || '',
+          published_date: tavilyData.published_date,
+          author: tavilyData.author,
+          image_context: tavilyData.content?.substring(0, 500) || '', // First 500 chars for context
+          surrounding_text: tavilyData.content || '',
+          page_title: tavilyData.title || source.title,
+          excerpt: tavilyData.content?.substring(0, 200) || ''
+        }
+        console.log(`✅ Enriched: ${source.url}`)
+      } else {
+        console.log(`⚠️ No Tavily data for: ${source.url}`)
+      }
+    } catch (error) {
+      console.error(`❌ Failed to enrich ${source.url}:`, error)
+    }
+    
+    enrichedSources.push(source)
+  }
+  
+  return enrichedSources
+}
+
+// Function to generate Gemini fact-check report
+async function generateGeminiFactCheckReport(enrichedSources: EnrichedSource[]): Promise<SearchResponse['factCheckReport']> {
+  const apiKey = process.env.GEMINI_API_KEY_2
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY_2 not configured')
+  }
+  
+  console.log('🤖 Generating Gemini fact-check report...')
+  
+  const genAI = new GoogleGenerativeAI(apiKey)
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+  
+  // Prepare source data for Gemini in Bengali
+  const sourceData = enrichedSources.map((source, index) => `
+[${index + 1}] ${source.title}
+লিংক: ${source.url}
+মিলের হার: ${source.similarity}%
+উৎস: ${source.source}
+প্রকাশের তারিখ: ${source.publishedDate || 'অজানা'}
+${source.tavilyData ? `
+বিষয়বস্তু: ${source.tavilyData.surrounding_text?.substring(0, 300) || 'কোনো বিষয়বস্তু পাওয়া যায়নি'}
+লেখক: ${source.tavilyData.author || 'অজানা'}
+পৃষ্ঠার শিরোনাম: ${source.tavilyData.page_title || source.title}
+` : 'কোনো অতিরিক্ত তথ্য পাওয়া যায়নি'}
+`).join('\n')
+  
+  const prompt = `You are an experienced journalist. Analyze the following reverse image search results and create a simple, understandable Bengali report.
+
+CURRENT DATE CONTEXT: Today is ${new Date().toISOString().split('T')[0]} (YYYY-MM-DD format). All dates mentioned in the search results are in the past relative to this date.
+
+WRITING GUIDELINES:
+- Write in very simple Bengali that everyone can understand
+- Avoid complex words and technical jargon
+- Use conversational Bengali style
+- Write in short, clear sentences
+- Explain with real-life examples
+- Return response in JSON format
+- Treat all years and dates as historical/past events
+
+SEARCH RESULTS:
+${sourceData}
+
+Create a simple Bengali report in this JSON format:
+{
+  "title": "Simple title about the image in Bengali",
+  "originalUploadSource": "URL of the earliest/original source",
+  "earliestTimestamp": "ISO date of first appearance",
+  "contextualAnalysis": "Simple explanation of how the image was used across different sources in Bengali",
+  "usageDescription": "Simple description of image usage patterns in Bengali",
+  "sources": [
+    {
+      "url": "source URL",
+      "title": "source title",
+      "context": "how the image was used in this source in simple Bengali",
+      "timestamp": "date if available"
+    }
+  ],
+  "conclusion": "final assessment and conclusion in simple Bengali"
+}
+
+IMPORTANT: Return ONLY the JSON object, no additional text.`
+
+  try {
+    const result = await model.generateContent(prompt)
+    const response = result.response.text()
+    
+    // Parse the JSON response
+    const cleanResponse = response.replace(/```json|```/g, '').trim()
+    const factCheckReport = JSON.parse(cleanResponse)
+    
+    console.log('✅ Gemini fact-check report generated successfully')
+    return factCheckReport
+  } catch (error) {
+    console.error('❌ Gemini fact-check report generation failed:', error)
+    throw error
   }
 }
 
@@ -87,7 +237,8 @@ async function searchImageWithSerpAPI(fileBuffer: Buffer): Promise<SearchRespons
 
     console.log('Google Lens API response received:', {
       status: data.search_metadata?.status,
-      totalResults: data.visual_matches?.length || 0
+      totalResults: data.visual_matches?.length || 0,
+      sampleMatch: data.visual_matches?.[0] ? Object.keys(data.visual_matches[0]) : []
     })
 
     // Extract Google Lens visual matches
@@ -126,25 +277,34 @@ async function searchImageWithSerpAPI(fileBuffer: Buffer): Promise<SearchRespons
       title: match.title || `Visual Match ${index + 1}`,
       description: `Visual match found from ${match.source || 'Google Lens'}`,
       similarity: Math.max(92 - (index * 8), 65),
-      publishedDate: new Date().toISOString(),
+      publishedDate: match.date || match.published_date || match.upload_date || new Date().toISOString(),
       source: match.source || 'Google Lens'
     }))
 
     console.log(`Found ${sources.length} visual matches`)
 
+    // Step 2: Enrich sources with Tavily data
+    console.log('🔍 Starting Tavily enrichment...')
+    const enrichedSources = await enrichSourcesWithTavily(sources)
+    
+    // Step 3: Generate Gemini fact-check report
+    console.log('🤖 Generating Gemini fact-check report...')
+    const factCheckReport = await generateGeminiFactCheckReport(enrichedSources)
+
     return {
       success: true,
       type: 'image',
-      sources,
+      sources: enrichedSources,
       metadata: {
         originalSource: data.search_metadata?.status || 'Google Lens',
         creationDate: new Date().toISOString(),
       },
       analysis: {
-        totalSources: sources.length,
-        confidence: sources.length > 0 ? 88 : 0,
+        totalSources: enrichedSources.length,
+        confidence: enrichedSources.length > 0 ? 88 : 0,
         processingTime: parseFloat(processingTime)
-      }
+      },
+      factCheckReport
     }
   } catch (error) {
     console.error('Reverse image search error:', error)
@@ -199,8 +359,13 @@ export async function POST(request: NextRequest) {
         // Convert file to buffer
         const fileBuffer = await convertFileToBuffer(file)
         
-        // Search for similar images using real SerpAPI
+        // Search for similar images using enhanced SerpAPI → Tavily → Gemini pipeline
         const result = await searchImageWithSerpAPI(fileBuffer)
+        
+        // If no results found, return early without generating report
+        if (!result.success || result.sources.length === 0) {
+          return NextResponse.json(result)
+        }
         
         return NextResponse.json(result)
       } catch (error) {

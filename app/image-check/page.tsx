@@ -12,6 +12,8 @@ interface ImageCheckResult {
   aiGeneratedScore: number
   requestId?: string
   mediaId?: string
+  imageUrl?: string
+  bengaliReport?: string
 }
 
 export default function ImageCheckPage() {
@@ -22,6 +24,7 @@ export default function ImageCheckPage() {
   const [error, setError] = useState('')
   const [previewUrl, setPreviewUrl] = useState('')
   const [autoCheckStarted, setAutoCheckStarted] = useState(false)
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
 
   // Auto-load image from sessionStorage and start check
   useEffect(() => {
@@ -171,6 +174,38 @@ export default function ImageCheckPage() {
     }
   }
 
+  const handleGenerateReport = async () => {
+    if (!result || !result.imageUrl) return
+
+    setIsGeneratingReport(true)
+    try {
+      const response = await fetch('/api/image-check', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageUrl: result.imageUrl,
+          sightengineResult: {
+            type: { ai_generated: result.aiGeneratedScore }
+          }
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setResult(prev => prev ? { ...prev, bengaliReport: data.bengaliReport } : null)
+      } else {
+        setError(data.error || 'রিপোর্ট তৈরি করতে সমস্যা হয়েছে')
+      }
+    } catch (err) {
+      setError('নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।')
+    } finally {
+      setIsGeneratingReport(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-stone-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -305,6 +340,43 @@ export default function ImageCheckPage() {
                   <span className="text-gray-700 font-tiro-bangla text-sm">ব্যাখ্যা:</span>
                   <p className="text-gray-800 mt-1 font-tiro-bangla text-sm">{result.explanation}</p>
                 </div>
+
+                {/* Report Generation Button */}
+                {!result.bengaliReport && (
+                  <div className="mt-6">
+                    <button
+                      onClick={handleGenerateReport}
+                      disabled={isGeneratingReport}
+                      className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed font-tiro-bangla font-medium transition-all duration-200"
+                    >
+                      {isGeneratingReport ? (
+                        <div className="flex items-center justify-center space-x-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          <span>রিপোর্ট তৈরি হচ্ছে...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center space-x-2">
+                          <span>📊</span>
+                          <span>রিপোর্ট</span>
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                )}
+
+                {/* Bengali Report */}
+                {result.bengaliReport && (
+                  <div className="mt-6 p-4 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 rounded-xl border border-blue-200/50">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-3 font-tiro-bangla">
+                      বিস্তারিত বিশ্লেষণ
+                    </h4>
+                    <div className="prose prose-sm max-w-none">
+                      <p className="text-gray-700 font-tiro-bangla text-sm leading-relaxed whitespace-pre-wrap">
+                        {result.bengaliReport}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Request ID */}
                 {result.requestId && (

@@ -14,6 +14,15 @@ interface SearchResult {
     similarity: number
     publishedDate?: string
     source: string
+    tavilyData?: {
+      content: string
+      published_date?: string
+      author?: string
+      image_context?: string
+      surrounding_text?: string
+      page_title?: string
+      excerpt?: string
+    }
   }>
   metadata?: {
     originalSource?: string
@@ -26,7 +35,23 @@ interface SearchResult {
     confidence: number
     processingTime: number
   }
+  factCheckReport?: {
+    title: string
+    originalUploadSource: string
+    earliestTimestamp: string
+    contextualAnalysis: string
+    usageDescription: string
+    sources: Array<{
+      url: string
+      title: string
+      context: string
+      timestamp?: string
+    }>
+    conclusion: string
+  }
   message?: string
+  id?: string
+  savedAt?: string
 }
 
 export default function ImageSearchPage() {
@@ -37,6 +62,8 @@ export default function ImageSearchPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState<string>('')
   const [isClient, setIsClient] = useState(false)
+  const [savedReports, setSavedReports] = useState<SearchResult[]>([])
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   
   const router = useRouter()
 
@@ -44,6 +71,20 @@ export default function ImageSearchPage() {
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  // Load saved reports from localStorage
+  useEffect(() => {
+    if (isClient) {
+      const saved = localStorage.getItem('imageSearchReports')
+      if (saved) {
+        try {
+          setSavedReports(JSON.parse(saved))
+        } catch (error) {
+          console.error('Error loading saved reports:', error)
+        }
+      }
+    }
+  }, [isClient])
 
   // Check for file data from sessionStorage
   useEffect(() => {
@@ -124,8 +165,10 @@ export default function ImageSearchPage() {
       if (response.ok) {
         setResult(data)
         setUploadProgress('')
+        // Save report to localStorage
+        saveReportToLocalStorage(data)
       } else {
-        setError(data.error || 'উৎস সন্ধান করতে সমস্যা হয়েছে')
+        setError(data.error || 'ছবিটির উৎস সন্ধান করতে সমস্যা হয়েছে')
         setUploadProgress('')
       }
     } catch (err) {
@@ -145,6 +188,84 @@ export default function ImageSearchPage() {
     }
 
     await handleImageSearch(file)
+  }
+
+  const handleDownloadText = () => {
+    if (!result) return
+    
+    const reportText = generateReportText(result)
+    const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `khoj-image-search-${new Date().toISOString().split('T')[0]}.txt`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  }
+
+  const generateReportText = (reportData: SearchResult): string => {
+    let text = 'খোঁজ - ছবি সন্ধান রিপোর্ট\n'
+    text += `প্রতিবেদনের তারিখ: ${new Date().toLocaleDateString('bn-BD')}\n\n`
+    
+    if (reportData.factCheckReport) {
+      text += `রিপোর্টের শিরোনাম: ${reportData.factCheckReport.title}\n\n`
+      text += `মূল আপলোড উৎস: ${reportData.factCheckReport.originalUploadSource}\n\n`
+      text += `সর্বপ্রথম দেখা গেছে: ${new Date(reportData.factCheckReport.earliestTimestamp).toLocaleDateString('bn-BD')}\n\n`
+      text += `প্রেক্ষাপট বিশ্লেষণ:\n${reportData.factCheckReport.contextualAnalysis}\n\n`
+      text += `ব্যবহারের বর্ণনা:\n${reportData.factCheckReport.usageDescription}\n\n`
+      
+      text += 'উৎসসমূহ:\n'
+      reportData.factCheckReport.sources.forEach((source, index) => {
+        text += `${index + 1}. ${source.title}\n`
+        text += `   প্রেক্ষাপট: ${source.context}\n`
+        if (source.timestamp) {
+          text += `   তারিখ: ${new Date(source.timestamp).toLocaleDateString('bn-BD')}\n`
+        }
+        text += `   লিংক: ${source.url}\n\n`
+      })
+      
+      text += `সিদ্ধান্ত:\n${reportData.factCheckReport.conclusion}\n\n`
+    }
+    
+    text += 'বিশ্লেষণ সারসংক্ষেপ:\n'
+    text += `মোট উৎস: ${reportData.analysis.totalSources}\n`
+    text += `আস্থা: ${reportData.analysis.confidence}%\n`
+    text += `প্রক্রিয়াকরণ সময়: ${reportData.analysis.processingTime} সেকেন্ড\n`
+    
+    return text
+  }
+
+  const saveReportToLocalStorage = (reportData: SearchResult) => {
+    const newReport = {
+      ...reportData,
+      savedAt: new Date().toISOString(),
+      id: Date.now().toString()
+    }
+    
+    const updatedReports = [newReport, ...savedReports]
+    setSavedReports(updatedReports)
+    localStorage.setItem('imageSearchReports', JSON.stringify(updatedReports))
+  }
+
+  const deleteReport = (reportId: string) => {
+    const updatedReports = savedReports.filter(report => report.id !== reportId)
+    setSavedReports(updatedReports)
+    localStorage.setItem('imageSearchReports', JSON.stringify(updatedReports))
+  }
+
+  const downloadSavedReport = (reportData: SearchResult) => {
+    const reportText = generateReportText(reportData)
+    const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `khoj-image-search-${reportData.savedAt?.split('T')[0] || 'unknown'}.txt`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
   }
 
   // Loading screen component
@@ -171,14 +292,106 @@ export default function ImageSearchPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-stone-50">
+      {/* Sidebar Toggle Button */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="fixed top-20 right-4 z-50 p-3 bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200/50 hover:bg-white transition-all"
+      >
+        <div className="flex items-center space-x-2">
+          <span className="text-lg">📋</span>
+          <span className="text-sm font-tiro-bangla">পূর্ববর্তী সার্চ</span>
+          <span className="text-xs text-gray-500">({savedReports.length})</span>
+        </div>
+      </button>
+
+      {/* Collapsible Sidebar */}
+      <div className={`fixed top-0 left-0 h-full w-80 bg-white/95 backdrop-blur-sm border-r border-gray-200/50 transform transition-transform duration-300 z-40 ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-bold text-gray-800 font-tiro-bangla">
+              সেভ করা রিপোর্ট
+            </h2>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <span className="text-lg">✕</span>
+            </button>
+          </div>
+          
+          {savedReports.length === 0 ? (
+            <div className="text-center py-8">
+              <span className="text-4xl mb-4 block">📄</span>
+              <p className="text-gray-600 font-tiro-bangla text-sm">
+                এখনো কোনো রিপোর্ট সেভ করা হয়নি
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4 max-h-[calc(100vh-120px)] overflow-y-auto">
+              {savedReports.map((report) => (
+                <div key={report.id} className="bg-gray-50/80 rounded-lg p-4 border border-gray-200/50">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-medium text-gray-800 font-tiro-bangla text-sm line-clamp-2">
+                      {report.factCheckReport?.title || 'রিপোর্ট'}
+                    </h3>
+                    <button
+                      onClick={() => deleteReport(report.id!)}
+                      className="p-1 hover:bg-red-100 rounded transition-colors text-red-500"
+                    >
+                      <span className="text-xs">🗑️</span>
+                    </button>
+                  </div>
+                  
+                  <p className="text-xs text-gray-600 font-tiro-bangla mb-3">
+                    {report.savedAt ? new Date(report.savedAt).toLocaleDateString('bn-BD') : 'তারিখ অজানা'}
+                  </p>
+                  
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => {
+                        setResult(report)
+                        setIsSidebarOpen(false)
+                      }}
+                      className="flex-1 px-3 py-2 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors font-tiro-bangla"
+                    >
+                      দেখুন
+                    </button>
+                    <button
+                      onClick={() => downloadSavedReport(report)}
+                      className="flex-1 px-3 py-2 bg-green-500 text-white text-xs rounded-lg hover:bg-green-600 transition-colors font-tiro-bangla"
+                    >
+                      ডাউনলোড
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-amber-200">
-            <span className="text-amber-600 text-3xl">🔍</span>
+          <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <img 
+              src="https://i.postimg.cc/d14zRx5D/image.png" 
+              alt="Image Search Icon" 
+              className="w-12 h-12 object-contain"
+            />
           </div>
           <h1 className="text-3xl font-bold text-gray-800 mb-3 font-tiro-bangla tracking-tight">
-            ছবি সন্ধান
+            ছবি সার্চ
           </h1>
           <p className="text-lg text-gray-600 font-tiro-bangla">
             ছবি আপলোড করে অনলাইনে আর কোথায় আছে খুঁজে বের করুন
@@ -218,10 +431,16 @@ export default function ImageSearchPage() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <div className="text-3xl mb-4">🖼️</div>
+                      <div className="mb-4">
+                        <img 
+                          src="https://i.postimg.cc/Prm02J3Z/image.png" 
+                          alt="Upload Icon" 
+                          className="w-12 h-12 object-contain mx-auto"
+                        />
+                      </div>
                       <div>
                         <p className="text-base font-medium text-gray-800 font-tiro-bangla">
-                          {file ? file.name : 'ছবি নির্বাচন করুন'}
+                          {file ? file.name : 'ছবি আপলোড করুন'}
                         </p>
                         <p className="text-sm text-gray-500 font-tiro-bangla">
                           {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'ক্লিক করে ছবি নির্বাচন করুন'}
@@ -247,10 +466,10 @@ export default function ImageSearchPage() {
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span className="text-sm">সন্ধান করা হচ্ছে...</span>
+                    <span className="text-sm">আপনার আপলোড করা ছবিটা নিয়ে আমরা ইন্টারনেটে ঘাটাঘাটি করছি...</span>
                   </div>
                 ) : (
-                  <span className="text-sm">ছবি সন্ধান করুন</span>
+                  <span className="text-sm">ছবিটা সার্চ করুন</span>
                 )}
               </button>
             </div>
@@ -274,9 +493,43 @@ export default function ImageSearchPage() {
         {/* Results */}
         {result && (
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-8">
-            <h3 className="text-xl font-bold text-gray-800 mb-6 font-tiro-bangla">
-              সন্ধান ফলাফল
-            </h3>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-800 font-tiro-bangla">
+                সার্চ রেজাল্ট
+              </h3>
+              
+              <div className="flex items-center space-x-3">
+                {/* Start New Search Button */}
+                <button
+                  onClick={() => {
+                    setResult(null)
+                    setFile(null)
+                    setPreviewUrl(null)
+                    setError(null)
+                    setUploadProgress(null)
+                  }}
+                  className="px-4 py-2 rounded-lg font-medium transition-all bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 font-tiro-bangla text-sm"
+                >
+                  <div className="flex items-center space-x-2">
+                    <span>🔄</span>
+                    <span>নতুন ছবি সার্চ</span>
+                  </div>
+                </button>
+                
+                {/* Text Download Button */}
+                {result.factCheckReport && (
+                  <button
+                    onClick={handleDownloadText}
+                    className="px-4 py-2 rounded-lg font-medium transition-all bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 font-tiro-bangla text-sm"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span>📄</span>
+                      <span>টেক্সট ডাউনলোড</span>
+                    </div>
+                  </button>
+                )}
+              </div>
+            </div>
             
             {/* Coming Soon Message for Audio/Video */}
             {result.message && (
@@ -351,6 +604,87 @@ export default function ImageSearchPage() {
                     ))}
                   </div>
                 </div>
+
+                {/* Gemini Fact-Check Report */}
+                {result.factCheckReport && (
+                  <div className="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 rounded-xl p-6 border border-blue-200/50">
+                    <h4 className="text-lg font-bold text-gray-800 mb-4 font-tiro-bangla">
+                      {result.factCheckReport.title}
+                    </h4>
+                    
+                    {/* Original Upload Source */}
+                    <div className="mb-4 p-4 bg-white/60 rounded-lg border border-blue-100">
+                      <h5 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">মূল আপলোড উৎস:</h5>
+                      <a 
+                        href={result.factCheckReport.originalUploadSource}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-700 font-tiro-bangla text-sm break-all"
+                      >
+                        {result.factCheckReport.originalUploadSource}
+                      </a>
+                      <p className="text-xs text-gray-600 mt-1 font-tiro-bangla">
+                        সর্বপ্রথম দেখা গেছে: {new Date(result.factCheckReport.earliestTimestamp).toLocaleDateString('bn-BD')}
+                      </p>
+                    </div>
+
+                    {/* Contextual Analysis */}
+                    <div className="mb-4 p-4 bg-white/60 rounded-lg border border-blue-100">
+                      <h5 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">প্রেক্ষাপট বিশ্লেষণ:</h5>
+                      <p className="text-sm text-gray-700 font-tiro-bangla leading-relaxed">
+                        {result.factCheckReport.contextualAnalysis}
+                      </p>
+                    </div>
+
+                    {/* Usage Description */}
+                    <div className="mb-4 p-4 bg-white/60 rounded-lg border border-blue-100">
+                      <h5 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">ব্যবহারের বর্ণনা:</h5>
+                      <p className="text-sm text-gray-700 font-tiro-bangla leading-relaxed">
+                        {result.factCheckReport.usageDescription}
+                      </p>
+                    </div>
+
+                    {/* Sources with Context */}
+                    <div className="mb-4">
+                      <h5 className="font-semibold text-gray-800 mb-3 font-tiro-bangla">উৎসসমূহ:</h5>
+                      <div className="space-y-3">
+                        {result.factCheckReport.sources.map((source, index) => (
+                          <div key={index} className="p-3 bg-white/60 rounded-lg border border-blue-100">
+                            <div className="flex justify-between items-start mb-2">
+                              <h6 className="font-medium text-gray-800 font-tiro-bangla text-sm">
+                                {source.title}
+                              </h6>
+                              {source.timestamp && (
+                                <span className="text-xs text-gray-500 font-tiro-bangla">
+                                  {new Date(source.timestamp).toLocaleDateString('bn-BD')}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-600 mb-2 font-tiro-bangla">
+                              {source.context}
+                            </p>
+                            <a
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-700 text-xs font-medium font-tiro-bangla"
+                            >
+                              দেখুন →
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Conclusion */}
+                    <div className="p-4 bg-white/60 rounded-lg border border-blue-100">
+                      <h5 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">সিদ্ধান্ত:</h5>
+                      <p className="text-sm text-gray-700 font-tiro-bangla leading-relaxed">
+                        {result.factCheckReport.conclusion}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Metadata */}
                 {result.metadata && (

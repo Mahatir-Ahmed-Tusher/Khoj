@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
       model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
     } catch (error) {
       try {
-        model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+        model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
       } catch (error2) {
         try {
           model = genAI.getGenerativeModel({ model: 'gemini-pro' })

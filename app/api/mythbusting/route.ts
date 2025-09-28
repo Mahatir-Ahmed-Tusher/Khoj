@@ -185,11 +185,11 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.error('gemini-2.5-flash failed:', error)
       try {
-        console.log('Trying gemini-1.5-pro model...')
-        model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
-        console.log('Successfully initialized gemini-1.5-pro model')
+        console.log('Trying gemini-2.5-flash model...')
+        model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+        console.log('Successfully initialized gemini-2.5-flash model')
       } catch (error2) {
-        console.error('gemini-1.5-pro failed:', error2)
+        console.error('gemini-2.5-flash failed:', error2)
         try {
           console.log('Trying gemini-pro model...')
           model = genAI.getGenerativeModel({ model: 'gemini-pro' })
@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ 
             error: 'No compatible Gemini model found', 
             details: 'Please check your API key and model availability',
-            models_tried: ['gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-pro'],
+            models_tried: ['gemini-2.5-flash', 'gemini-2.5-flash', 'gemini-pro'],
             last_error: fallbackError instanceof Error ? fallbackError.message : 'Unknown error'
           }, { status: 500 })
         }

@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { Groq } from 'groq-sdk'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" })
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
 const fallbackModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
 
@@ -298,7 +298,7 @@ async function generateAIReport(text: string, type: string, maxRetries: number =
   // Try main Gemini model first
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`🤖 Generating AI report with gemini-1.5-pro (attempt ${attempt}/${maxRetries})...`)
+      console.log(`🤖 Generating AI report with gemini-2.5-flash (attempt ${attempt}/${maxRetries})...`)
       const result = await model.generateContent(geminiPrompt)
       const response = await result.response
       return response.text()

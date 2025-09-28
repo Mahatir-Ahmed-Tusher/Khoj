@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.2.1",
+    "@lottiefiles/dotlottie-react": "^0.17.1",
     "@tavily/core": "^0.5.11",
     "axios": "^1.6.2",
     "clsx": "^2.0.0",

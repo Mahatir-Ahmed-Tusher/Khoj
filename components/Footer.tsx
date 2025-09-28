@@ -49,7 +49,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/aifactcheck" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
+                <a href="/" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
                   AI ফ্যাক্টচেক
                 </a>
               </li>
