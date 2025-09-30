@@ -28,8 +28,8 @@ class TavilyManager {
       })
     }
 
-    // Fallback keys (2-16)
-    for (let i = 2; i <= 16; i++) {
+    // Fallback keys (2-19)
+    for (let i = 2; i <= 19; i++) {
       const key = process.env[`TAVILY_API_KEY_${i}`]
       if (key) {
         this.clients.push({

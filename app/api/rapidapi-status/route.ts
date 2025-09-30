@@ -24,6 +24,9 @@ export async function GET(request: NextRequest) {
         hasAppKey10: !!process.env.APP_KEY_10,
         hasAppKey11: !!process.env.APP_KEY_11,
         hasAppKey12: !!process.env.APP_KEY_12,
+        hasAppKey13: !!process.env.APP_KEY_13,
+        hasAppKey14: !!process.env.APP_KEY_14,
+        hasAppKey15: !!process.env.APP_KEY_15,
       }
     })
   } catch (error) {

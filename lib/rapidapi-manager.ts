@@ -19,7 +19,10 @@ export class RapidAPIKeyManager {
       process.env.APP_KEY_9,
       process.env.APP_KEY_10,
       process.env.APP_KEY_11,
-      process.env.APP_KEY_12
+      process.env.APP_KEY_12,
+      process.env.APP_KEY_13,
+      process.env.APP_KEY_14,
+      process.env.APP_KEY_15
     ].filter(Boolean) as string[] // Remove undefined keys
 
     console.log(`🔑 RapidAPI Key Manager initialized with ${this.keys.length} keys`)
