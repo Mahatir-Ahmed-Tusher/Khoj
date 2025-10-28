@@ -401,7 +401,7 @@ You are an experienced journalist and fact-checker. Create a detailed, human-fri
 [Write the main claim clearly]
 
 # Verdict
-[Write clearly: সত্য/মিথ্যা/ভ্রান্ত তথ্য/অযাচাইকৃত - Choose ONE and explain briefly]
+[Write clearly: সত্য/মিথ্যা/ভ্রান্ত তথ্য/অযাচাইকৃত - Choose ONE and explain briefly with strong, definitive language]
 
 # Detailed Analysis
 Include the following topics in this section:
@@ -450,7 +450,8 @@ Include the following topics in this section:
 - **Examples and Analysis:** Provide detailed examples and analysis for each point.
 - **CRITICAL - Current Date Context:** Today's date is ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}. This is NOT the future - this is the CURRENT date. Any dates in 2025 or earlier are in the PAST or PRESENT. Do NOT say any event in 2025 is "in the future" - we are currently in 2025.
 - **TEMPORAL LANGUAGE RESTRICTION:** NEVER use phrases like "ভবিষ্যতের খবর" (future news), "ভবিষ্যত সম্পর্কে" (about future), "এটি ভবিষ্যতের" (this is future), or any variation suggesting 2025 events are in the future. August 2025, September 2025, October 2025 are all PAST or PRESENT, not future, you don't have to mention about any date incompatibality of any news.
-- **VERDICT CLARITY:** In the Verdict section, clearly state ONE of: "সত্য" (True), "মিথ্যা" (False), "ভ্রান্ত তথ্য" (Misleading), or "অযাচাইকৃত" (Unverified). Be explicit and unambiguous.
+- **STRICT DATE ANALYSIS PROHIBITION:** DO NOT analyze, compare, or comment on dates in any way. Do NOT mention date inconsistencies, date mismatches, or temporal discrepancies. Do NOT verify dates or question date accuracy. Focus ONLY on factual content verification, not temporal analysis. Ignore all date-related information completely.
+- **VERDICT CLARITY:** In the Verdict section, clearly state ONE of: "সত্য" (True), "মিথ্যা" (False), "ভ্রান্ত তথ্য" (Misleading), or "অযাচাইকৃত" (Unverified). Be explicit and unambiguous. Use strong, definitive language like "স্পষ্টভাবে সত্য" (clearly true), "নিঃসন্দেহে মিথ্যা" (undoubtedly false), or "স্পষ্টতই ভ্রান্ত" (clearly misleading).
 
 Write the report as if an experienced journalist is writing for their readers - simple, clear, and trustworthy.
 **MOST IMPORTANT: This report MUST be detailed and comprehensive. Do NOT write concisely or briefly.**`;
@@ -661,8 +662,32 @@ export async function POST(request: NextRequest) {
     // Step 2: Search for additional sources using Tavily (same as main fact checker)
     console.log("Step 2: Searching for additional sources...");
     
-    // Create search query from news content
-    const searchQuery = `${newsContent.title} ${newsContent.content.substring(0, 200)}`;
+    // Create enhanced search query from news content
+    const extractKeyTerms = (text: string) => {
+      // Remove common words and extract meaningful terms
+      const stopWords = ['এবং', 'অথবা', 'কিন্তু', 'তবে', 'যেমন', 'সাথে', 'জন্য', 'থেকে', 'হয়', 'হয়েছে', 'করেছে', 'করেন', 'করেছেন', 'the', 'and', 'or', 'but', 'for', 'with', 'from', 'has', 'have', 'had', 'is', 'are', 'was', 'were'];
+      const words = text.toLowerCase().split(/\s+/).filter(word => 
+        word.length > 3 && 
+        !stopWords.includes(word) && 
+        !/^\d+$/.test(word) && // Remove pure numbers
+        !/^[^\u0980-\u09FF\u0000-\u007F]+$/.test(word) // Remove special characters only
+      );
+      return [...new Set(words)].slice(0, 10); // Remove duplicates and limit to 10 terms
+    };
+    
+    const titleTerms = extractKeyTerms(newsContent.title);
+    const contentTerms = extractKeyTerms(newsContent.content.substring(0, 500));
+    const allTerms = [...new Set([...titleTerms, ...contentTerms])];
+    
+    // Create multiple search queries for better coverage
+    const searchQueries = [
+      newsContent.title, // Original title
+      `${titleTerms.slice(0, 5).join(' ')}`, // Top 5 terms from title
+      `${allTerms.slice(0, 8).join(' ')}`, // Top 8 combined terms
+      `${newsContent.title} ${newsContent.content.substring(0, 100)}` // Title + first 100 chars
+    ].filter(query => query.trim().length > 10); // Filter out very short queries
+    
+    console.log(`Generated ${searchQueries.length} search queries:`, searchQueries.map(q => q.substring(0, 50) + '...'));
     
     // Search within Bangladeshi news sites first
     const bangladeshiNewsSites = [
@@ -680,63 +705,117 @@ export async function POST(request: NextRequest) {
     let hasBengaliSources = false;
     let hasEnglishSources = false;
 
-    // Step 1: Search within Bangladeshi news sites for Bengali content
+    // Step 1: Search within Bangladeshi news sites for Bengali content using multiple queries
     try {
-      const bangladeshiResults = await tavilyClient.search(searchQuery, {
-        sites: bangladeshiNewsSites,
-        max_results: 11,
-        search_depth: "advanced"
-      });
+      let allBangladeshiResults: any[] = [];
       
-      if (bangladeshiResults.results && bangladeshiResults.results.length > 0) {
-        searchResults.results = bangladeshiResults.results;
+      for (const query of searchQueries.slice(0, 2)) { // Use first 2 queries for Bengali sites
+        try {
+          const bangladeshiResults = await tavilyClient.search(query, {
+            sites: bangladeshiNewsSites,
+            max_results: 6,
+            search_depth: "advanced"
+          });
+          
+          if (bangladeshiResults.results && bangladeshiResults.results.length > 0) {
+            allBangladeshiResults.push(...bangladeshiResults.results);
+            console.log(`✅ Found ${bangladeshiResults.results.length} Bengali sources for query: ${query.substring(0, 30)}...`);
+          }
+        } catch (queryError) {
+          console.error(`Failed to search with query: ${query.substring(0, 30)}...`, queryError);
+        }
+      }
+      
+      // Remove duplicates based on URL
+      const uniqueResults = allBangladeshiResults.filter((result, index, self) => 
+        index === self.findIndex(r => r.url === result.url)
+      );
+      
+      if (uniqueResults.length > 0) {
+        searchResults.results = uniqueResults.slice(0, 11);
         hasBengaliSources = true;
-        console.log(`✅ Found ${bangladeshiResults.results.length} Bengali sources`);
+        console.log(`✅ Total unique Bengali sources found: ${uniqueResults.length}`);
       }
     } catch (error) {
       console.error('Failed to search Bangladeshi sites:', error);
     }
 
-    // Step 2: If insufficient Bengali sources, search for English sources
+    // Step 2: If insufficient Bengali sources, search for English sources using multiple queries
     if (!hasBengaliSources || searchResults.results.length < 3) {
       try {
         console.log('🔍 Searching for English sources...');
-        const englishResults = await tavilyClient.search(searchQuery, {
-          max_results: 11,
-          search_depth: "advanced",
-          include_domains: [
-            'reuters.com', 'bbc.com', 'cnn.com', 'ap.org', 'factcheck.org',
-            'snopes.com', 'politifact.com', 'who.int', 'un.org', 'worldbank.org'
-          ]
-        });
+        let allEnglishResults: any[] = [];
         
-        if (englishResults.results && englishResults.results.length > 0) {
+        for (const query of searchQueries.slice(0, 3)) { // Use first 3 queries for English sites
+          try {
+            const englishResults = await tavilyClient.search(query, {
+              max_results: 4,
+              search_depth: "advanced",
+              include_domains: [
+                'reuters.com', 'bbc.com', 'cnn.com', 'ap.org', 'factcheck.org',
+                'snopes.com', 'politifact.com', 'who.int', 'un.org', 'worldbank.org'
+              ]
+            });
+            
+            if (englishResults.results && englishResults.results.length > 0) {
+              allEnglishResults.push(...englishResults.results);
+              console.log(`✅ Found ${englishResults.results.length} English sources for query: ${query.substring(0, 30)}...`);
+            }
+          } catch (queryError) {
+            console.error(`Failed to search English with query: ${query.substring(0, 30)}...`, queryError);
+          }
+        }
+        
+        // Remove duplicates based on URL
+        const uniqueEnglishResults = allEnglishResults.filter((result, index, self) => 
+          index === self.findIndex(r => r.url === result.url)
+        );
+        
+        if (uniqueEnglishResults.length > 0) {
           // If we have Bengali sources, append English sources
           if (hasBengaliSources) {
-            searchResults.results = [...searchResults.results, ...englishResults.results.slice(0, 5)];
+            searchResults.results = [...searchResults.results, ...uniqueEnglishResults.slice(0, 5)];
           } else {
-            searchResults.results = englishResults.results;
+            searchResults.results = uniqueEnglishResults.slice(0, 11);
           }
           hasEnglishSources = true;
-          console.log(`✅ Found ${englishResults.results.length} English sources`);
+          console.log(`✅ Total unique English sources found: ${uniqueEnglishResults.length}`);
         }
       } catch (error) {
         console.error('Failed to search English sources:', error);
       }
     }
 
-    // Step 3: If still no results, try general search
+    // Step 3: If still no results, try general search using multiple queries
     if (!searchResults.results || searchResults.results.length === 0) {
       try {
         console.log('🔍 Trying general search...');
-        const generalResults = await tavilyClient.search(searchQuery, {
-          max_results: 11,
-          search_depth: "advanced"
-        });
+        let allGeneralResults: any[] = [];
         
-        if (generalResults.results) {
-          searchResults.results = generalResults.results;
-          console.log(`✅ Found ${generalResults.results.length} general sources`);
+        for (const query of searchQueries.slice(0, 2)) { // Use first 2 queries for general search
+          try {
+            const generalResults = await tavilyClient.search(query, {
+              max_results: 6,
+              search_depth: "advanced"
+            });
+            
+            if (generalResults.results && generalResults.results.length > 0) {
+              allGeneralResults.push(...generalResults.results);
+              console.log(`✅ Found ${generalResults.results.length} general sources for query: ${query.substring(0, 30)}...`);
+            }
+          } catch (queryError) {
+            console.error(`Failed to search general with query: ${query.substring(0, 30)}...`, queryError);
+          }
+        }
+        
+        // Remove duplicates based on URL
+        const uniqueGeneralResults = allGeneralResults.filter((result, index, self) => 
+          index === self.findIndex(r => r.url === result.url)
+        );
+        
+        if (uniqueGeneralResults.length > 0) {
+          searchResults.results = uniqueGeneralResults.slice(0, 11);
+          console.log(`✅ Total unique general sources found: ${uniqueGeneralResults.length}`);
         }
       } catch (error) {
         console.error('Failed to search general web:', error);
@@ -798,7 +877,7 @@ ${crawledContent.map((item: any, index: number) => `- ${item.title} (${item.isEn
       `
       : report;
 
-    // Determine verdict from report content (improved logic)
+    // Determine verdict from report content (enhanced logic for better accuracy)
     const getVerdictFromReport = (reportText: string): 'true' | 'false' | 'misleading' | 'unverified' => {
       const lowerText = reportText.toLowerCase();
       
@@ -807,14 +886,20 @@ ${crawledContent.map((item: any, index: number) => `- ${item.title} (${item.isEn
         const verdictSection = lowerText.split('# সিদ্ধান্ত')[1]?.split('#')[0] || 
                               lowerText.split('# verdict')[1]?.split('#')[0] || '';
         
+        // Check for clear verdict indicators in the verdict section
         if (verdictSection.includes('সত্য') || verdictSection.includes('true') || 
-            verdictSection.includes('সঠিক') || verdictSection.includes('correct')) {
+            verdictSection.includes('সঠিক') || verdictSection.includes('correct') ||
+            verdictSection.includes('প্রমাণিত') || verdictSection.includes('verified')) {
           return 'true';
         } else if (verdictSection.includes('মিথ্যা') || verdictSection.includes('false') || 
-                   verdictSection.includes('ভুল') || verdictSection.includes('incorrect')) {
+                   verdictSection.includes('ভুল') || verdictSection.includes('incorrect') ||
+                   verdictSection.includes('অসত্য') || verdictSection.includes('untrue') ||
+                   verdictSection.includes('প্রমাণিত নয়') || verdictSection.includes('not verified')) {
           return 'false';
         } else if (verdictSection.includes('ভ্রান্ত') || verdictSection.includes('misleading') || 
-                   verdictSection.includes('প্ররোচক') || verdictSection.includes('deceptive')) {
+                   verdictSection.includes('প্ররোচক') || verdictSection.includes('deceptive') ||
+                   verdictSection.includes('অর্ধসত্য') || verdictSection.includes('half-truth') ||
+                   verdictSection.includes('ভুল তথ্য') || verdictSection.includes('false information')) {
           return 'misleading';
         }
       }
@@ -825,27 +910,70 @@ ${crawledContent.map((item: any, index: number) => `- ${item.title} (${item.isEn
                                  lowerText.split('# conclusion')[1]?.split('#')[0] || '';
         
         if (conclusionSection.includes('সত্য') || conclusionSection.includes('true') || 
-            conclusionSection.includes('সঠিক') || conclusionSection.includes('correct')) {
+            conclusionSection.includes('সঠিক') || conclusionSection.includes('correct') ||
+            conclusionSection.includes('প্রমাণিত') || conclusionSection.includes('verified')) {
           return 'true';
         } else if (conclusionSection.includes('মিথ্যা') || conclusionSection.includes('false') || 
-                   conclusionSection.includes('ভুল') || conclusionSection.includes('incorrect')) {
+                   conclusionSection.includes('ভুল') || conclusionSection.includes('incorrect') ||
+                   conclusionSection.includes('অসত্য') || conclusionSection.includes('untrue') ||
+                   conclusionSection.includes('প্রমাণিত নয়') || conclusionSection.includes('not verified')) {
           return 'false';
         } else if (conclusionSection.includes('ভ্রান্ত') || conclusionSection.includes('misleading') || 
-                   conclusionSection.includes('প্ররোচক') || conclusionSection.includes('deceptive')) {
+                   conclusionSection.includes('প্ররোচক') || conclusionSection.includes('deceptive') ||
+                   conclusionSection.includes('অর্ধসত্য') || conclusionSection.includes('half-truth') ||
+                   conclusionSection.includes('ভুল তথ্য') || conclusionSection.includes('false information')) {
           return 'misleading';
         }
       }
       
-      // Fallback to general text analysis
+      // Enhanced analysis of the entire report content
+      const trueIndicators = [
+        'সত্য', 'true', 'সঠিক', 'correct', 'প্রমাণিত', 'verified', 'নিশ্চিত', 'confirmed',
+        'সত্য বলে প্রমাণিত', 'proven true', 'সঠিক তথ্য', 'accurate information'
+      ];
+      
+      const falseIndicators = [
+        'মিথ্যা', 'false', 'ভুল', 'incorrect', 'অসত্য', 'untrue', 'প্রমাণিত নয়', 'not verified',
+        'মিথ্যা বলে প্রমাণিত', 'proven false', 'ভুল তথ্য', 'false information', 'অপ্রমাণিত', 'unproven'
+      ];
+      
+      const misleadingIndicators = [
+        'ভ্রান্ত', 'misleading', 'প্ররোচক', 'deceptive', 'অর্ধসত্য', 'half-truth',
+        'ভুল তথ্য', 'false information', 'প্ররোচনা', 'misinformation', 'অর্ধসত্য', 'partial truth'
+      ];
+      
+      // Count occurrences of each type
+      const trueCount = trueIndicators.reduce((count, indicator) => 
+        count + (lowerText.split(indicator).length - 1), 0);
+      const falseCount = falseIndicators.reduce((count, indicator) => 
+        count + (lowerText.split(indicator).length - 1), 0);
+      const misleadingCount = misleadingIndicators.reduce((count, indicator) => 
+        count + (lowerText.split(indicator).length - 1), 0);
+      
+      console.log(`Verdict analysis: True=${trueCount}, False=${falseCount}, Misleading=${misleadingCount}`);
+      
+      // Determine verdict based on highest count and context
+      if (trueCount > falseCount && trueCount > misleadingCount && trueCount > 0) {
+        return 'true';
+      } else if (falseCount > trueCount && falseCount > misleadingCount && falseCount > 0) {
+        return 'false';
+      } else if (misleadingCount > trueCount && misleadingCount > falseCount && misleadingCount > 0) {
+        return 'misleading';
+      }
+      
+      // Fallback to general text analysis with stricter criteria
       if (lowerText.includes('সত্য') || lowerText.includes('true') || 
-          lowerText.includes('সঠিক') || lowerText.includes('correct')) {
+          lowerText.includes('সঠিক') || lowerText.includes('correct') ||
+          lowerText.includes('প্রমাণিত') || lowerText.includes('verified')) {
         return 'true';
       } else if (lowerText.includes('মিথ্যা') || lowerText.includes('false') || 
                  lowerText.includes('ভুল') || lowerText.includes('incorrect') ||
-                 lowerText.includes('অসত্য') || lowerText.includes('untrue')) {
+                 lowerText.includes('অসত্য') || lowerText.includes('untrue') ||
+                 lowerText.includes('প্রমাণিত নয়') || lowerText.includes('not verified')) {
         return 'false';
       } else if (lowerText.includes('ভ্রান্ত') || lowerText.includes('misleading') || 
                  lowerText.includes('প্ররোচক') || lowerText.includes('deceptive') ||
+                 lowerText.includes('অর্ধসত্য') || lowerText.includes('half-truth') ||
                  lowerText.includes('ভুল তথ্য') || lowerText.includes('false information')) {
         return 'misleading';
       } else {
