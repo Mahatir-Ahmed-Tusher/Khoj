@@ -67,6 +67,18 @@
     /* Performance optimization */
     will-change: transform;
     transform: translateZ(0);
+    
+    /* Mobile-specific optimizations */
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: text;
+    
+    /* Prevent zoom on iOS */
+    font-size: 16px;
+    
+    /* Better touch targets */
+    min-height: 44px;
   }
   
   .card {
@@ -96,6 +108,24 @@
   @media (max-width: 768px) {
     .mukti-chat-bg {
       background-image: url('/mukti-chat-bg-mobile.png');
+    }
+    
+    /* Mobile performance optimizations */
+    .search-input {
+      font-size: 16px; /* Prevents zoom on iOS */
+      padding: 12px 16px;
+      border-radius: 12px;
+    }
+    
+    /* Reduce animations on mobile for better performance */
+    * {
+      animation-duration: 0.2s !important;
+      transition-duration: 0.2s !important;
+    }
+    
+    /* Optimize scrolling */
+    .overflow-y-auto {
+      -webkit-overflow-scrolling: touch;
     }
   }
   

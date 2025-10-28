@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, memo, useEffect, useRef } from "react";
+import { useState, memo, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Mic, MicOff } from "lucide-react";
 import Image from "next/image";
@@ -133,13 +133,13 @@ const SearchBar = memo(function SearchBar({
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
     // Clear selected file when typing
     if (selectedFile) {
       setSelectedFile(null);
     }
-  };
+  }, [selectedFile]);
 
   const handleMicClick = async () => {
     if (isRecording) {
@@ -182,6 +182,12 @@ const SearchBar = memo(function SearchBar({
           onChange={handleInputChange}
           placeholder={dynamicPlaceholder || placeholder}
           className="search-input pr-24 md:pr-36 text-sm md:text-base"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck="false"
+          inputMode="text"
+          enterKeyHint="search"
         />
 
         {/* Hidden file input */}

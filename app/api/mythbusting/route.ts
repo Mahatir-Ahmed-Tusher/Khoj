@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import Groq from 'groq-sdk'
 import { searchWithRapidAPIFallback, searchWithRapidAPIFallbackAlternative } from '@/lib/rapidapi-manager'
 
 // Generate fallback references when RapidAPI search fails
@@ -79,19 +80,27 @@ function generateFallbackReferences(query: string) {
 
 export async function GET() {
   try {
-    const apiKey = process.env.GEMINI_API_KEY_2
-    if (!apiKey) {
+    const groqApiKey = process.env.GROQ_API_KEY
+    const geminiApiKey = process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY
+    
+    if (!groqApiKey && !geminiApiKey) {
       return NextResponse.json({ 
         status: 'Mythbusting API is working',
         message: 'Use POST method with query parameter to analyze claims',
-        error: 'GEMINI_API_KEY_2 not configured'
+        error: 'No AI API keys configured',
+        details: 'Need either GROQ_API_KEY or GEMINI_API_KEY',
+        availableKeys: Object.keys(process.env).filter(key => key.includes('GROQ') || key.includes('GEMINI'))
       })
     }
 
     return NextResponse.json({ 
       status: 'Mythbusting API is working',
       message: 'Use POST method with query parameter to analyze claims',
-      apiKeyConfigured: true
+      apiKeyConfigured: true,
+      primaryModel: groqApiKey ? 'Groq GPT-OSS-120B' : 'Gemini 2.5 Flash',
+      fallbackModel: groqApiKey && geminiApiKey ? 'Gemini 2.5 Flash' : 'None',
+      groqAvailable: !!groqApiKey,
+      geminiAvailable: !!geminiApiKey
     })
   } catch (error) {
     return NextResponse.json({ 
@@ -111,18 +120,6 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Mythbusting request received:', query)
-    
-    // Check environment variables first
-    const apiKey = process.env.GEMINI_API_KEY_2
-    if (!apiKey) {
-      console.error('GEMINI_API_KEY_2 not configured in environment')
-      return NextResponse.json({ 
-        error: 'GEMINI_API_KEY_2 not configured',
-        details: 'Please check your environment variables in Vercel deployment settings'
-      }, { status: 500 })
-    }
-    
-    console.log('Environment check passed - GEMINI_API_KEY_2 is configured')
 
     // Step 1: Search for evidence using RapidAPI with fallback
     let searchResults = null
@@ -173,37 +170,63 @@ export async function POST(request: NextRequest) {
 
     console.log(`📚 Found ${evidenceSources.length} evidence sources`)
 
-    console.log('Initializing Gemini AI...')
-    const genAI = new GoogleGenerativeAI(apiKey)
+    // Initialize AI models - Groq first, then Gemini fallback
+    const groqApiKey = process.env.GROQ_API_KEY
+    const geminiApiKey = process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY
     
-    // Try different model names in case gemini-pro is not available
-    let model
-    try {
-      console.log('Trying gemini-2.5-flash model...')
-      model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
-      console.log('Successfully initialized gemini-2.5-flash model')
-    } catch (error) {
-      console.error('gemini-2.5-flash failed:', error)
+    if (!groqApiKey && !geminiApiKey) {
+      console.error('No AI API keys configured in environment')
+      return NextResponse.json({ 
+        error: 'No AI API keys configured',
+        details: 'Please check your environment variables. Need either GROQ_API_KEY or GEMINI_API_KEY',
+        availableKeys: Object.keys(process.env).filter(key => key.includes('GROQ') || key.includes('GEMINI'))
+      }, { status: 500 })
+    }
+    
+    console.log('Environment check passed - AI API keys are configured')
+    
+    let useGroq = false
+    let groqClient = null
+    let geminiModel = null
+    
+    // Try Groq first (primary)
+    if (groqApiKey) {
       try {
-        console.log('Trying gemini-2.5-flash model...')
-        model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
-        console.log('Successfully initialized gemini-2.5-flash model')
-      } catch (error2) {
-        console.error('gemini-2.5-flash failed:', error2)
-        try {
-          console.log('Trying gemini-pro model...')
-          model = genAI.getGenerativeModel({ model: 'gemini-pro' })
-          console.log('Successfully initialized gemini-pro model')
-        } catch (fallbackError) {
-          console.error('All Gemini models failed:', fallbackError)
-          return NextResponse.json({ 
-            error: 'No compatible Gemini model found', 
-            details: 'Please check your API key and model availability',
-            models_tried: ['gemini-2.5-flash', 'gemini-2.5-flash', 'gemini-pro'],
-            last_error: fallbackError instanceof Error ? fallbackError.message : 'Unknown error'
-          }, { status: 500 })
-        }
+        console.log('Initializing Groq client with GPT-OSS-120B...')
+        groqClient = new Groq({ apiKey: groqApiKey })
+        useGroq = true
+        console.log('Successfully initialized Groq client')
+      } catch (error) {
+        console.error('Groq initialization failed:', error)
+        useGroq = false
       }
+    } else {
+      console.log('GROQ_API_KEY not found, using Gemini fallback')
+    }
+    
+    // Initialize Gemini as fallback
+    if (!useGroq && geminiApiKey) {
+      try {
+        console.log('Initializing Gemini AI as fallback...')
+        const genAI = new GoogleGenerativeAI(geminiApiKey)
+        geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+        console.log('Successfully initialized Gemini 2.5 Flash model')
+      } catch (error) {
+        console.error('Gemini initialization failed:', error)
+        return NextResponse.json({ 
+          error: 'No AI model available', 
+          details: 'Both Groq and Gemini failed to initialize',
+          groqAvailable: !!groqApiKey,
+          geminiAvailable: !!geminiApiKey,
+          last_error: error instanceof Error ? error.message : 'Unknown error'
+        }, { status: 500 })
+      }
+    } else if (!useGroq && !geminiApiKey) {
+      return NextResponse.json({ 
+        error: 'No AI API keys configured', 
+        details: 'Need either GROQ_API_KEY or GEMINI_API_KEY',
+        availableKeys: Object.keys(process.env).filter(key => key.includes('GROQ') || key.includes('GEMINI'))
+      }, { status: 500 })
     }
 
     // Prepare evidence context for AI
@@ -255,7 +278,7 @@ export async function POST(request: NextRequest) {
 
 VERDICT: [true/false/misleading/unverified/partially_true/context_dependent]
 
-SUMMARY: [Write a simple, engaging summary in Bengali that explains the main issue]
+SUMMARY: [Write a BRIEF 2-3 sentence gist in Bengali that captures the essence - NOT a detailed analysis, just the core finding]
 
 DETAILED_ANALYSIS: [Write a comprehensive, flowing analysis in Bengali that:
 - Starts and ends naturally
@@ -267,7 +290,8 @@ DETAILED_ANALYSIS: [Write a comprehensive, flowing analysis in Bengali that:
 - Provides detailed scientific/historical context
 - Analyzes from multiple perspectives
 - Encourages readers to think critically
-- Contains at least 5-7 detailed paragraphs]
+- Contains at least 5-7 detailed paragraphs
+- NO TABLES, NO BULLET POINTS - only flowing paragraphs]
 
 CONCLUSION: [Write "তাহলে যেটা দাঁড়ায়" - your own explanation and final opinion that includes:
 - Summary of all analysis
@@ -278,10 +302,15 @@ CONCLUSION: [Write "তাহলে যেটা দাঁড়ায়" - you
 
 KEY_TAKEAWAYS: [Write 2-3 simple, memorable key messages in Bengali]
 
-SOURCES: [List of sources]
+SOURCES: [List sources with proper hyperlinks in this format:
+- Source Title - [URL]
+- Another Source - [URL]
+Make sure all URLs are properly formatted and clickable]
 
-**Writing Guidelines:**
-- Avoid bullet points and numbered lists in the main analysis
+**Critical Formatting Requirements:**
+- SUMMARY must be a BRIEF gist (2-3 sentences max), NOT a detailed analysis
+- NO TABLES anywhere in the response
+- NO bullet points or numbered lists in DETAILED_ANALYSIS
 - Write in flowing paragraphs that connect naturally
 - Use conversational tone in Bengali - "আপনি হয়তো ভাবছেন..." "এখানে আসল ঘটনা হলো..."
 - Include interesting facts and surprising discoveries
@@ -293,6 +322,7 @@ SOURCES: [List of sources]
 - In CONCLUSION section, provide your own expert opinion and final assessment
 - Make the analysis educational but accessible to everyone
 - Write ALL content in Bengali except for technical terms that are better in English
+- Ensure all links in SOURCES section are properly formatted as hyperlinks
 
 Analyze the claim: "`
 
@@ -308,28 +338,75 @@ Write: "আপনি হয়তো ভাবছেন এটা সত্য�
 
 Write at least 5-7 detailed paragraphs in DETAILED_ANALYSIS and provide your own expert conclusion in CONCLUSION section.`
 
-    console.log('Sending request to Gemini AI with evidence...')
+    console.log('Sending request to AI with evidence...')
     let text: string
+    let aiModelUsed: string
+    
     try {
-      const result = await model.generateContent(prompt)
-      const response = await result.response
-      text = response.text()
+      if (useGroq && groqClient) {
+        console.log('Using Groq GPT-OSS-120B for mythbusting analysis...')
+        const completion = await groqClient.chat.completions.create({
+          model: "openai/gpt-oss-120b",
+          messages: [
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          temperature: 1,
+          max_tokens: 8192,
+          top_p: 1
+        })
+        
+        text = completion.choices[0]?.message?.content || ''
+        aiModelUsed = 'Groq GPT-OSS-120B'
+        console.log('Successfully received response from Groq GPT-OSS-120B')
+      } else if (geminiModel) {
+        console.log('Using Gemini 2.5 Flash for mythbusting analysis...')
+        const result = await geminiModel.generateContent(prompt)
+        const response = await result.response
+        text = response.text()
+        aiModelUsed = 'Gemini 2.5 Flash'
+        console.log('Successfully received response from Gemini 2.5 Flash')
+      } else {
+        throw new Error('No AI model available')
+      }
 
       if (!text) {
-        console.error('Empty response from Gemini AI')
+        console.error('Empty response from AI model')
         return NextResponse.json({ error: 'Empty response from AI model' }, { status: 500 })
       }
       
-      console.log('Successfully received response from Gemini AI')
-    } catch (geminiError) {
-      console.error('Gemini AI request failed:', geminiError)
-      return NextResponse.json({ 
-        error: 'Failed to generate content with Gemini AI',
-        details: geminiError instanceof Error ? geminiError.message : 'Unknown error'
-      }, { status: 500 })
+    } catch (aiError) {
+      console.error('AI request failed:', aiError)
+      
+      // Try fallback if Groq failed and Gemini is available
+      if (useGroq && geminiModel) {
+        console.log('Groq failed, trying Gemini fallback...')
+        try {
+          const result = await geminiModel.generateContent(prompt)
+          const response = await result.response
+          text = response.text()
+          aiModelUsed = 'Gemini 2.5 Flash (fallback)'
+          console.log('Successfully received response from Gemini fallback')
+        } catch (fallbackError) {
+          console.error('Both AI models failed:', fallbackError)
+          return NextResponse.json({ 
+            error: 'Failed to generate content with AI models',
+            details: `Groq error: ${aiError instanceof Error ? aiError.message : 'Unknown'}, Gemini error: ${fallbackError instanceof Error ? fallbackError.message : 'Unknown'}`,
+            models_tried: ['Groq GPT-OSS-120B', 'Gemini 2.5 Flash']
+          }, { status: 500 })
+        }
+      } else {
+        return NextResponse.json({ 
+          error: 'Failed to generate content with AI model',
+          details: aiError instanceof Error ? aiError.message : 'Unknown error',
+          model_used: useGroq ? 'Groq GPT-OSS-120B' : 'Gemini 2.5 Flash'
+        }, { status: 500 })
+      }
     }
 
-    console.log('Received response from Gemini AI, parsing...')
+    console.log(`Received response from ${aiModelUsed}, parsing...`)
     // Parse the response to extract structured data
     const parsedResult = parseMythbustingResponse(text, query, evidenceSources)
 
@@ -338,6 +415,7 @@ Write at least 5-7 detailed paragraphs in DETAILED_ANALYSIS and provide your own
     return NextResponse.json({
       ...parsedResult,
       evidenceSources: evidenceSources,
+      aiModelUsed: aiModelUsed,
       timestamp: new Date().toISOString()
     })
 
@@ -366,10 +444,16 @@ function parseMythbustingResponse(response: string, query: string, evidenceSourc
       verdict = verdictMatch[1].toLowerCase() as any
     }
 
-    // Try to extract summary
+    // Try to extract summary - ensure it's brief (2-3 sentences max)
     const summaryMatch = response.match(/SUMMARY:\s*(.+?)(?=\nDETAILED_ANALYSIS:|$)/is)
     if (summaryMatch) {
       summary = summaryMatch[1].trim()
+      
+      // Ensure summary is brief - truncate if too long
+      if (summary.length > 200) {
+        const sentences = summary.split(/[.!?]+/)
+        summary = sentences.slice(0, 2).join('. ').trim() + '.'
+      }
     }
 
     // Try to extract detailed analysis
@@ -391,11 +475,29 @@ function parseMythbustingResponse(response: string, query: string, evidenceSourc
       keyTakeaways = takeawaysText.split('\n').filter(takeaway => takeaway.trim().length > 0)
     }
 
-    // Try to extract sources
+    // Try to extract sources and format them properly with hyperlinks
     const sourcesMatch = response.match(/SOURCES:\s*(.+?)(?=\n|$)/is)
     if (sourcesMatch) {
       const sourcesText = sourcesMatch[1].trim()
-      sources = sourcesText.split('\n').filter(source => source.trim().length > 0)
+      const sourceLines = sourcesText.split('\n').filter(line => line.trim())
+      
+      // Format sources with proper hyperlinks
+      sources = sourceLines.map(line => {
+        // Check if line already has URL format
+        if (line.includes(' - [') && line.includes(']')) {
+          return line // Already formatted
+        } else if (line.includes(' - ')) {
+          // Format: "Title - URL" -> "Title - [URL]"
+          const parts = line.split(' - ')
+          if (parts.length === 2) {
+            return `${parts[0].trim()} - [${parts[1].trim()}]`
+          }
+        } else if (line.startsWith('http')) {
+          // Just URL, create generic title
+          return `Source - [${line.trim()}]`
+        }
+        return line
+      })
     }
 
     // If no structured format found, try to extract URLs

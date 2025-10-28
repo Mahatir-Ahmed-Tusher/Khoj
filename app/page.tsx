@@ -261,6 +261,7 @@ export default function HomePage() {
   const [isTextCheckActive, setIsTextCheckActive] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [isAtTop, setIsAtTop] = useState(true);
+  const [isClassifying, setIsClassifying] = useState(false);
 
   // Track visit and check if first visit
   useEffect(() => {
@@ -520,6 +521,9 @@ export default function HomePage() {
       // 🤖 INTELLIGENT AUTO-ROUTING (when no button is pressed)
       console.log('🤖 Using intelligent routing for query:', query);
       
+      // Show loading animation for AI classification
+      setIsClassifying(true);
+      
       try {
         // Classify the query using AI
         const classification = await classifyQuery(query);
@@ -547,6 +551,9 @@ export default function HomePage() {
         console.error('Classification failed, using default routing:', error);
         // Fallback to factcheck on error
         window.location.href = `/factcheck-detail?query=${encodeURIComponent(query)}`;
+      } finally {
+        // Hide loading animation
+        setIsClassifying(false);
       }
     },
     [
@@ -560,6 +567,36 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* AI Classification Loading Overlay */}
+      {isClassifying && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-sm mx-4">
+            <div className="text-center">
+              {/* Spinning Circle Animation */}
+              <div className="relative w-16 h-16 mx-auto mb-4">
+                <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+                <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+              </div>
+              
+              {/* Loading Text */}
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">
+              ফ্যাক্টচেকিং এ পাঠানো হচ্ছে...
+              </h3>
+              <p className="text-sm text-gray-600 font-tiro-bangla">
+              একটু অপেক্ষা করুন...
+              </p>
+              
+              {/* Progress Dots */}
+              <div className="flex justify-center space-x-1 mt-4">
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Site Tour - Only for first-time visitors */}
       <SiteTour
         isOpen={showSiteTour}
@@ -662,19 +699,6 @@ export default function HomePage() {
               >
                 <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap drop-shadow-sm">
                   AI ছবি যাচাই
-                </span>
-              </button>
-              <button
-                onClick={handleMythbustingClick}
-                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 flex-shrink-0 ${
-                  isMythbustingActive
-                    ? "bg-gradient-to-b from-blue-300 to-blue-700 shadow-[0_8px_16px_rgba(59,130,246,0.6)]"
-                    : "bg-gradient-to-b from-white/30 to-white/10 shadow-[0_4px_8px_rgba(0,0,0,0.2)]"
-                }`}
-                data-tour="mythbusting"
-              >
-                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap drop-shadow-sm">
-                  মিথবাস্টিং
                 </span>
               </button>
               <button

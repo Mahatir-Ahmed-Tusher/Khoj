@@ -1,18 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import Groq from 'groq-sdk'
+
+// Define the expected classification result type
+interface ClassificationResult {
+  type: 'mythbusting' | 'factcheck' | 'url'
+  confidence: number
+  reasoning: string
+}
 
 /**
- * Query Classification API
- * 
- * This endpoint uses AI to intelligently classify user queries into:
+ * API endpoint for intelligent query classification.
+ * Classifies incoming queries into one of three types:
  * - "mythbusting": General beliefs, pseudoscience, folklore, common misconceptions
  * - "factcheck": Specific events, news claims, factual statements about real incidents
  * - "url": URL-based verification
  */
 
 export async function POST(request: NextRequest) {
+  let query: string = ''
+  
   try {
-    const { query } = await request.json()
+    const body = await request.json()
+    query = body.query
 
     if (!query || typeof query !== 'string') {
       return NextResponse.json({ error: 'Valid query is required' }, { status: 400 })
@@ -24,7 +34,7 @@ export async function POST(request: NextRequest) {
     // Use strict URL detection - must have protocol or clear URL pattern
     const isUrlQuery = isUrl(query.trim())
     console.log('URL detection result:', isUrlQuery)
-    
+
     if (isUrlQuery) {
       console.log('✅ Classified as URL')
       return NextResponse.json({
@@ -36,168 +46,242 @@ export async function POST(request: NextRequest) {
 
     console.log('❌ Not a URL, proceeding with AI classification...')
 
-    // Use AI to classify the query
-    const apiKey = process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY
-    if (!apiKey) {
-      console.error('No Gemini API key configured')
-      // Fallback to basic classification
-      return NextResponse.json(basicClassification(query))
-    }
+    // Try Groq first (primary) - fast classification
+    const groqApiKey = process.env.GROQ_API_KEY
+    const geminiApiKey = process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY
+    
+    if (groqApiKey) {
+      try {
+        console.log('🚀 Using Groq GPT-OSS-120B for fast classification...')
+        const groqClient = new Groq({ apiKey: groqApiKey })
+        
+        const prompt = `You are an intelligent query classification system. Your task is to analyze a user's query and determine if it is a "mythbusting" query or a "factcheck" query.
 
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+**Definition of Query Types:**
+- **mythbusting:** The user is asking to verify a general belief, common misconception, pseudoscience, folklore, or a scientific explanation that is often misunderstood. These queries often ask "if something is true" or "how something works" in a general sense.
+  *   Example: "দুধ আর আনারস খেলে কি বিষক্রিয়া হয়?" (Does eating milk and pineapple cause poisoning?)
+  *   Example: "ভূত আছে কি নাই?" (Are there ghosts?)
+  *   Example: "অ্যাস্ট্রোলজি কি সত্য?" (Is astrology true?)
+  *   Example: "৫জি নেটওয়ার্ক ক্ষতিকর?" (Is 5G network harmful?)
 
-    const prompt = `You are an expert query classifier for a fact-checking platform. Analyze the following query in Bengali/English and classify it into ONE of these categories:
+- **factcheck:** The user is asking to verify a specific event, a news claim, a statement about a real incident, or a claim involving specific people, dates, or locations. These queries are about concrete, verifiable occurrences.
+  *   Example: "দুধ আর আনারস খাওয়ায় ড মুহম্মদ ইউনুস বিষক্রিয়ায় মারা গেলেন" (Dr. Muhammad Yunus died of poisoning after eating milk and pineapple)
+  *   Example: "প্রধানমন্ত্রী শেখ হাসিনা আজ একটি নতুন প্রকল্প ঘোষণা করেছেন" (Prime Minister Sheikh Hasina announced a new project today)
+  *   Example: "২০২৩ সালের বন্যায় সিলেট ডুবে গিয়েছিল" (Sylhet was submerged in the 2023 flood)
 
-**MYTHBUSTING**: General beliefs, pseudoscience, myths, folklore, common misconceptions, "does X cause Y?" questions, scientific principles, superstitions, health myths, conspiracy theories, etc.
-Examples:
-- "দুধ আর আনারস খেলে কি বিষক্রিয়া হয়?"
-- "ভূত আছে কি নাই?"
-- "5G causes cancer"
-- "Does eating bananas at night cause cough?"
-- "অ্যাস্ট্রোলজি কি সত্য?"
+**Instructions:**
+1. Analyze the user's query carefully.
+2. Determine if it fits the "mythbusting" or "factcheck" definition.
+3. Provide a 'type' (either 'mythbusting' or 'factcheck'), a 'confidence' score (0.0 to 1.0), and a brief 'reasoning' for your classification.
+4. The output MUST be a JSON object.
 
-**FACTCHECK**: Specific events, news claims, statements about real people/places/incidents, recent happenings, "X person did Y" statements, dated events, political claims about specific actions.
-Examples:
-- "দুধ আর আনারস খাওয়ায় ড মুহম্মদ ইউনুস বিষক্রিয়ায় মারা গেলেন"
-- "The president announced new policy yesterday"
-- "শেখ হাসিনা পদত্যাগ করেছেন"
-- "Elon Musk bought Twitter"
-
-Query to classify: "${query}"
-
-Respond ONLY with this exact JSON format (no additional text):
+**Output Format:**
+\`\`\`json
 {
-  "type": "mythbusting" or "factcheck",
-  "confidence": 0.0 to 1.0,
-  "reasoning": "Brief explanation in English"
+  "type": "mythbusting" | "factcheck",
+  "confidence": number,
+  "reasoning": string
 }
+\`\`\`
 
-Consider:
-- Questions about general principles = mythbusting
-- Questions with "কি", "কেন", "আসলে", "সত্যি কি" about general topics = mythbusting  
-- Statements about specific people/events/dates = factcheck
-- "X person did Y" or "X happened in Y" = factcheck
-- General health/science questions = mythbusting
-- Specific incident claims = factcheck`
+**Query to classify:** "${query}"
 
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    const text = response.text()
+**Begin Classification Output:**`
 
-    console.log('📝 AI Response:', text)
+        const completion = await groqClient.chat.completions.create({
+          model: "openai/gpt-oss-120b",
+          messages: [
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          temperature: 1,
+          max_tokens: 8192,
+          top_p: 1
+        })
+        
+        const text = completion.choices[0]?.message?.content || ''
+        console.log('Groq raw response:', text)
 
-    // Parse the JSON response
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      console.warn('Could not parse AI response, using basic classification')
-      return NextResponse.json(basicClassification(query))
+        // Attempt to parse the JSON response
+        let classification: ClassificationResult
+        try {
+          classification = JSON.parse(text)
+          // Validate the parsed structure
+          if (!['mythbusting', 'factcheck'].includes(classification.type) ||
+              typeof classification.confidence !== 'number' ||
+              typeof classification.reasoning !== 'string') {
+            throw new Error('Invalid AI response structure')
+          }
+          console.log('✅ Groq Classified:', classification)
+          return NextResponse.json(classification)
+        } catch (parseError) {
+          console.error('Failed to parse Groq response as JSON:', parseError)
+          console.log('Falling back to basic classification due to Groq response parsing error.')
+          return NextResponse.json(basicClassification(query), { status: 200 })
+        }
+      } catch (groqError) {
+        console.error('Groq classification failed:', groqError)
+        console.log('Groq failed, trying Gemini fallback...')
+      }
     }
 
-    const classification = JSON.parse(jsonMatch[0])
-    console.log('✅ Classification result:', classification)
+    // Fallback to Gemini if Groq fails or not available
+    if (geminiApiKey) {
+      try {
+        console.log('🔄 Using Gemini as fallback for classification...')
+        const genAI = new GoogleGenerativeAI(geminiApiKey)
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
-    return NextResponse.json({
-      type: classification.type,
-      confidence: classification.confidence,
-      reasoning: classification.reasoning,
-      timestamp: new Date().toISOString()
-    })
+        const prompt = `You are an intelligent query classification system. Your task is to analyze a user's query and determine if it is a "mythbusting" query or a "factcheck" query.
+
+**Definition of Query Types:**
+- **mythbusting:** The user is asking to verify a general belief, common misconception, pseudoscience, folklore, or a scientific explanation that is often misunderstood. These queries often ask "if something is true" or "how something works" in a general sense.
+  *   Example: "দুধ আর আনারস খেলে কি বিষক্রিয়া হয়?" (Does eating milk and pineapple cause poisoning?)
+  *   Example: "ভূত আছে কি নাই?" (Are there ghosts?)
+  *   Example: "অ্যাস্ট্রোলজি কি সত্য?" (Is astrology true?)
+  *   Example: "৫জি নেটওয়ার্ক ক্ষতিকর?" (Is 5G network harmful?)
+
+- **factcheck:** The user is asking to verify a specific event, a news claim, a statement about a real incident, or a claim involving specific people, dates, or locations. These queries are about concrete, verifiable occurrences.
+  *   Example: "দুধ আর আনারস খাওয়ায় ড মুহম্মদ ইউনুস বিষক্রিয়ায় মারা গেলেন" (Dr. Muhammad Yunus died of poisoning after eating milk and pineapple)
+  *   Example: "প্রধানমন্ত্রী শেখ হাসিনা আজ একটি নতুন প্রকল্প ঘোষণা করেছেন" (Prime Minister Sheikh Hasina announced a new project today)
+  *   Example: "২০২৩ সালের বন্যায় সিলেট ডুবে গিয়েছিল" (Sylhet was submerged in the 2023 flood)
+
+**Instructions:**
+1. Analyze the user's query carefully.
+2. Determine if it fits the "mythbusting" or "factcheck" definition.
+3. Provide a 'type' (either 'mythbusting' or 'factcheck'), a 'confidence' score (0.0 to 1.0), and a brief 'reasoning' for your classification.
+4. The output MUST be a JSON object.
+
+**Output Format:**
+\`\`\`json
+{
+  "type": "mythbusting" | "factcheck",
+  "confidence": number,
+  "reasoning": string
+}
+\`\`\`
+
+**Query to classify:** "${query}"
+
+**Begin Classification Output:**`
+
+        const result = await model.generateContent(prompt)
+        const response = await result.response
+        const text = response.text()
+
+        console.log('Gemini raw response:', text)
+
+        // Attempt to parse the JSON response
+        let classification: ClassificationResult
+        try {
+          classification = JSON.parse(text)
+          // Validate the parsed structure
+          if (!['mythbusting', 'factcheck'].includes(classification.type) ||
+              typeof classification.confidence !== 'number' ||
+              typeof classification.reasoning !== 'string') {
+            throw new Error('Invalid AI response structure')
+          }
+          console.log('✅ Gemini Classified:', classification)
+          return NextResponse.json(classification)
+        } catch (parseError) {
+          console.error('Failed to parse Gemini response as JSON:', parseError)
+          console.log('Falling back to basic classification due to Gemini response parsing error.')
+          return NextResponse.json(basicClassification(query), { status: 200 })
+        }
+      } catch (geminiError) {
+        console.error('Gemini classification failed:', geminiError)
+        console.log('Both AI models failed, using basic classification.')
+        return NextResponse.json(basicClassification(query), { status: 200 })
+      }
+    } else {
+      console.log('No AI API keys available, using basic classification.')
+      return NextResponse.json(basicClassification(query), { status: 200 })
+    }
 
   } catch (error) {
-    console.error('Classification error:', error)
-    // Fallback to basic classification
-    const { query } = await request.json()
-    return NextResponse.json(basicClassification(query))
+    console.error('Error in query classification API:', error)
+    // Fallback to basic classification on any API error
+    if (query) {
+      return NextResponse.json(basicClassification(query), { status: 200 })
+    } else {
+      return NextResponse.json({ error: 'Failed to process query' }, { status: 500 })
+    }
   }
 }
 
-// Basic rule-based classification as fallback
-function basicClassification(query: string): {
-  type: 'mythbusting' | 'factcheck'
-  confidence: number
-  reasoning: string
-} {
+/**
+ * Basic rule-based classification as fallback
+ */
+function basicClassification(query: string): ClassificationResult {
   const lowerQuery = query.toLowerCase()
 
   // Mythbusting indicators
   const mythIndicators = [
     'কি সত্য', 'কি হয়', 'আসলে কি', 'সত্যি কি', 'কেন হয়',
     'is it true', 'does it', 'can it', 'will it', 'should i',
-    'ভূত', 'জিন', 'অ্যাস্ট্রোলজি', 'হোমিওপ্যাথি', '৫জি', '5g',
-    'superstition', 'myth', 'belief', 'folklore', 'pseudoscience'
+    'ভূত', 'জিন', 'অ্যাস্ট্রোলজি', 'হোমিওপ্যাথি', '৫জি', '5g'
   ]
 
-  // Factcheck indicators
+  // Factcheck indicators (specific events, actions)
   const factcheckIndicators = [
     'মারা গেলেন', 'ঘোষণা করেছেন', 'বলেছেন', 'করেছেন', 'হয়েছে',
-    'announced', 'declared', 'said', 'did', 'happened', 'resigned',
-    'died', 'killed', 'arrested', 'appointed', 'elected'
+    'announced', 'declared', 'said', 'did', 'happened', 'resigned'
   ]
 
-  // Check for person names (strong indicator of factcheck)
-  const personNames = [
-    'ড মুহম্মদ ইউনুস', 'শেখ হাসিনা', 'খালেদা জিয়া', 'নরেন্দ্র মোদি',
-    'donald trump', 'joe biden', 'elon musk', 'bill gates'
-  ]
-
-  // Scoring
   let mythScore = 0
   let factcheckScore = 0
 
   // Check for question words (usually mythbusting)
-  if (lowerQuery.includes('কি') || lowerQuery.includes('কেন') || 
-      lowerQuery.includes('?') || lowerQuery.includes('how') || 
+  if (lowerQuery.includes('কি') || lowerQuery.includes('কেন') ||
+      lowerQuery.includes('?') || lowerQuery.includes('how') ||
       lowerQuery.includes('why') || lowerQuery.includes('what')) {
     mythScore += 0.3
   }
 
-  // Check mythbusting indicators
   mythIndicators.forEach(indicator => {
     if (lowerQuery.includes(indicator.toLowerCase())) {
       mythScore += 0.2
     }
   })
 
-  // Check factcheck indicators
   factcheckIndicators.forEach(indicator => {
     if (lowerQuery.includes(indicator.toLowerCase())) {
       factcheckScore += 0.25
     }
   })
 
-  // Check for person names (strong indicator)
-  personNames.forEach(name => {
-    if (lowerQuery.includes(name.toLowerCase())) {
-      factcheckScore += 0.5
-    }
-  })
-
-  // Determine classification
   if (factcheckScore > mythScore) {
     return {
       type: 'factcheck',
-      confidence: Math.min(factcheckScore, 0.85),
-      reasoning: 'Query appears to be about a specific event or person'
+      confidence: Math.min(factcheckScore, 0.75),
+      reasoning: 'Query appears to be about a specific event (basic heuristic)'
     }
   } else {
     return {
       type: 'mythbusting',
-      confidence: Math.min(Math.max(mythScore, 0.6), 0.85),
-      reasoning: 'Query appears to be about a general belief or principle'
+      confidence: Math.min(Math.max(mythScore, 0.6), 0.75),
+      reasoning: 'Query appears to be about a general belief (basic heuristic)'
     }
   }
 }
 
-// Strict URL detection helper
+// Strict URL detection helper (duplicated from lib/utils.ts for API self-containment)
 function isUrl(text: string): boolean {
   if (!text || typeof text !== 'string') return false
-  
+
   const trimmedText = text.trim()
-  
+
+  // If it has spaces, it's definitely not a URL
+  if (trimmedText.includes(' ')) {
+    console.log('✗ Contains spaces, not a URL:', trimmedText.substring(0, 50))
+    return false
+  }
+
   // First, check if it has a protocol (http:// or https://)
   const hasProtocol = /^https?:\/\//i.test(trimmedText)
-  
+
   if (hasProtocol) {
     try {
       new URL(trimmedText)
@@ -208,7 +292,7 @@ function isUrl(text: string): boolean {
       return false
     }
   }
-  
+
   // Check if it looks like a domain without protocol (e.g., "example.com" or "www.example.com")
   // Must have at least one dot and look like a domain
   const domainPattern = /^(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/.*)?$/
@@ -222,17 +306,11 @@ function isUrl(text: string): boolean {
       return false
     }
   }
-  
-  // If it has spaces, it's definitely not a URL
-  if (trimmedText.includes(' ')) {
-    console.log('✗ Contains spaces, not a URL:', trimmedText.substring(0, 50))
-    return false
-  }
-  
+
   // Check for clear URL indicators (must have domain + path)
   const hasValidDomain = /[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/i.test(trimmedText)
   const hasPath = /\/[a-zA-Z0-9-_\/]+/i.test(trimmedText)
-  
+
   if (hasValidDomain && hasPath) {
     try {
       new URL(`https://${trimmedText}`)
@@ -243,7 +321,7 @@ function isUrl(text: string): boolean {
       return false
     }
   }
-  
+
   console.log('✗ Not a URL (natural language text):', trimmedText.substring(0, 50))
   return false
 }
@@ -252,15 +330,9 @@ function isUrl(text: string): boolean {
 export async function GET() {
   return NextResponse.json({
     status: 'Query Classification API is active',
-    message: 'Use POST method with { "query": "your query here" }',
-    endpoints: {
-      classify: '/api/classify-query'
-    },
-    types: {
-      mythbusting: 'General beliefs, pseudoscience, folklore',
-      factcheck: 'Specific events, news claims, factual statements',
-      url: 'URL-based verification'
-    }
+    message: 'Use POST method with query parameter to classify queries',
+    example_mythbusting: { query: 'দুধ আর আনারস খেলে কি বিষক্রিয়া হয়?' },
+    example_factcheck: { query: 'দুধ আর আনারস খাওয়ায় ড মুহম্মদ ইউনুস বিষক্রিয়ায় মারা গেলেন' },
+    example_url: { query: 'https://www.prothomalo.com/article' }
   })
 }
-
