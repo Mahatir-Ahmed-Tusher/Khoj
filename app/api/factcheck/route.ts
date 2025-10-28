@@ -47,31 +47,31 @@ You are an experienced journalist and fact-checker. Create a detailed, human-fri
 # Detailed Analysis
 Include the following topics in this section:
 
-## Primary Information Collection
+## প্রাথমিক তথ্য সংগ্রহ (Primary Information Collection)
 - What sources we reviewed
 - What information we found from each source
 - How credible the sources are
 
-## Information Analysis
+## তথ্যের বিশ্লেষণ (Information Analysis)
 - How consistent the found information is with each other
 - Which information is credible and why
 - Which information is questionable and why
 
-## Logic and Evidence
+## যুক্তি ও প্রমাণ (Logic and Evidence)
 - Explain step by step the logic for reaching the conclusion
 - Provide evidence behind each argument
 - Use numbered references [1], [2], [3], etc.
 
-## Context and History
+## পটভূমি ও ইতিহাস (Context and History)
 - If relevant, explain the history or context behind the event
 - Explain why this is important
 
-# Warnings and Limitations
+# সতর্কতা ও সীমাবদ্ধতা (Warnings and Limitations)
 - If any information is unclear or limited
 - If more research is needed
 - If there are questions about source credibility
 
-# Conclusion
+# উপসংহার (Conclusion)
 - Summary of main decision
 - Why this decision was reached
 - What it means for common people

@@ -251,3 +251,43 @@ export function isAllowedSite(url: string): boolean {
   const domain = extractDomain(url)
   return ALLOWED_SITES.some(site => domain.includes(site))
 }
+
+// Helper function to detect if input is a URL
+export function isUrl(text: string): boolean {
+  if (!text || typeof text !== 'string') return false
+  
+  const trimmedText = text.trim()
+  
+  // More flexible URL detection that handles long URLs
+  try {
+    // First try to parse as URL (most reliable method)
+    const urlObj = new URL(trimmedText)
+    console.log('✅ URL detected (direct):', urlObj.href.substring(0, 100))
+    return true
+  } catch {
+    // If that fails, try with http:// prefix
+    try {
+      const urlObj = new URL(`http://${trimmedText}`)
+      console.log('✅ URL detected (with http prefix):', urlObj.href.substring(0, 100))
+      return true
+    } catch {
+      // If that also fails, check for basic URL patterns
+      const hasProtocol = /^https?:\/\//i.test(trimmedText)
+      const hasDomain = /\.[a-z]{2,}/i.test(trimmedText)
+      const hasPath = /\//.test(trimmedText)
+      
+      const isUrlPattern = hasProtocol && hasDomain && hasPath
+      if (isUrlPattern) {
+        console.log('✅ URL detected (pattern match):', trimmedText.substring(0, 100))
+      } else {
+        console.log('❌ Not a URL:', trimmedText.substring(0, 50))
+      }
+      return isUrlPattern
+    }
+  }
+}
+
+// Helper function to detect input type
+export function detectInputType(input: string): 'url' | 'text' {
+  return isUrl(input) ? 'url' : 'text'
+}

@@ -30,7 +30,6 @@ const nextConfig = {
     // Performance optimizations
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 60,
-    // Add timeout and retry settings
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

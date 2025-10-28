@@ -478,7 +478,7 @@ ${report.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`
               {report.relatedArticles && report.relatedArticles.length > 0 && (
                 <div className="card">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    📚 সম্পর্কিত নিবন্ধসমূহ:
+                     সম্পর্কিত নিবন্ধসমূহ:
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {report.relatedArticles.map((article) => (
