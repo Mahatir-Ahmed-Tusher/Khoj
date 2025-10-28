@@ -333,14 +333,14 @@ ${report.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`
                       className="flex items-center space-x-2 bg-gray-100 text-black px-6 py-3 rounded-lg hover:bg-gray-300 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
                       <Share />
-                      <span className="font-medium">শেয়ার করুন</span>
+                      <span className="font-medium hidden md:inline">শেয়ার করুন</span>
                     </button>
                     <button
                       onClick={downloadReport}
                       className="flex items-center space-x-2 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
                       <Download className="h-5 w-5" />
-                      <span className="font-medium">ডাউনলোড করুন</span>
+                      <span className="font-medium hidden md:inline">ডাউনলোড করুন</span>
                     </button>
                   </div>
                 </div>

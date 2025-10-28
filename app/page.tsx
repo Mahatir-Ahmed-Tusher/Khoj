@@ -646,11 +646,11 @@ export default function HomePage() {
               খোঁজ
             </h1>
             <p
-              className="text-xl md:text-2xl text-white mb-6 font-tiro-bangla animate-pulse cursor-pointer hover:text-blue-200 transition-colors duration-300"
+              className="text-xl md:text-2xl text-white mb-6 font-tiro-bangla cursor-pointer hover:text-blue-200 transition-colors duration-300 glow-text"
               style={{
                 textShadow:
-                  "0 0 3px rgba(255, 255, 255, 0.3), 0 0 6px rgba(255, 255, 255, 0.2)",
-                animation: "glow 2s ease-in-out infinite alternate",
+                  "0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6), 0 0 24px rgba(255, 255, 255, 0.4), 0 0 32px rgba(255, 255, 255, 0.3)",
+                animation: "glow 4s ease-in-out infinite alternate",
               }}
             >
               <Link
@@ -740,11 +740,11 @@ export default function HomePage() {
                     alt="খোঁজ চ্যাট"
                     width={80}
                     height={26}
-                    className="mx-auto drop-shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:drop-shadow-[0_0_30px_rgba(59,130,246,0.8)] transition-all duration-300 animate-bounce"
+                    className="mx-auto drop-shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:drop-shadow-[0_0_30px_rgba(59,130,246,0.8)] transition-all duration-300 khoj-chat-icon"
                     style={{
                       filter:
                         "drop-shadow(0 0 15px rgba(59, 130, 246, 0.5)) drop-shadow(0 0 25px rgba(59, 130, 246, 0.3))",
-                      animation: "float 3s ease-in-out infinite",
+                      animation: "float 4s ease-in-out infinite",
                     }}
                   />
                 </div>

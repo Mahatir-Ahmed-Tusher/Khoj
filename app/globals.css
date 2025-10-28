@@ -17,10 +17,10 @@
 
 @keyframes glow {
   0% {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 0 16px rgba(255, 255, 255, 0.4), 0 0 24px rgba(255, 255, 255, 0.3);
   }
   100% {
-    text-shadow: 0 0 15px rgba(255, 255, 255, 1), 0 0 25px rgba(255, 255, 255, 0.8), 0 0 35px rgba(255, 255, 255, 0.6), 0 0 45px rgba(255, 255, 255, 0.4);
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 28px rgba(255, 255, 255, 0.4), 0 0 36px rgba(255, 255, 255, 0.3);
   }
 }
 
@@ -40,7 +40,7 @@
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-6px);
   }
 }
 
@@ -65,7 +65,7 @@
   .search-input {
     @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all duration-200 text-gray-900 bg-white placeholder-gray-500;
     /* Performance optimization */
-    will-change: transform;
+    will-change: auto;
     transform: translateZ(0);
     
     /* Mobile-specific optimizations */
@@ -78,7 +78,21 @@
     font-size: 16px;
     
     /* Better touch targets */
-    min-height: 44px;
+    min-height: 56px;
+    
+    /* Optimize input responsiveness */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    
+    /* Reduce repaints */
+    backface-visibility: hidden;
+    perspective: 1000px;
+    
+    /* Textarea specific styles */
+    resize: none;
+    overflow: hidden;
+    line-height: 1.5;
+    font-family: inherit;
   }
   
   .card {
@@ -113,14 +127,54 @@
     /* Mobile performance optimizations */
     .search-input {
       font-size: 16px; /* Prevents zoom on iOS */
-      padding: 12px 16px;
+      padding: 14px 16px;
       border-radius: 12px;
+      min-height: 56px;
+      /* Additional mobile optimizations */
+      -webkit-appearance: none;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: text;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      backface-visibility: hidden;
+      perspective: 1000px;
+      will-change: auto;
+      transform: translateZ(0);
     }
     
-    /* Reduce animations on mobile for better performance */
+    /* Disable animations on mobile for better performance */
     * {
-      animation-duration: 0.2s !important;
-      transition-duration: 0.2s !important;
+      animation-duration: 0.3s !important;
+      transition-duration: 0.3s !important;
+    }
+    
+    /* Disable specific animations on mobile */
+    .animate-pulse {
+      animation: none !important;
+    }
+    
+    .animate-bounce {
+      animation: none !important;
+    }
+    
+    /* Keep glow effect but disable animation on mobile */
+    .glow-text {
+      animation: none !important;
+    }
+    
+    /* Disable float animation on mobile but keep the visual effects */
+    .khoj-chat-icon {
+      animation: none !important;
+    }
+    
+    /* Force override inline styles on mobile */
+    .glow-text[style*="animation"] {
+      animation: none !important;
+    }
+    
+    .khoj-chat-icon[style*="animation"] {
+      animation: none !important;
     }
     
     /* Optimize scrolling */
