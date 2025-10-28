@@ -253,41 +253,170 @@ export function isAllowedSite(url: string): boolean {
 }
 
 // Helper function to detect if input is a URL
+// Uses strict detection to avoid false positives with natural language
 export function isUrl(text: string): boolean {
   if (!text || typeof text !== 'string') return false
   
   const trimmedText = text.trim()
   
-  // More flexible URL detection that handles long URLs
-  try {
-    // First try to parse as URL (most reliable method)
-    const urlObj = new URL(trimmedText)
-    console.log('✅ URL detected (direct):', urlObj.href.substring(0, 100))
-    return true
-  } catch {
-    // If that fails, try with http:// prefix
+  // If it has spaces, it's definitely not a URL
+  if (trimmedText.includes(' ')) {
+    console.log('❌ Contains spaces, not a URL:', trimmedText.substring(0, 50))
+    return false
+  }
+  
+  // First, check if it has a protocol (http:// or https://)
+  const hasProtocol = /^https?:\/\//i.test(trimmedText)
+  
+  if (hasProtocol) {
     try {
-      const urlObj = new URL(`http://${trimmedText}`)
-      console.log('✅ URL detected (with http prefix):', urlObj.href.substring(0, 100))
+      new URL(trimmedText)
+      console.log('✅ URL with protocol detected:', trimmedText.substring(0, 100))
       return true
     } catch {
-      // If that also fails, check for basic URL patterns
-      const hasProtocol = /^https?:\/\//i.test(trimmedText)
-      const hasDomain = /\.[a-z]{2,}/i.test(trimmedText)
-      const hasPath = /\//.test(trimmedText)
-      
-      const isUrlPattern = hasProtocol && hasDomain && hasPath
-      if (isUrlPattern) {
-        console.log('✅ URL detected (pattern match):', trimmedText.substring(0, 100))
-      } else {
-        console.log('❌ Not a URL:', trimmedText.substring(0, 50))
-      }
-      return isUrlPattern
+      console.log('❌ Invalid URL despite protocol:', trimmedText.substring(0, 50))
+      return false
     }
   }
+  
+  // Check if it looks like a domain without protocol (e.g., "example.com" or "www.example.com")
+  // Must have at least one dot and look like a domain
+  const domainPattern = /^(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/.*)?$/
+  if (domainPattern.test(trimmedText)) {
+    try {
+      new URL(`https://${trimmedText}`)
+      console.log('✅ Domain without protocol detected:', trimmedText.substring(0, 100))
+      return true
+    } catch {
+      console.log('❌ Invalid domain format:', trimmedText.substring(0, 50))
+      return false
+    }
+  }
+  
+  // Check for clear URL indicators (must have domain + path)
+  const hasValidDomain = /[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/i.test(trimmedText)
+  const hasPath = /\/[a-zA-Z0-9-_\/]+/i.test(trimmedText)
+  
+  if (hasValidDomain && hasPath) {
+    try {
+      new URL(`https://${trimmedText}`)
+      console.log('✅ URL pattern detected:', trimmedText.substring(0, 100))
+      return true
+    } catch {
+      console.log('❌ Failed URL validation:', trimmedText.substring(0, 50))
+      return false
+    }
+  }
+  
+  console.log('❌ Not a URL (natural language text):', trimmedText.substring(0, 50))
+  return false
 }
 
 // Helper function to detect input type
 export function detectInputType(input: string): 'url' | 'text' {
   return isUrl(input) ? 'url' : 'text'
+}
+
+// Query classification types
+export type QueryType = 'mythbusting' | 'factcheck' | 'url'
+
+export interface ClassificationResult {
+  type: QueryType
+  confidence: number
+  reasoning: string
+}
+
+/**
+ * Intelligently classifies a query to determine routing
+ * - mythbusting: General beliefs, pseudoscience, folklore
+ * - factcheck: Specific events, news claims
+ * - url: URL-based verification
+ */
+export async function classifyQuery(query: string): Promise<ClassificationResult> {
+  try {
+    // Quick URL check first
+    if (isUrl(query)) {
+      return {
+        type: 'url',
+        confidence: 1.0,
+        reasoning: 'Input is a URL'
+      }
+    }
+
+    // Call classification API
+    const response = await fetch('/api/classify-query', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+    })
+
+    if (!response.ok) {
+      throw new Error('Classification API failed')
+    }
+
+    const result = await response.json()
+    return result
+  } catch (error) {
+    console.error('Classification error:', error)
+    // Fallback to basic heuristics
+    return basicQueryClassification(query)
+  }
+}
+
+/**
+ * Basic rule-based classification as fallback
+ */
+function basicQueryClassification(query: string): ClassificationResult {
+  const lowerQuery = query.toLowerCase()
+
+  // Mythbusting indicators
+  const mythIndicators = [
+    'কি সত্য', 'কি হয়', 'আসলে কি', 'সত্যি কি', 'কেন হয়',
+    'is it true', 'does it', 'can it', 'will it', 'should i',
+    'ভূত', 'জিন', 'অ্যাস্ট্রোলজি', 'হোমিওপ্যাথি', '৫জি', '5g'
+  ]
+
+  // Factcheck indicators (specific events, actions)
+  const factcheckIndicators = [
+    'মারা গেলেন', 'ঘোষণা করেছেন', 'বলেছেন', 'করেছেন', 'হয়েছে',
+    'announced', 'declared', 'said', 'did', 'happened', 'resigned'
+  ]
+
+  let mythScore = 0
+  let factcheckScore = 0
+
+  // Check for question words (usually mythbusting)
+  if (lowerQuery.includes('কি') || lowerQuery.includes('কেন') || 
+      lowerQuery.includes('?') || lowerQuery.includes('how') || 
+      lowerQuery.includes('why') || lowerQuery.includes('what')) {
+    mythScore += 0.3
+  }
+
+  mythIndicators.forEach(indicator => {
+    if (lowerQuery.includes(indicator.toLowerCase())) {
+      mythScore += 0.2
+    }
+  })
+
+  factcheckIndicators.forEach(indicator => {
+    if (lowerQuery.includes(indicator.toLowerCase())) {
+      factcheckScore += 0.25
+    }
+  })
+
+  if (factcheckScore > mythScore) {
+    return {
+      type: 'factcheck',
+      confidence: Math.min(factcheckScore, 0.75),
+      reasoning: 'Query appears to be about a specific event'
+    }
+  } else {
+    return {
+      type: 'mythbusting',
+      confidence: Math.min(Math.max(mythScore, 0.6), 0.75),
+      reasoning: 'Query appears to be about a general belief'
+    }
+  }
 }

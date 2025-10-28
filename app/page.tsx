@@ -16,7 +16,7 @@ import {
 } from "@/lib/visit-tracker";
 import SiteTour from "@/components/SiteTour";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { detectInputType } from "@/lib/utils";
+import { detectInputType, classifyQuery } from "@/lib/utils";
 
 // Blog data
 interface BlogPost {
@@ -495,31 +495,57 @@ export default function HomePage() {
   ]);
 
   const handleSearch = useCallback(
-    (query: string) => {
-      const inputType = detectInputType(query);
+    async (query: string) => {
+      // Check if any mode is manually activated by button click
+      const hasActiveMode = isMythbustingActive || isAIImageCheckActive || 
+                           isImageSearchActive || isTextCheckActive || isNewsCheckActive;
       
-      // Auto-detect URL and route to news verification (unless another mode is active)
-      if (inputType === 'url' && !isMythbustingActive && !isAIImageCheckActive && 
-          !isImageSearchActive && !isTextCheckActive) {
-        window.location.href = `/news-verification-v2?url=${encodeURIComponent(query.trim())}`;
+      // If a mode is manually active, use traditional routing
+      if (hasActiveMode) {
+        if (isMythbustingActive) {
+          window.location.href = `/mythbusting?query=${encodeURIComponent(query)}`;
+        } else if (isAIImageCheckActive) {
+          window.location.href = `/image-check?query=${encodeURIComponent(query)}`;
+        } else if (isImageSearchActive) {
+          window.location.href = `/image-search?query=${encodeURIComponent(query)}`;
+        } else if (isTextCheckActive) {
+          sessionStorage.setItem("plagiarismText", query);
+          window.location.href = `/plag-test`;
+        } else if (isNewsCheckActive) {
+          window.location.href = `/news-verification-v2?url=${encodeURIComponent(query)}`;
+        }
         return;
       }
+
+      // 🤖 INTELLIGENT AUTO-ROUTING (when no button is pressed)
+      console.log('🤖 Using intelligent routing for query:', query);
       
-      // Existing mode-based routing
-      if (isMythbustingActive) {
-        window.location.href = `/mythbusting?query=${encodeURIComponent(query)}`;
-      } else if (isAIImageCheckActive) {
-        window.location.href = `/image-check?query=${encodeURIComponent(query)}`;
-      } else if (isImageSearchActive) {
-        window.location.href = `/image-search?query=${encodeURIComponent(query)}`;
-      } else if (isTextCheckActive) {
-        // Store text in sessionStorage and redirect to plag-test
-        sessionStorage.setItem("plagiarismText", query);
-        window.location.href = `/plag-test`;
-      } else if (isNewsCheckActive) {
-        // Use new news verification API
-        window.location.href = `/news-verification-v2?url=${encodeURIComponent(query)}`;
-      } else {
+      try {
+        // Classify the query using AI
+        const classification = await classifyQuery(query);
+        console.log('📊 Classification result:', classification);
+
+        // Route based on classification
+        if (classification.type === 'url') {
+          // URL detected - go to news verification
+          console.log('🔗 Routing to news verification (URL detected)');
+          window.location.href = `/news-verification-v2?url=${encodeURIComponent(query.trim())}`;
+        } else if (classification.type === 'mythbusting') {
+          // General belief/myth question - go to mythbusting
+          console.log('🔍 Routing to mythbusting (myth/belief detected)');
+          window.location.href = `/mythbusting?query=${encodeURIComponent(query)}`;
+        } else if (classification.type === 'factcheck') {
+          // Specific event/news claim - go to AI factchecking
+          console.log('✅ Routing to factcheck (specific event detected)');
+          window.location.href = `/factcheck-detail?query=${encodeURIComponent(query)}`;
+        } else {
+          // Default fallback
+          console.log('⚠️ Using default routing');
+          window.location.href = `/factcheck-detail?query=${encodeURIComponent(query)}`;
+        }
+      } catch (error) {
+        console.error('Classification failed, using default routing:', error);
+        // Fallback to factcheck on error
         window.location.href = `/factcheck-detail?query=${encodeURIComponent(query)}`;
       }
     },

@@ -47,105 +47,267 @@ async function puppeteerScrapper(
     console.log("[PuppeteerScrapper] Launching browser...");
     browser = await puppeteer.launch({
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      args: [
+        "--no-sandbox", 
+        "--disable-setuid-sandbox",
+        "--disable-blink-features=AutomationControlled",
+        "--disable-features=VizDisplayCompositor",
+        "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      ],
     });
     console.log("[PuppeteerScrapper] Browser launched.");
 
     const page = await browser.newPage();
+    
+    // Detect social media platform
+    const urlObj = new URL(url);
+    const domain = urlObj.hostname.toLowerCase();
+    const isSocialMedia = domain.includes('facebook.com') || 
+                         domain.includes('twitter.com') || 
+                         domain.includes('x.com') ||
+                         domain.includes('instagram.com') ||
+                         domain.includes('linkedin.com') ||
+                         domain.includes('tiktok.com') ||
+                         domain.includes('youtube.com');
+
+    console.log(`[PuppeteerScrapper] Detected platform: ${domain} (Social Media: ${isSocialMedia})`);
+
+    // Set user agent and viewport for better social media compatibility
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    await page.setViewport({ width: 1920, height: 1080 });
+    
+    // Add extra headers for social media platforms
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+      'Upgrade-Insecure-Requests': '1',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Cache-Control': 'max-age=0'
+    });
+
     console.log(`[PuppeteerScrapper] Navigating to ${url}...`);
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 }); // Increased timeout to 60 seconds
+    
+    // Longer timeout for social media platforms
+    const timeout = isSocialMedia ? 90000 : 60000;
+    await page.goto(url, { 
+      waitUntil: "networkidle2", 
+      timeout: timeout 
+    });
     console.log(`[PuppeteerScrapper] Navigation to ${url} complete.`);
 
-    const newsAnalysis = await page.evaluate(() => {
+    // Wait a bit more for social media content to load
+    if (isSocialMedia) {
+      await page.waitForTimeout(3000);
+    }
+
+    const newsAnalysis = await page.evaluate((platform: string) => {
       const extractText = (el: Element | null) =>
         el ? el.textContent?.trim() : null;
       const extractAttribute = (el: Element | null, attr: string) =>
         el ? el.getAttribute(attr) : null;
 
-      let title =
-        document.querySelector("h1")?.textContent?.trim() ||
-        document
-          .querySelector('meta[property="og:title"]')
-          ?.getAttribute("content") ||
-        document
-          .querySelector('meta[name="twitter:title"]')
-          ?.getAttribute("content") ||
-        document.title;
-      console.log(`[PuppeteerScrapper] Scraped title: ${title}`);
+      // Platform-specific selectors
+      const getPlatformSelectors = (platform: string): { title: string[]; content: string[]; author: string[] } => {
+        switch (platform) {
+          case 'facebook':
+            return {
+              title: [
+                'meta[property="og:title"]',
+                'meta[name="twitter:title"]',
+                'h1',
+                '[data-testid="post-title"]',
+                '.post-title',
+                'title'
+              ],
+              content: [
+                '[data-testid="post-content"]',
+                '.post-content',
+                '[data-testid="story-subtitle"]',
+                '.story-subtitle',
+                'p',
+                'div[role="article"]',
+                '[data-testid="post-text"]'
+              ],
+              author: [
+                'meta[property="article:author"]',
+                '[data-testid="post-author"]',
+                '.post-author',
+                '[data-testid="story-author"]',
+                '.story-author'
+              ]
+            };
+          case 'twitter':
+          case 'x':
+            return {
+              title: [
+                'meta[property="og:title"]',
+                'meta[name="twitter:title"]',
+                '[data-testid="tweet-text"]',
+                '.tweet-text',
+                'title'
+              ],
+              content: [
+                '[data-testid="tweet-text"]',
+                '.tweet-text',
+                '[data-testid="tweet"]',
+                '.tweet-content',
+                'div[data-testid="tweetText"]'
+              ],
+              author: [
+                '[data-testid="tweet-author"]',
+                '.tweet-author',
+                '[data-testid="user-name"]',
+                '.user-name'
+              ]
+            };
+          case 'instagram':
+            return {
+              title: [
+                'meta[property="og:title"]',
+                'meta[name="twitter:title"]',
+                'title'
+              ],
+              content: [
+                'meta[property="og:description"]',
+                'meta[name="description"]',
+                '[data-testid="post-caption"]',
+                '.post-caption'
+              ],
+              author: [
+                'meta[property="og:site_name"]',
+                '[data-testid="post-author"]',
+                '.post-author'
+              ]
+            };
+          default:
+            return {
+              title: [
+                'meta[property="og:title"]',
+                'meta[name="twitter:title"]',
+                'h1',
+                'title'
+              ],
+              content: [
+                'p',
+                'article',
+                'main',
+                'div[role="main"]'
+              ],
+              author: [
+                'meta[name="author"]',
+                'meta[property="article:author"]',
+                '.author',
+                '.byline'
+              ]
+            };
+        }
+      };
 
+      const selectors = getPlatformSelectors(platform);
+      
+      // Extract title
+      let title = "";
+      for (const selector of selectors.title) {
+        const element = document.querySelector(selector);
+        if (element) {
+          title = element.getAttribute("content") || 
+                  element.getAttribute("textContent") || 
+                  element.textContent?.trim() || "";
+          if (title && title.length > 10) break;
+        }
+      }
+
+      // Extract content
       let content = "";
-      const paragraphs = Array.from(document.querySelectorAll("p"));
-      content = paragraphs
-        .map((p) => p.textContent?.trim())
+      for (const selector of selectors.content) {
+        const elements = document.querySelectorAll(selector);
+        if (elements.length > 0) {
+          content = Array.from(elements)
+            .map(el => el.textContent?.trim())
         .filter(Boolean)
         .join("\n");
-      console.log(
-        `[PuppeteerScrapper] Scraped content length: ${content.length}`
-      );
+          if (content && content.length > 50) break;
+        }
+      }
 
-      // Fallback for content if paragraphs are not enough
+      // Fallback for content if not enough
       if (content.length < 200) {
-        // Arbitrary threshold to check if content is too short
-        const articleBody =
-          document.querySelector("article") ||
+        const articleBody = document.querySelector("article") ||
           document.querySelector("main") ||
+                           document.querySelector('[role="main"]') ||
           document.body;
         content = articleBody?.textContent?.trim() || "";
-        // Clean up content by removing excessive newlines and spaces
         content = content
           .replace(/\n\s*\n/g, "\n")
           .replace(/\s{2,}/g, " ")
           .trim();
-        console.log(
-          `[PuppeteerScrapper] Fallback content length: ${content.length}`
-        );
       }
 
-      let author =
-        extractAttribute(
-          document.querySelector('meta[name="author"]'),
-          "content"
-        ) ||
-        extractAttribute(
-          document.querySelector('meta[property="article:author"]'),
-          "content"
-        ) ||
-        extractText(document.querySelector(".byline")) ||
-        extractText(document.querySelector(".author")) ||
-        extractText(document.querySelector('[itemprop="author"]'));
-      console.log(`[PuppeteerScrapper] Scraped author: ${author}`);
+      // Extract author
+      let author = "";
+      for (const selector of selectors.author) {
+        const element = document.querySelector(selector);
+        if (element) {
+          author = element.getAttribute("content") ||
+                   element.textContent?.trim() ||
+                   "";
+          if (author) break;
+        }
+      }
 
-      let publishedDate =
-        extractAttribute(
-          document.querySelector('meta[property="article:published_time"]'),
-          "content"
-        ) ||
-        extractAttribute(
-          document.querySelector('meta[name="pubdate"]'),
-          "content"
-        ) ||
-        extractAttribute(
-          document.querySelector('meta[name="publishdate"]'),
-          "content"
-        ) ||
-        extractAttribute(
-          document.querySelector('meta[itemprop="datePublished"]'),
-          "content"
-        ) ||
-        extractText(document.querySelector("time")) ||
-        extractText(document.querySelector(".date"));
-      console.log(
-        `[PuppeteerScrapper] Scraped publishedDate: ${publishedDate}`
-      );
+      // Extract published date
+      let publishedDate = "";
+      const dateSelectors = [
+        'meta[property="article:published_time"]',
+        'meta[name="pubdate"]',
+        'time[datetime]',
+        '[data-testid="post-date"]',
+        '[data-testid="tweet-date"]',
+        '.date',
+        '.published',
+        '[class*="date"]',
+        '[class*="time"]',
+        'time'
+      ];
 
-      const domain = window.location.hostname;
-      console.log(`[PuppeteerScrapper] Scraped domain: ${domain}`);
+      for (const selector of dateSelectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+          publishedDate = element.getAttribute("content") ||
+                         element.getAttribute("datetime") ||
+                         element.textContent?.trim() ||
+                         "";
+          if (publishedDate) break;
+        }
+      }
 
-      return { title, content, author, publishedDate, domain };
-    });
+      return {
+        title: title || "No title found",
+        content: content || "No content available",
+        author: author || "",
+        publishedDate: publishedDate || "",
+      };
+    }, domain.includes('facebook.com') ? 'facebook' : 
+       domain.includes('twitter.com') || domain.includes('x.com') ? 'twitter' :
+       domain.includes('instagram.com') ? 'instagram' : 'default');
 
-    console.log("[PuppeteerScrapper] Scraped data:", newsAnalysis);
-    return newsAnalysis;
+    console.log("[PuppeteerScrapper] Content extraction complete.");
+    console.log(`[PuppeteerScrapper] Extracted title: ${newsAnalysis.title}`);
+    console.log(`[PuppeteerScrapper] Extracted content length: ${newsAnalysis.content.length}`);
+    console.log(`[PuppeteerScrapper] Extracted author: ${newsAnalysis.author}`);
+    console.log(`[PuppeteerScrapper] Extracted published date: ${newsAnalysis.publishedDate}`);
+
+    return {
+      title: newsAnalysis.title,
+      content: newsAnalysis.content,
+      url: url,
+      author: newsAnalysis.author,
+      publishedDate: newsAnalysis.publishedDate,
+      domain: new URL(url).hostname,
+    };
   } catch (error) {
     console.error(`[PuppeteerScrapper] Error scraping ${url}:`, error);
     return null;
@@ -162,7 +324,33 @@ async function fetchNewsContent(url: string): Promise<NewsAnalysis | null> {
   try {
     console.log("Fetching news content for:", url);
 
-    // First try with Puppeteer as primary method
+    // Detect if it's a social media platform
+    const urlObj2 = new URL(url);
+    const domain2 = urlObj2.hostname.toLowerCase();
+    const isSocialMedia = domain2.includes('facebook.com') || 
+                         domain2.includes('twitter.com') || 
+                         domain2.includes('x.com') ||
+                         domain2.includes('instagram.com') ||
+                         domain2.includes('linkedin.com') ||
+                         domain2.includes('tiktok.com') ||
+                         domain2.includes('youtube.com');
+
+    console.log(`[fetchNewsContent] Detected platform: ${domain2} (Social Media: ${isSocialMedia})`);
+
+    // For social media, prioritize Puppeteer as it handles dynamic content better
+    if (isSocialMedia) {
+      console.log("Social media detected - using Puppeteer as primary method...");
+      try {
+        const puppeteerResult = await puppeteerScrapper(url);
+        if (puppeteerResult && puppeteerResult.content.length > 50) {
+          console.log("Successfully scraped social media content with Puppeteer");
+          return puppeteerResult;
+        }
+      } catch (puppeteerError) {
+        console.log("Puppeteer failed for social media:", puppeteerError);
+      }
+    } else {
+      // For regular news sites, try Puppeteer first
     console.log("Trying Puppeteer web scraping as primary method...");
     try {
       const puppeteerResult = await puppeteerScrapper(url);
@@ -172,6 +360,7 @@ async function fetchNewsContent(url: string): Promise<NewsAnalysis | null> {
       }
     } catch (puppeteerError) {
       console.log("Puppeteer primary method failed:", puppeteerError);
+      }
     }
 
     // If Puppeteer fails, try with multiple user agents as fallback
@@ -184,6 +373,10 @@ async function fetchNewsContent(url: string): Promise<NewsAnalysis | null> {
       "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0",
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/121.0",
+      // Social media specific user agents
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+      "Mozilla/5.0 (Android 14; Mobile; rv:109.0) Gecko/121.0 Firefox/121.0",
+      "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
     ];
 
     let response: Response | null = null;
@@ -343,8 +536,8 @@ async function fetchNewsContent(url: string): Promise<NewsAnalysis | null> {
     }
 
     // Extract domain
-    const urlObj = new URL(url);
-    const domain = urlObj.hostname;
+    const urlObj3 = new URL(url);
+    const domain3 = urlObj3.hostname;
 
     return {
       title,
@@ -352,7 +545,7 @@ async function fetchNewsContent(url: string): Promise<NewsAnalysis | null> {
       url,
       author,
       publishedDate,
-      domain,
+      domain: domain3,
     };
   } catch (error) {
     console.error("Error fetching news content:", error);
@@ -644,6 +837,8 @@ export async function POST(request: NextRequest) {
         {
           error:
             "Failed to fetch news content. The website might be blocking requests, have anti-bot protection, or the URL might be invalid. Please try with a different news website or check if the URL is accessible.",
+          errorBengali:
+            "আপনি যে লিংকটা দিলেন, আনফর্চুনেটলি সেটায় এক্সেস করতে একটু সমস্যা হচ্ছে। আপনি বরং সেই নিউজের দাবিটাই আমাদের সার্চবারে গিয়ে লিখে ফেলুন, কাজ হয়ে যাবে।",
           details:
             "This could be due to: 1) Website blocking automated requests, 2) Invalid or broken URL, 3) Network connectivity issues, 4) Website requiring JavaScript to load content",
         },

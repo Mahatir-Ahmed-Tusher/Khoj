@@ -159,7 +159,7 @@ ${result.sources.map((source, index) =>
       if (response.ok) {
         setResult(data);
       } else {
-        setError(data.error || "নিউজ যাচাই করতে সমস্যা হয়েছে");
+        setError(data.errorBengali || data.error || "নিউজ যাচাই করতে সমস্যা হয়েছে");
       }
     } catch (err) {
       setError("নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।");
