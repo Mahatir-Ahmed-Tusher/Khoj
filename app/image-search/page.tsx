@@ -291,7 +291,7 @@ export default function ImageSearchPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-stone-50">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50 via-white to-slate-50">
       {/* Sidebar Toggle Button */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -383,23 +383,26 @@ export default function ImageSearchPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <img 
-              src="https://i.postimg.cc/d14zRx5D/image.png" 
-              alt="Image Search Icon" 
-              className="w-12 h-12 object-contain"
-            />
+          <div className="relative w-24 h-24 mx-auto mb-6">
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-200/80 to-indigo-200/80 blur-xl"></div>
+            <div className="relative w-full h-full rounded-3xl bg-white/60 backdrop-blur border border-blue-200 flex items-center justify-center shadow-xl">
+              <img 
+                src="https://i.postimg.cc/d14zRx5D/image.png" 
+                alt="Image Search Icon" 
+                className="w-12 h-12 object-contain"
+              />
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-3 font-tiro-bangla tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3 font-tiro-bangla tracking-tight">
             ছবি সার্চ
           </h1>
-          <p className="text-lg text-gray-600 font-tiro-bangla">
-            ছবি আপলোড করে অনলাইনে আর কোথায় আছে খুঁজে বের করুন
+          <p className="text-base md:text-lg text-gray-600 font-tiro-bangla">
+            আপনার ছবিটি কোথায় কোথায় আছে—স্মার্ট বিশ্লেষণে এক জায়গায় দেখুন
           </p>
         </div>
 
         {/* Main Form */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-8 mb-8">
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.06)] p-8 mb-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* File Upload */}
             <div>
@@ -408,7 +411,7 @@ export default function ImageSearchPage() {
               </label>
               
               {/* File Input */}
-              <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-gray-300 transition-colors bg-gradient-to-br from-gray-50/50 to-slate-50/50">
+              <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:border-gray-300 transition-colors bg-gradient-to-br from-gray-50/60 to-slate-50/60">
                 <input
                   type="file"
                   onChange={handleFileChange}
@@ -420,11 +423,13 @@ export default function ImageSearchPage() {
                 <label htmlFor="file-upload" className="cursor-pointer">
                   {previewUrl ? (
                     <div className="space-y-4">
-                      <img 
-                        src={previewUrl} 
-                        alt="Preview" 
-                        className="max-w-full h-48 object-contain mx-auto rounded-xl border border-gray-200 bg-white/50"
-                      />
+                      <div className="inline-block p-2 bg-gradient-to-br from-blue-100/60 to-indigo-100/60 rounded-2xl border border-blue-200">
+                        <img 
+                          src={previewUrl} 
+                          alt="Preview" 
+                          className="max-w-full h-48 object-contain mx-auto rounded-xl bg-white shadow-inner"
+                        />
+                      </div>
                       <p className="text-sm text-gray-600 font-tiro-bangla">
                         {file?.name} - {file?.size ? (file.size / 1024 / 1024).toFixed(2) : '0'} MB
                       </p>
@@ -457,11 +462,12 @@ export default function ImageSearchPage() {
               <button
                 type="submit"
                 disabled={!file || isLoading}
-                className={`px-8 py-3 rounded-xl font-medium transition-all ${
+                className={`px-8 py-3 rounded-xl font-medium transition-all font-tiro-bangla ${
                   !file || isLoading
                     ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600'
-                } font-tiro-bangla`}
+                    : ''
+                }`}
+                style={!file || isLoading ? {} : { background: 'linear-gradient(90deg, rgba(37,99,235,1) 0%, rgba(79,70,229,1) 100%)', color: 'white', boxShadow: '0 10px 20px rgba(79,70,229,0.25)' }}
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">

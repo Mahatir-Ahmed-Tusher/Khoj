@@ -108,6 +108,18 @@ You MUST write an EXTENSIVE, DETAILED, and COMPREHENSIVE report. Do NOT be conci
 - Write so readers get the complete picture`;
   }
 
+  // Add Groq/OpenAI-specific constraints to avoid table outputs
+  if (modelType === 'openai') {
+    return `${basePrompt}
+
+**STRICT FORMAT RULES (for GROQ/OpenAI):**
+- Do NOT generate tables in any form (no Markdown tables, no HTML tables)
+- Do NOT use the pipe character '|' to format columns
+- Write ONLY paragraphs and, where necessary, simple bullet lists
+- Keep headings to only # and ## as specified above
+`
+  }
+
   return basePrompt;
 }
 

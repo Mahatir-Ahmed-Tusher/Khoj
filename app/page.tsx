@@ -262,11 +262,17 @@ export default function HomePage() {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [isAtTop, setIsAtTop] = useState(true);
   const [isClassifying, setIsClassifying] = useState(false);
+  const [heroImageIndex, setHeroImageIndex] = useState(0);
 
   // Track visit and check if first visit
   useEffect(() => {
     // Track this page visit
     visitTracker.trackVisit("home");
+
+    // Rotate hero background image on each visit/refresh
+    const heroImages = ['khoj.png', 'khoj-2.png', 'khoj-3.png'];
+    const randomIndex = Math.floor(Math.random() * heroImages.length);
+    setHeroImageIndex(randomIndex);
 
     // Check if mobile device
     const checkMobile = () => {
@@ -612,7 +618,7 @@ export default function HomePage() {
       />
 
       {/* Hero Section with Grid Background */}
-      <section className="hero-section relative bg-cover bg-center bg-no-repeat text-white py-12">
+      <section className="hero-section relative bg-cover bg-center bg-no-repeat text-white py-6 md:py-10">
         {/* Grid Background - Behind the image */}
         <div
           className="absolute inset-0"
@@ -628,14 +634,18 @@ export default function HomePage() {
         {/* Main Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url(/khoj.png)" }}
+          style={{ 
+            backgroundImage: isMobile 
+              ? "url(/khoj-mobile.png)" 
+              : `url(/${['khoj.png', 'khoj-2.png', 'khoj-3.png'][heroImageIndex]})` 
+          }}
         ></div>
 
         {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-60"></div>
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="mb-6">
+          <div className="mb-4 md:mb-5">
             <h1
               className="text-3xl md:text-5xl font-bold mb-3 font-tiro-bangla"
               style={{
@@ -646,7 +656,7 @@ export default function HomePage() {
               খোঁজ
             </h1>
             <p
-              className="text-xl md:text-2xl text-white mb-6 font-tiro-bangla cursor-pointer hover:text-blue-200 transition-colors duration-300 glow-text"
+              className="text-lg md:text-2xl text-white mb-4 md:mb-5 font-tiro-bangla cursor-pointer hover:text-blue-200 transition-colors duration-300 glow-text"
               style={{
                 textShadow:
                   "0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(255, 255, 255, 0.6), 0 0 24px rgba(255, 255, 255, 0.4), 0 0 32px rgba(255, 255, 255, 0.3)",
@@ -665,15 +675,15 @@ export default function HomePage() {
           <div className="max-w-2xl mx-auto">
             <SearchBar
               placeholder="আজকে কী ব্যাপারে যাচাই-বাচাই করতে চান?"
-              className="mb-4"
+              className="mb-2 md:mb-3"
               data-tour="search-bar"
               dynamicPlaceholder={
                 isNewsCheckActive
                   ? "যে খবরটা যাচাই করতে চান সেটার লিংক দিন..."
                   : isMythbustingActive
-                    ? "যে ব্যাপারে মিথবাস্টিং করতে চান, সেটা এখানে লিখুন..."
+                    ? "যে ব্যাপারে মিথবাস্টিং করতে চান, সেটা লিখুন..."
                     : isAIImageCheckActive
-                      ? "AI জেনারেটেড ছবি কিনা জানতে আপলোড করুন..."
+                      ? "AI জেনারেটেড সনাক্ত আপলোড করুন..."
                       : isImageSearchActive
                         ? "ছবি সার্চ করতে আপলোড করুন..."
                         : isTextCheckActive
@@ -681,55 +691,12 @@ export default function HomePage() {
                           : undefined
               }
               isNewsCheckMode={isNewsCheckActive}
-              isAIImageCheckMode={isAIImageCheckActive}
-              isImageSearchMode={isImageSearchActive}
               onSearch={handleSearch}
             />
 
-            {/* Floating Feature Buttons - All in same line even on mobile */}
-            <div className="flex justify-center space-x-1 md:space-x-3 flex-nowrap overflow-x-auto">
-              <button
-                onClick={handleAIImageCheckClick}
-                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 flex-shrink-0 ${
-                  isAIImageCheckActive
-                    ? "bg-gradient-to-b from-green-300 to-green-700 shadow-[0_8px_16px_rgba(34,197,94,0.6)]"
-                    : "bg-gradient-to-b from-white/30 to-white/10 shadow-[0_4px_8px_rgba(0,0,0,0.2)]"
-                }`}
-                data-tour="image-check"
-              >
-                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap drop-shadow-sm">
-                  AI ছবি যাচাই
-                </span>
-              </button>
-              <button
-                onClick={handleImageSearchClick}
-                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 flex-shrink-0 ${
-                  isImageSearchActive
-                    ? "bg-gradient-to-b from-orange-300 to-orange-700 shadow-[0_8px_16px_rgba(251,146,60,0.6)]"
-                    : "bg-gradient-to-b from-white/30 to-white/10 shadow-[0_4px_8px_rgba(0,0,0,0.2)]"
-                }`}
-                data-tour="source-search"
-              >
-                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap drop-shadow-sm">
-                  ছবি সার্চ
-                </span>
-              </button>
-              <button
-                onClick={handleTextCheckClick}
-                className={`px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl flex items-center justify-center transition-all duration-200 backdrop-blur-sm border border-white border-opacity-30 flex-shrink-0 ${
-                  isTextCheckActive
-                    ? "bg-gradient-to-b from-red-300 to-red-700 shadow-[0_8px_16px_rgba(239,68,68,0.6)]"
-                    : "bg-gradient-to-b from-white/30 to-white/10 shadow-[0_4px_8px_rgba(0,0,0,0.2)]"
-                }`}
-                data-tour="text-check"
-              >
-                <span className="text-white text-xs md:text-sm font-medium font-tiro-bangla whitespace-nowrap drop-shadow-sm">
-                  লেখা যাচাই
-                </span>
-              </button>
-            </div>
+            {/* Floating Feature Buttons removed as features now auto-route via search bar */}
 
-            <div className="mt-2 text-center">
+            <div className="mt-1 md:mt-2 text-center">
               <Link
                 href="/khoj-chat"
                 className="inline-block hover:opacity-90 transition-opacity duration-300"

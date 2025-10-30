@@ -207,18 +207,21 @@ export default function ImageCheckPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-stone-50">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-50 via-white to-slate-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-amber-200">
-            <span className="text-amber-600 text-3xl">🖼️</span>
+          <div className="relative w-24 h-24 mx-auto mb-6">
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-amber-200/80 to-orange-200/80 blur-xl"></div>
+            <div className="relative w-full h-full rounded-3xl bg-white/60 backdrop-blur border border-amber-200 flex items-center justify-center shadow-xl">
+              <span className="text-amber-600 text-4xl">🖼️</span>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-3 font-tiro-bangla tracking-tight">
-            ছবি যাচাই
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3 font-tiro-bangla tracking-tight">
+            AI ছবি যাচাই
           </h1>
-          <p className="text-lg text-gray-600 font-tiro-bangla">
-            AI দ্বারা তৈরি ছবি সনাক্ত করুন
+          <p className="text-base md:text-lg text-gray-600 font-tiro-bangla">
+            আপলোড করা ছবিটি AI-জেনারেটেড কিনা, সুন্দর ভিজ্যুয়াল রিপোর্টে দেখুন
           </p>
         </div>
 
@@ -235,7 +238,7 @@ export default function ImageCheckPage() {
         )}
 
         {/* Main Form */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-8 mb-8">
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.06)] p-8 mb-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* File Upload */}
             <div>
@@ -246,7 +249,7 @@ export default function ImageCheckPage() {
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-gradient-to-r file:from-amber-50 file:to-orange-50 file:text-amber-700 hover:file:from-amber-100 hover:file:to-orange-100 file:border file:border-amber-200"
+                className="block w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border file:border-amber-200 file:text-sm file:font-medium file:bg-gradient-to-r file:from-amber-50 file:to-orange-50 file:text-amber-700 hover:file:from-amber-100 hover:file:to-orange-100"
               />
             </div>
 
@@ -277,11 +280,13 @@ export default function ImageCheckPage() {
             {/* Preview */}
             {previewUrl && (
               <div className="text-center">
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="max-w-full h-60 object-contain rounded-xl border border-gray-200 bg-white/50"
-                />
+                <div className="inline-block p-2 bg-gradient-to-br from-amber-100/60 to-orange-100/60 rounded-2xl border border-amber-200">
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="max-w-full h-60 object-contain rounded-xl bg-white shadow-inner"
+                  />
+                </div>
               </div>
             )}
 
@@ -289,7 +294,12 @@ export default function ImageCheckPage() {
             <button
               type="submit"
               disabled={isLoading || (!selectedFile && !imageUrl)}
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-6 rounded-xl hover:from-amber-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed font-tiro-bangla font-medium transition-all duration-200"
+              className="w-full relative overflow-hidden text-white py-3 px-6 rounded-xl font-tiro-bangla font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                background:
+                  'linear-gradient(90deg, rgba(245,158,11,1) 0%, rgba(249,115,22,1) 100%)',
+                boxShadow: '0 10px 20px rgba(249,115,22,0.25)'
+              }}
             >
               {isLoading ? 'যাচাই হচ্ছে...' : 'ছবি যাচাই করুন'}
             </button>
@@ -304,7 +314,7 @@ export default function ImageCheckPage() {
 
           {/* Result */}
           {result && (
-            <div className="mt-8 p-6 bg-gradient-to-br from-gray-50/80 to-slate-50/80 rounded-xl border border-gray-200/50">
+            <div className="mt-8 p-6 bg-white/70 backdrop-blur-md rounded-2xl border border-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 font-tiro-bangla">
                 যাচাইকরণ ফলাফল
               </h3>
