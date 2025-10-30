@@ -6,6 +6,7 @@ export interface VisitInfo {
   lastVisitDate: string | null;
   sessionCount: number;
   hasSeenTour: boolean;
+  lastIntroImageShown: string | null;
 }
 
 // Safe wrapper to prevent hydration issues
@@ -17,7 +18,8 @@ const safeGetVisitInfo = (): VisitInfo => {
       firstVisitDate: null,
       lastVisitDate: null,
       sessionCount: 0,
-      hasSeenTour: false
+        hasSeenTour: false,
+        lastIntroImageShown: null
     };
   }
   return getVisitInfo();
@@ -87,7 +89,8 @@ class VisitTracker {
         firstVisitDate: null,
         lastVisitDate: null,
         sessionCount: 0,
-        hasSeenTour: false
+        hasSeenTour: false,
+        lastIntroImageShown: null
       };
     }
 
@@ -101,13 +104,19 @@ class VisitTracker {
           firstVisitDate: new Date().toISOString(),
           lastVisitDate: new Date().toISOString(),
           sessionCount: 1,
-          hasSeenTour: false
+          hasSeenTour: false,
+          lastIntroImageShown: null
         };
         localStorage.setItem(this.VISIT_KEY, JSON.stringify(visitInfo));
         return visitInfo;
       }
 
       const visitInfo: VisitInfo = JSON.parse(stored);
+      
+      // Initialize lastIntroImageShown if it doesn't exist (for existing users)
+      if (!visitInfo.hasOwnProperty('lastIntroImageShown')) {
+        visitInfo.lastIntroImageShown = null;
+      }
       
       // Check if this is a new session
       const isNewSession = this.isNewSession();
@@ -127,8 +136,46 @@ class VisitTracker {
         firstVisitDate: null,
         lastVisitDate: null,
         sessionCount: 0,
-        hasSeenTour: false
+        hasSeenTour: false,
+        lastIntroImageShown: null
       };
+    }
+  }
+
+  // Check if we should show intro image (every 5 minutes)
+  shouldShowIntroImage(): boolean {
+    if (typeof window === 'undefined') return false;
+    
+    const visitInfo = this.getVisitInfo();
+    
+    // Always show on first visit
+    if (visitInfo.isFirstVisit) {
+      return true;
+    }
+    
+    // Check if 5 minutes have passed since last shown
+    if (visitInfo.lastIntroImageShown) {
+      const lastShown = new Date(visitInfo.lastIntroImageShown).getTime();
+      const now = new Date().getTime();
+      const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+      
+      return (now - lastShown) >= fiveMinutes;
+    }
+    
+    // If never shown before (but not first visit), show it
+    return true;
+  }
+
+  // Mark intro image as shown
+  markIntroImageShown(): void {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const visitInfo = this.getVisitInfo();
+      visitInfo.lastIntroImageShown = new Date().toISOString();
+      localStorage.setItem(this.VISIT_KEY, JSON.stringify(visitInfo));
+    } catch (error) {
+      console.error('Error marking intro image as shown:', error);
     }
   }
 
@@ -190,6 +237,8 @@ export const markTourAsSeen = () => visitTracker.markTourAsSeen();
 export const getVisitInfo = () => visitTracker.getVisitInfo();
 export const trackVisit = (pageName: string) => visitTracker.trackVisit(pageName);
 export const getPageVisitCount = (pageName: string) => visitTracker.getPageVisitCount(pageName);
+export const shouldShowIntroImage = () => visitTracker.shouldShowIntroImage();
+export const markIntroImageShown = () => visitTracker.markIntroImageShown();
 
 // Safe exports for SSR
 export { safeGetVisitInfo as getSafeVisitInfo };

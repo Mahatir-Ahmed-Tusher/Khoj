@@ -78,6 +78,7 @@ const SearchBar = memo(function SearchBar({
       "কোনো ছবি এআই জেনারেটেড কীনা জানতে আপলোড করুন",
       "কোনো ছবির উৎস জানতে আপলোড করুন",
       "যেকোনো গুজব, অপবিজ্ঞান নিয়ে প্রশ্ন করুন",
+      "কোনো লেখা চুরি হয়েছে কিনা তা জানতে এখানে লিখুন",
     ];
     const intervalId = window.setInterval(() => {
       setPlaceholderIndex((prev) => (prev + 1) % placeholders.length);
@@ -266,6 +267,7 @@ const SearchBar = memo(function SearchBar({
               "কোনো ছবি এআই জেনারেটেড কীনা জানতে আপলোড করুন",
               "কোনো ছবির উৎস জানতে আপলোড করুন",
               "যেকোনো গুজব, অপবিজ্ঞান নিয়ে প্রশ্ন করুন",
+              "কোনো লেখা চুরি হয়েছে কিনা তা জানতে এখানে লিখুন",
             ][placeholderIndex] || placeholder}
             className="search-input pr-24 md:pr-36 text-sm md:text-base resize-none overflow-hidden"
             autoComplete="off"

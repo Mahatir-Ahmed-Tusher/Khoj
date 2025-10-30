@@ -22,11 +22,11 @@ const MythbustingIcon = ({ className }: { className?: string }) => (
   />
 )
 
-// Custom Blog Icon Component
-const BlogIcon = ({ className }: { className?: string }) => (
+// Custom Text Plagiarism Check Icon Component
+const PlagiarismIcon = ({ className }: { className?: string }) => (
   <img 
-    src="/blog-icon.png" 
-    alt="ব্লগ" 
+    src="/plagiarism.png" 
+    alt="লেখা যাচাই" 
     className={className}
   />
 )
@@ -82,12 +82,12 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
       color: 'bg-red-500 hover:bg-red-600'
     },
     {
-      id: 'blog',
-      title: 'ব্লগ',
-      description: 'বিজ্ঞান, গবেষণা ও বিশ্লেষণমূলক লেখা',
-      icon: BlogIcon,
-      href: '/blog',
-      color: 'bg-blue-500 hover:bg-blue-600'
+      id: 'plagiarism',
+      title: 'লেখা যাচাই',
+      description: 'কোনো লেখা চুরি হয়েছে কিনা তা যাচাই করুন',
+      icon: PlagiarismIcon,
+      href: '/plag-test',
+      color: 'bg-orange-500 hover:bg-orange-600'
     },
     {
       id: 'video-corner',
@@ -122,8 +122,8 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
               >
                 <div className="bg-gray-50 hover:bg-gray-100 rounded-lg p-2 transition-all duration-300 border border-gray-200 hover:border-gray-300">
                   <div className="flex items-center space-x-2">
-                    <div className={`p-2 rounded-lg ${feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' || feature.id === 'video-corner' || feature.id === 'khoj-chat' ? 'bg-transparent' : feature.color} transition-colors duration-300`}>
-                      {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' || feature.id === 'video-corner' || feature.id === 'khoj-chat' ? (
+                    <div className={`p-2 rounded-lg ${feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'plagiarism' || feature.id === 'video-corner' || feature.id === 'khoj-chat' ? 'bg-transparent' : feature.color} transition-colors duration-300`}>
+                      {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'plagiarism' || feature.id === 'video-corner' || feature.id === 'khoj-chat' ? (
                         <feature.icon className="h-9 w-9 object-contain" />
                       ) : (
                         <feature.icon className="h-5 w-5 text-white" />
@@ -159,7 +159,7 @@ export default function FeatureWidget({ className = '' }: FeatureWidgetProps) {
                 }}
               >
                 <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-100">
-                  {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'blog' || feature.id === 'video-corner' || feature.id === 'khoj-chat' ? (
+                  {feature.id === 'mukti-corner' || feature.id === 'mythbusting' || feature.id === 'plagiarism' || feature.id === 'video-corner' || feature.id === 'khoj-chat' ? (
                     <feature.icon className="h-8 w-8 object-contain" />
                   ) : (
                     <feature.icon className="h-6 w-6 text-gray-700" />

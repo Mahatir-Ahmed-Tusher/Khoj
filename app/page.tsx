@@ -13,8 +13,10 @@ import {
   isNewSession,
   hasSeenTour,
   markTourAsSeen,
+  shouldShowIntroImage,
+  markIntroImageShown,
 } from "@/lib/visit-tracker";
-import SiteTour from "@/components/SiteTour";
+import IntroImagePopup from "@/components/IntroImagePopup";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { detectInputType, classifyQuery } from "@/lib/utils";
 
@@ -252,7 +254,7 @@ export default function HomePage() {
   const [filter, setFilter] = useState("all");
   const [filteredArticles, setFilteredArticles] = useState(allFactChecks);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [showSiteTour, setShowSiteTour] = useState(false);
+  const [showIntroImage, setShowIntroImage] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isNewsCheckActive, setIsNewsCheckActive] = useState(false);
   const [isMythbustingActive, setIsMythbustingActive] = useState(false);
@@ -282,11 +284,12 @@ export default function HomePage() {
     checkMobile();
     window.addEventListener("resize", checkMobile);
 
-    // Check if this is the first visit, mobile, and hasn't seen tour
-    if (isFirstVisit() && isMobile && !hasSeenTour()) {
-      // Show site tour after a short delay
+    // Check if we should show intro image (first visit or every 5 minutes)
+    if (shouldShowIntroImage()) {
+      // Show intro image after a short delay
       setTimeout(() => {
-        setShowSiteTour(true);
+        setShowIntroImage(true);
+        markIntroImageShown();
       }, 1000);
     }
 
@@ -304,6 +307,18 @@ export default function HomePage() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Check for intro image every 5 minutes
+  useEffect(() => {
+    const checkInterval = setInterval(() => {
+      if (shouldShowIntroImage() && !showIntroImage) {
+        setShowIntroImage(true);
+        markIntroImageShown();
+      }
+    }, 5 * 60 * 1000); // Check every 5 minutes
+
+    return () => clearInterval(checkInterval);
+  }, [showIntroImage]);
 
   // Auto-slide carousel - optimized with useCallback
   const nextSlide = useCallback(() => {
@@ -603,17 +618,11 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Site Tour - Only for first-time visitors */}
-      <SiteTour
-        isOpen={showSiteTour}
+      {/* Intro Image Popup - Shows on first visit and every 5 minutes */}
+      <IntroImagePopup
+        isOpen={showIntroImage}
         onClose={() => {
-          setShowSiteTour(false);
-          markTourAsSeen(); // Mark tour as seen
-        }}
-        onComplete={() => {
-          console.log("Site tour completed!");
-          setShowSiteTour(false);
-          markTourAsSeen(); // Mark tour as seen
+          setShowIntroImage(false);
         }}
       />
 
