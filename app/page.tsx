@@ -265,6 +265,7 @@ export default function HomePage() {
   const [isAtTop, setIsAtTop] = useState(true);
   const [isClassifying, setIsClassifying] = useState(false);
   const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const [heroBgUrl, setHeroBgUrl] = useState<string>("/khoj.png");
 
   // Track visit and check if first visit
   useEffect(() => {
@@ -295,6 +296,57 @@ export default function HomePage() {
 
     return () => window.removeEventListener("resize", checkMobile);
   }, [isMobile]);
+
+  // Resolve hero background with external-first, local-fallback (desktop & mobile)
+  useEffect(() => {
+    const desktopMappings = [
+      { ext: "https://i.postimg.cc/5t3nKt5G/khoj.png", local: "/khoj.png" },
+      { ext: "https://i.postimg.cc/PrmHfBm3/khoj-2.png", local: "/khoj-2.png" },
+      { ext: "https://i.postimg.cc/15B0ZdVP/khoj-3.png", local: "/khoj-3.png" },
+    ];
+    const mobileMappings = [
+      { ext: "https://i.postimg.cc/90qP2XTH/khoj-mobile.png", local: "/khoj-mobile.png" },
+      { ext: "https://i.postimg.cc/PrmHfBm3/khoj-2.png", local: "/khoj-mobile-2.png" },
+    ];
+
+    // Choose mapping based on viewport and selected index
+    const mapping = isMobile
+      ? mobileMappings[heroImageIndex % mobileMappings.length]
+      : desktopMappings[heroImageIndex];
+
+    // Show local immediately to avoid blank while we try external
+    setHeroBgUrl(mapping.local);
+
+    // Attempt to load external; if loaded quickly, swap in
+    const externalImg = new window.Image();
+    let didFinish = false;
+    const timeoutId = window.setTimeout(() => {
+      // If external is slow, we keep local. We don't change state here unless needed.
+      if (!didFinish) {
+        didFinish = true; // lock in
+      }
+    }, 2000); // 2s safety timeout
+
+    externalImg.onload = () => {
+      if (!didFinish) {
+        didFinish = true;
+        window.clearTimeout(timeoutId);
+        setHeroBgUrl(mapping.ext);
+      }
+    };
+    externalImg.onerror = () => {
+      if (!didFinish) {
+        didFinish = true;
+        window.clearTimeout(timeoutId);
+        setHeroBgUrl(mapping.local);
+      }
+    };
+    externalImg.src = mapping.ext;
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isMobile, heroImageIndex]);
 
   // Track scroll position
   useEffect(() => {
@@ -643,11 +695,7 @@ export default function HomePage() {
         {/* Main Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ 
-            backgroundImage: isMobile 
-              ? "url(/khoj-mobile.png)" 
-              : `url(/${['khoj.png', 'khoj-2.png', 'khoj-3.png'][heroImageIndex]})` 
-          }}
+          style={{ backgroundImage: `url(${heroBgUrl})` }}
         ></div>
 
         {/* Dark Overlay */}
@@ -727,6 +775,36 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
+        </div>
+        {/* Social Icons - Bottom Right of Hero (not fixed) */}
+        <div className="pointer-events-auto absolute right-3 bottom-3 md:right-6 md:bottom-6 flex items-center gap-2 md:gap-3 z-10">
+        <a
+          href="https://www.facebook.com/profile.php?id=61580245735019"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Facebook"
+          className="opacity-90 hover:opacity-100 transition-opacity"
+        >
+          <Image src="/socials/facebook.png" alt="Facebook" width={24} height={24} className="w-6 h-6 md:w-7 md:h-7" />
+        </a>
+        <a
+          href="https://t.me/khojfact"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Telegram"
+          className="opacity-90 hover:opacity-100 transition-opacity"
+        >
+          <Image src="/socials/telegram.png" alt="Telegram" width={24} height={24} className="w-6 h-6 md:w-7 md:h-7" />
+        </a>
+        <a
+          href="https://www.youtube.com/@khoj-factchecker"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="YouTube"
+          className="opacity-90 hover:opacity-100 transition-opacity"
+        >
+          <Image src="/socials/youtube.png" alt="YouTube" width={24} height={24} className="w-6 h-6 md:w-7 md:h-7" />
+        </a>
         </div>
       </section>
 

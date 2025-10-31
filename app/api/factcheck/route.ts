@@ -90,6 +90,13 @@ Include the following topics in this section:
 - **Detailed Writing:** Write at least 3-4 paragraphs in each section.
 - **Examples and Analysis:** Provide detailed examples and analysis for each point.
 
+**STRICT SOURCE RESTRICTION - SOCIAL MEDIA:**
+- **NEVER use social media links (Facebook, Twitter/X, Instagram, YouTube, TikTok, LinkedIn, Reddit, Telegram, WhatsApp, etc.) as fact-checking sources for verifying information accuracy.**
+- Social media links are NOT acceptable as authoritative sources for fact-checking verification.
+- Social media can ONLY be referenced for contextual purposes (e.g., "This claim was widely shared on social media") or to mention related discussions, but NEVER as a source to verify facts or determine the truthfulness of information.
+- If a source is from social media, it should be completely excluded from the fact-checking analysis and verdict determination.
+- Only use credible news sources, official websites, research papers, government sources, and verified fact-checking organizations for fact verification.
+
 Write the report as if an experienced journalist is writing for their readers - simple, clear, and trustworthy.
 **MOST IMPORTANT: This report MUST be detailed and comprehensive. Do NOT write concisely or briefly.**`;
 
@@ -269,7 +276,7 @@ export async function POST(request: NextRequest) {
     try {
       const bangladeshiResults = await tavilyManager.search(query, {
         sites: bangladeshiNewsSites,
-        max_results: 11,
+        max_results: 15,
         search_depth: "advanced"
       })
       
@@ -287,7 +294,7 @@ export async function POST(request: NextRequest) {
       try {
         console.log('🔍 Searching for English sources...')
         const englishResults = await tavilyManager.search(query, {
-          max_results: 11,
+          max_results: 15,
           search_depth: "advanced",
           include_domains: [
             'reuters.com', 'bbc.com', 'cnn.com', 'ap.org', 'factcheck.org',
@@ -296,11 +303,14 @@ export async function POST(request: NextRequest) {
         })
         
         if (englishResults.results && englishResults.results.length > 0) {
-          // If we have Bengali sources, append English sources
+          // If we have Bengali sources, append English sources (limit to total of 15)
           if (hasBengaliSources) {
-            searchResults.results = [...searchResults.results, ...englishResults.results.slice(0, 5)]
+            const remainingSlots = 15 - searchResults.results.length
+            if (remainingSlots > 0) {
+              searchResults.results = [...searchResults.results, ...englishResults.results.slice(0, remainingSlots)]
+            }
           } else {
-            searchResults.results = englishResults.results
+            searchResults.results = englishResults.results.slice(0, 15)
           }
           hasEnglishSources = true
           console.log(`✅ Found ${englishResults.results.length} English sources`)
@@ -315,12 +325,12 @@ export async function POST(request: NextRequest) {
       try {
         console.log('🔍 Trying general search...')
         const generalResults = await tavilyManager.search(query, {
-          max_results: 11,
+          max_results: 15,
           search_depth: "advanced"
         })
         
         if (generalResults.results) {
-          searchResults.results = generalResults.results
+          searchResults.results = generalResults.results.slice(0, 15)
           console.log(`✅ Found ${generalResults.results.length} general sources`)
         }
       } catch (error) {
@@ -328,12 +338,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Use search results directly without crawling for faster response
-    const crawledContent = searchResults.results?.slice(0, 11).map((result: any, index: number) => ({
+    // Use search results directly without crawling for faster response (limit to 15 most relevant)
+    // Filter out social media sources - they should not be used for fact-checking verification
+    const filteredResults = searchResults.results?.filter((result: any) => {
+      const url = (result.url || '').toLowerCase()
+      const socialMediaDomains = ['facebook.com', 'twitter.com', 'x.com', 'instagram.com', 'youtube.com', 
+                                   'tiktok.com', 'linkedin.com', 'reddit.com', 'telegram.org', 'whatsapp.com',
+                                   'messenger.com', 'pinterest.com', 'snapchat.com', 'viber.com']
+      return !socialMediaDomains.some(domain => url.includes(domain))
+    }) || []
+    
+    const crawledContent = filteredResults.slice(0, 15).map((result: any, index: number) => ({
       title: result.title,
       url: result.url,
       content: (result as any).content || (result as any).snippet || 'Content not available',
-      isEnglish: !hasBengaliSources || (hasEnglishSources && index >= searchResults.results.length - 3)
+      isEnglish: !hasBengaliSources || (hasEnglishSources && index >= filteredResults.length - (hasEnglishSources ? 3 : 0))
     })) || []
 
     // Generate fact-checking report with model-specific prompts

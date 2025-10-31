@@ -14,6 +14,7 @@ export default function IntroImagePopup({ isOpen, onClose }: IntroImagePopupProp
   const [countdown, setCountdown] = useState(3)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const [introImgUrl, setIntroImgUrl] = useState<string>('/Khoj-intro.png')
 
   const handleClose = useCallback(() => {
     if (timeoutRef.current) {
@@ -31,6 +32,31 @@ export default function IntroImagePopup({ isOpen, onClose }: IntroImagePopupProp
     if (isOpen) {
       setIsVisible(true)
       setCountdown(3)
+      // Show local immediately to avoid blank, then try external and swap in on success
+      setIntroImgUrl('/Khoj-intro.png')
+      const ext = 'https://i.postimg.cc/zBynrwH6/Khoj-intro.png'
+      const img = new window.Image()
+      let finished = false
+      const t = window.setTimeout(() => {
+        if (!finished) {
+          finished = true
+        }
+      }, 2000)
+      img.onload = () => {
+        if (!finished) {
+          finished = true
+          window.clearTimeout(t)
+          setIntroImgUrl(ext)
+        }
+      }
+      img.onerror = () => {
+        if (!finished) {
+          finished = true
+          window.clearTimeout(t)
+          setIntroImgUrl('/Khoj-intro.png')
+        }
+      }
+      img.src = ext
       
       // Countdown timer
       countdownIntervalRef.current = setInterval(() => {
@@ -61,6 +87,7 @@ export default function IntroImagePopup({ isOpen, onClose }: IntroImagePopupProp
       if (countdownIntervalRef.current) {
         clearInterval(countdownIntervalRef.current)
       }
+      setIntroImgUrl('/Khoj-intro.png')
     }
   }, [isOpen, handleClose])
 
@@ -101,7 +128,7 @@ export default function IntroImagePopup({ isOpen, onClose }: IntroImagePopupProp
           {/* Image */}
           <div className="relative bg-white rounded-xl md:rounded-2xl shadow-2xl overflow-hidden">
             <Image
-              src="/Khoj-intro.png"
+              src={introImgUrl}
               alt="খোঁজ পরিচিতি"
               width={600}
               height={400}

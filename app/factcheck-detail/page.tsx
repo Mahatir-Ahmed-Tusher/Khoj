@@ -115,14 +115,17 @@ function FactCheckDetailContent() {
         // Continue with API call as fallback
       } else if (existingFactCheck) {
         console.log("Found existing fact check:", existingFactCheck);
-        setReport({
+        const existingReport = {
           claim: searchQuery,
           report: existingFactCheck.result,
           verdict: existingFactCheck.verdict as FactCheckReport["verdict"],
           sources: existingFactCheck.sources,
           sourceInfo: existingFactCheck.sourceInfo,
           generatedAt: existingFactCheck.generatedAt,
-        });
+        };
+        setReport(existingReport);
+        // Scroll to top when loading existing report
+        setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' }), 0);
         return;
       }
 
@@ -177,6 +180,13 @@ function FactCheckDetailContent() {
       performFactCheck(query);
     }
   }, [query, performFactCheck, existingFactCheck]);
+
+  // Scroll to top when report is generated (prevents auto-scroll to bottom)
+  useEffect(() => {
+    if (report && !isLoading) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [report, isLoading]);
 
   const downloadReport = () => {
     if (!report) return;
@@ -330,17 +340,15 @@ ${report.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`
                     <button
                       id="share-button"
                       onClick={() => setShowShareModal(true)}
-                      className="flex items-center space-x-2 bg-gray-100 text-black px-6 py-3 rounded-lg hover:bg-gray-300 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="flex items-center bg-gray-100 text-black p-3 rounded-lg hover:bg-gray-300 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
-                      <Share />
-                      <span className="font-medium hidden md:inline">শেয়ার করুন</span>
+                      <Share className="h-5 w-5" />
                     </button>
                     <button
                       onClick={downloadReport}
-                      className="flex items-center space-x-2 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="flex items-center bg-primary-600 text-white p-3 rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
                       <Download className="h-5 w-5" />
-                      <span className="font-medium hidden md:inline">ডাউনলোড করুন</span>
                     </button>
                   </div>
                 </div>
