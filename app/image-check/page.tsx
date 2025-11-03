@@ -1,210 +1,221 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Footer from '@/components/Footer'
-import Link from 'next/link'
+import { useState, useEffect } from "react";
+import Footer from "@/components/Footer";
+import { useLoading } from "@/components/LoadingProvider";
+import Link from "next/link";
 
 interface ImageCheckResult {
-  success: boolean
-  verdict: 'true' | 'false' | 'misleading' | 'unverified'
-  confidence: 'high' | 'medium' | 'low'
-  explanation: string
-  aiGeneratedScore: number
-  requestId?: string
-  mediaId?: string
-  imageUrl?: string
-  bengaliReport?: string
+  success: boolean;
+  verdict: "true" | "false" | "misleading" | "unverified";
+  confidence: "high" | "medium" | "low";
+  explanation: string;
+  aiGeneratedScore: number;
+  requestId?: string;
+  mediaId?: string;
+  imageUrl?: string;
+  bengaliReport?: string;
 }
 
 export default function ImageCheckPage() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [imageUrl, setImageUrl] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [result, setResult] = useState<ImageCheckResult | null>(null)
-  const [error, setError] = useState('')
-  const [previewUrl, setPreviewUrl] = useState('')
-  const [autoCheckStarted, setAutoCheckStarted] = useState(false)
-  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<ImageCheckResult | null>(null);
+  const [error, setError] = useState("");
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [autoCheckStarted, setAutoCheckStarted] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const loadingCtx = useLoading();
 
   // Auto-load image from sessionStorage and start check
   useEffect(() => {
-    const storedFileData = sessionStorage.getItem('selectedImageFile')
+    const storedFileData = sessionStorage.getItem("selectedImageFile");
     if (storedFileData && !autoCheckStarted) {
       try {
-        const fileData = JSON.parse(storedFileData)
-        
+        const fileData = JSON.parse(storedFileData);
+
         // Create a File object from the stored data
-        const byteCharacters = atob(fileData.content.split(',')[1])
-        const byteNumbers = new Array(byteCharacters.length)
+        const byteCharacters = atob(fileData.content.split(",")[1]);
+        const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i)
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
-        const byteArray = new Uint8Array(byteNumbers)
-        const file = new File([byteArray], fileData.name, { type: fileData.type })
-        
-        setSelectedFile(file)
-        setPreviewUrl(fileData.content)
-        
+        const byteArray = new Uint8Array(byteNumbers);
+        const file = new File([byteArray], fileData.name, {
+          type: fileData.type,
+        });
+
+        setSelectedFile(file);
+        setPreviewUrl(fileData.content);
+
         // Clear the stored data
-        sessionStorage.removeItem('selectedImageFile')
-        
+        sessionStorage.removeItem("selectedImageFile");
+
         // Start auto-check after a short delay
         setTimeout(() => {
-          setAutoCheckStarted(true)
-          handleImageCheck(file)
-        }, 1000)
+          setAutoCheckStarted(true);
+          handleImageCheck(file);
+        }, 1000);
       } catch (error) {
-        console.error('Error loading stored image:', error)
-        sessionStorage.removeItem('selectedImageFile')
+        console.error("Error loading stored image:", error);
+        sessionStorage.removeItem("selectedImageFile");
       }
     }
-  }, [autoCheckStarted])
+  }, [autoCheckStarted]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      setSelectedFile(file)
-      setImageUrl('')
-      setPreviewUrl(URL.createObjectURL(file))
-      setResult(null)
-      setError('')
+      setSelectedFile(file);
+      setImageUrl("");
+      setPreviewUrl(URL.createObjectURL(file));
+      setResult(null);
+      setError("");
     }
-  }
+  };
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value
-    setImageUrl(url)
-    setSelectedFile(null)
-    setPreviewUrl(url)
-    setResult(null)
-    setError('')
-  }
+    const url = e.target.value;
+    setImageUrl(url);
+    setSelectedFile(null);
+    setPreviewUrl(url);
+    setResult(null);
+    setError("");
+  };
 
   const handleImageCheck = async (file: File) => {
-    setIsLoading(true)
-    setError('')
-    setResult(null)
-
+    setIsLoading(true);
+    setError("");
+    setResult(null);
     try {
-      const formData = new FormData()
-      formData.append('image', file)
+      loadingCtx.setLoading(true);
+    } catch (e) {}
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
 
-      const response = await fetch('/api/image-check', {
-        method: 'POST',
+      const response = await fetch("/api/image-check", {
+        method: "POST",
         body: formData,
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        setResult(data)
+        setResult(data);
       } else {
-        setError(data.error || 'ছবি যাচাই করতে সমস্যা হয়েছে')
+        setError(data.error || "ছবি যাচাই করতে সমস্যা হয়েছে");
       }
     } catch (err) {
-      setError('নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।')
+      setError("নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
+      try {
+        loadingCtx.setLoading(false);
+      } catch (e) {}
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!selectedFile && !imageUrl) {
-      setError('দয়া করে একটি ছবি আপলোড করুন বা URL দিন')
-      return
+      setError("দয়া করে একটি ছবি আপলোড করুন বা URL দিন");
+      return;
     }
 
-    setIsLoading(true)
-    setError('')
-    setResult(null)
+    setIsLoading(true);
+    setError("");
+    setResult(null);
 
     try {
-      const formData = new FormData()
-      
+      const formData = new FormData();
+
       if (selectedFile) {
-        formData.append('image', selectedFile)
+        formData.append("image", selectedFile);
       } else if (imageUrl) {
-        formData.append('imageUrl', imageUrl)
+        formData.append("imageUrl", imageUrl);
       }
 
-      const response = await fetch('/api/image-check', {
-        method: 'POST',
+      const response = await fetch("/api/image-check", {
+        method: "POST",
         body: formData,
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        setResult(data)
+        setResult(data);
       } else {
-        setError(data.error || 'ছবি যাচাই করতে সমস্যা হয়েছে')
+        setError(data.error || "ছবি যাচাই করতে সমস্যা হয়েছে");
       }
     } catch (err) {
-      setError('নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।')
+      setError("নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const getVerdictColor = (verdict: string) => {
     switch (verdict) {
-      case 'true':
-        return 'bg-red-50 text-red-700 border-red-200'
-      case 'false':
-        return 'bg-green-50 text-green-700 border-green-200'
-      case 'misleading':
-        return 'bg-yellow-50 text-yellow-700 border-yellow-200'
+      case "true":
+        return "bg-red-50 text-red-700 border-red-200";
+      case "false":
+        return "bg-green-50 text-green-700 border-green-200";
+      case "misleading":
+        return "bg-yellow-50 text-yellow-700 border-yellow-200";
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-200'
+        return "bg-gray-50 text-gray-700 border-gray-200";
     }
-  }
+  };
 
   const getVerdictText = (verdict: string) => {
     switch (verdict) {
-      case 'true':
-        return 'AI দ্বারা তৈরি'
-      case 'false':
-        return 'প্রকৃত ছবি'
-      case 'misleading':
-        return 'সন্দেহজনক'
+      case "true":
+        return "AI দ্বারা তৈরি";
+      case "false":
+        return "প্রকৃত ছবি";
+      case "misleading":
+        return "সন্দেহজনক";
       default:
-        return 'অযাচাইকৃত'
+        return "অযাচাইকৃত";
     }
-  }
+  };
 
   const handleGenerateReport = async () => {
-    if (!result || !result.imageUrl) return
+    if (!result || !result.imageUrl) return;
 
-    setIsGeneratingReport(true)
+    setIsGeneratingReport(true);
     try {
-      const response = await fetch('/api/image-check', {
-        method: 'PUT',
+      const response = await fetch("/api/image-check", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           imageUrl: result.imageUrl,
           sightengineResult: {
-            type: { ai_generated: result.aiGeneratedScore }
-          }
+            type: { ai_generated: result.aiGeneratedScore },
+          },
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        setResult(prev => prev ? { ...prev, bengaliReport: data.bengaliReport } : null)
+        setResult((prev) =>
+          prev ? { ...prev, bengaliReport: data.bengaliReport } : null
+        );
       } else {
-        setError(data.error || 'রিপোর্ট তৈরি করতে সমস্যা হয়েছে')
+        setError(data.error || "রিপোর্ট তৈরি করতে সমস্যা হয়েছে");
       }
     } catch (err) {
-      setError('নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।')
+      setError("নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।");
     } finally {
-      setIsGeneratingReport(false)
+      setIsGeneratingReport(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-50 via-white to-slate-50">
@@ -259,7 +270,9 @@ export default function ImageCheckPage() {
                 <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-3 bg-white text-gray-500 font-tiro-bangla">অথবা</span>
+                <span className="px-3 bg-white text-gray-500 font-tiro-bangla">
+                  অথবা
+                </span>
               </div>
             </div>
 
@@ -297,11 +310,11 @@ export default function ImageCheckPage() {
               className="w-full relative overflow-hidden text-white py-3 px-6 rounded-xl font-tiro-bangla font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 background:
-                  'linear-gradient(90deg, rgba(245,158,11,1) 0%, rgba(249,115,22,1) 100%)',
-                boxShadow: '0 10px 20px rgba(249,115,22,0.25)'
+                  "linear-gradient(90deg, rgba(245,158,11,1) 0%, rgba(249,115,22,1) 100%)",
+                boxShadow: "0 10px 20px rgba(249,115,22,0.25)",
               }}
             >
-              {isLoading ? 'যাচাই হচ্ছে...' : 'ছবি যাচাই করুন'}
+              {isLoading ? "যাচাই হচ্ছে..." : "ছবি যাচাই করুন"}
             </button>
           </form>
 
@@ -318,28 +331,39 @@ export default function ImageCheckPage() {
               <h3 className="text-lg font-semibold text-gray-800 mb-4 font-tiro-bangla">
                 যাচাইকরণ ফলাফল
               </h3>
-              
+
               <div className="space-y-4">
                 {/* Verdict */}
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-tiro-bangla text-sm">ফলাফল:</span>
-                  <span className={`px-3 py-1.5 rounded-lg text-sm font-medium border ${getVerdictColor(result.verdict)}`}>
+                  <span className="text-gray-700 font-tiro-bangla text-sm">
+                    ফলাফল:
+                  </span>
+                  <span
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium border ${getVerdictColor(result.verdict)}`}
+                  >
                     {getVerdictText(result.verdict)}
                   </span>
                 </div>
 
                 {/* Confidence */}
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-tiro-bangla text-sm">আত্মবিশ্বাস:</span>
+                  <span className="text-gray-700 font-tiro-bangla text-sm">
+                    আত্মবিশ্বাস:
+                  </span>
                   <span className="text-gray-800 font-medium text-sm">
-                    {result.confidence === 'high' ? 'উচ্চ' : 
-                     result.confidence === 'medium' ? 'মাঝারি' : 'নিম্ন'}
+                    {result.confidence === "high"
+                      ? "উচ্চ"
+                      : result.confidence === "medium"
+                        ? "মাঝারি"
+                        : "নিম্ন"}
                   </span>
                 </div>
 
                 {/* AI Score */}
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-tiro-bangla text-sm">AI স্কোর:</span>
+                  <span className="text-gray-700 font-tiro-bangla text-sm">
+                    AI স্কোর:
+                  </span>
                   <span className="text-gray-800 font-medium text-sm">
                     {(result.aiGeneratedScore * 100).toFixed(1)}%
                   </span>
@@ -347,8 +371,12 @@ export default function ImageCheckPage() {
 
                 {/* Explanation */}
                 <div>
-                  <span className="text-gray-700 font-tiro-bangla text-sm">ব্যাখ্যা:</span>
-                  <p className="text-gray-800 mt-1 font-tiro-bangla text-sm">{result.explanation}</p>
+                  <span className="text-gray-700 font-tiro-bangla text-sm">
+                    ব্যাখ্যা:
+                  </span>
+                  <p className="text-gray-800 mt-1 font-tiro-bangla text-sm">
+                    {result.explanation}
+                  </p>
                 </div>
 
                 {/* Report Generation Button */}
@@ -405,35 +433,48 @@ export default function ImageCheckPage() {
             কিভাবে কাজ করে
           </h2>
           <p className="text-gray-600 mb-6 font-tiro-bangla text-sm">
-            আমাদের AI সিস্টেম ছবির বিভিন্ন বৈশিষ্ট্য বিশ্লেষণ করে AI দ্বারা তৈরি কিনা তা সনাক্ত করে।
+            আমাদের AI সিস্টেম ছবির বিভিন্ন বৈশিষ্ট্য বিশ্লেষণ করে AI দ্বারা তৈরি
+            কিনা তা সনাক্ত করে।
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl flex items-center justify-center mx-auto mb-3 border border-blue-200">
                 <span className="text-blue-600 text-lg">📸</span>
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2 font-tiro-bangla text-sm">ছবি আপলোড</h3>
-              <p className="text-xs text-gray-600 font-tiro-bangla">ছবি আপলোড করুন বা URL দিন</p>
+              <h3 className="font-semibold text-gray-800 mb-2 font-tiro-bangla text-sm">
+                ছবি আপলোড
+              </h3>
+              <p className="text-xs text-gray-600 font-tiro-bangla">
+                ছবি আপলোড করুন বা URL দিন
+              </p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-3 border border-green-200">
                 <span className="text-green-600 text-lg">🔍</span>
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2 font-tiro-bangla text-sm">AI বিশ্লেষণ</h3>
-              <p className="text-xs text-gray-600 font-tiro-bangla">AI ছবি বিশ্লেষণ করে</p>
+              <h3 className="font-semibold text-gray-800 mb-2 font-tiro-bangla text-sm">
+                AI বিশ্লেষণ
+              </h3>
+              <p className="text-xs text-gray-600 font-tiro-bangla">
+                AI ছবি বিশ্লেষণ করে
+              </p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl flex items-center justify-center mx-auto mb-3 border border-purple-200">
                 <span className="text-purple-600 text-lg">📊</span>
               </div>
-              <h3 className="font-semibold text-gray-800 mb-2 font-tiro-bangla text-sm">ফলাফল</h3>
-              <p className="text-xs text-gray-600 font-tiro-bangla">বিস্তারিত রিপোর্ট পান</p>
+              <h3 className="font-semibold text-gray-800 mb-2 font-tiro-bangla text-sm">
+                ফলাফল
+              </h3>
+              <p className="text-xs text-gray-600 font-tiro-bangla">
+                বিস্তারিত রিপোর্ট পান
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="text-center">
-          <Link 
+          <Link
             href="/"
             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 rounded-xl hover:from-gray-200 hover:to-slate-200 transition-all duration-200 font-tiro-bangla text-sm font-medium border border-gray-200"
           >
@@ -441,8 +482,8 @@ export default function ImageCheckPage() {
           </Link>
         </div>
       </div>
-      
+
       <Footer />
     </div>
-  )
+  );
 }

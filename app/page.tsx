@@ -16,9 +16,10 @@ import {
   shouldShowIntroImage,
   markIntroImageShown,
 } from "@/lib/visit-tracker";
-import IntroImagePopup from "@/components/IntroImagePopup";
+// import IntroImagePopup from "@/components/IntroImagePopup";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { detectInputType, classifyQuery } from "@/lib/utils";
+import ImageOptionsModal from "@/components/ImageOptionsModal";
 
 // Blog data
 interface BlogPost {
@@ -266,6 +267,11 @@ export default function HomePage() {
   const [isClassifying, setIsClassifying] = useState(false);
   const [heroImageIndex, setHeroImageIndex] = useState(0);
   const [heroBgUrl, setHeroBgUrl] = useState<string>("/khoj.png");
+  // Image upload / modal state
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   // Track visit and check if first visit
   useEffect(() => {
@@ -273,7 +279,7 @@ export default function HomePage() {
     visitTracker.trackVisit("home");
 
     // Rotate hero background image on each visit/refresh
-    const heroImages = ['khoj.png', 'khoj-2.png', 'khoj-3.png'];
+    const heroImages = ["khoj.png", "khoj-2.png", "khoj-3.png"];
     const randomIndex = Math.floor(Math.random() * heroImages.length);
     setHeroImageIndex(randomIndex);
 
@@ -305,8 +311,14 @@ export default function HomePage() {
       { ext: "https://i.postimg.cc/15B0ZdVP/khoj-3.png", local: "/khoj-3.png" },
     ];
     const mobileMappings = [
-      { ext: "https://i.postimg.cc/90qP2XTH/khoj-mobile.png", local: "/khoj-mobile.png" },
-      { ext: "https://i.postimg.cc/PrmHfBm3/khoj-2.png", local: "/khoj-mobile-2.png" },
+      {
+        ext: "https://i.postimg.cc/90qP2XTH/khoj-mobile.png",
+        local: "/khoj-mobile.png",
+      },
+      {
+        ext: "https://i.postimg.cc/PrmHfBm3/khoj-2.png",
+        local: "/khoj-mobile-2.png",
+      },
     ];
 
     // Choose mapping based on viewport and selected index
@@ -362,12 +374,15 @@ export default function HomePage() {
 
   // Check for intro image every 5 minutes
   useEffect(() => {
-    const checkInterval = setInterval(() => {
-      if (shouldShowIntroImage() && !showIntroImage) {
-        setShowIntroImage(true);
-        markIntroImageShown();
-      }
-    }, 5 * 60 * 1000); // Check every 5 minutes
+    const checkInterval = setInterval(
+      () => {
+        if (shouldShowIntroImage() && !showIntroImage) {
+          setShowIntroImage(true);
+          markIntroImageShown();
+        }
+      },
+      5 * 60 * 1000
+    ); // Check every 5 minutes
 
     return () => clearInterval(checkInterval);
   }, [showIntroImage]);
@@ -571,9 +586,13 @@ export default function HomePage() {
   const handleSearch = useCallback(
     async (query: string) => {
       // Check if any mode is manually activated by button click
-      const hasActiveMode = isMythbustingActive || isAIImageCheckActive || 
-                           isImageSearchActive || isTextCheckActive || isNewsCheckActive;
-      
+      const hasActiveMode =
+        isMythbustingActive ||
+        isAIImageCheckActive ||
+        isImageSearchActive ||
+        isTextCheckActive ||
+        isNewsCheckActive;
+
       // If a mode is manually active, use traditional routing
       if (hasActiveMode) {
         if (isMythbustingActive) {
@@ -592,36 +611,36 @@ export default function HomePage() {
       }
 
       // 🤖 INTELLIGENT AUTO-ROUTING (when no button is pressed)
-      console.log('🤖 Using intelligent routing for query:', query);
-      
+      console.log("🤖 Using intelligent routing for query:", query);
+
       // Show loading animation for AI classification
       setIsClassifying(true);
-      
+
       try {
         // Classify the query using AI
         const classification = await classifyQuery(query);
-        console.log('📊 Classification result:', classification);
+        console.log("📊 Classification result:", classification);
 
         // Route based on classification
-        if (classification.type === 'url') {
+        if (classification.type === "url") {
           // URL detected - go to news verification
-          console.log('🔗 Routing to news verification (URL detected)');
+          console.log("🔗 Routing to news verification (URL detected)");
           window.location.href = `/news-verification-v2?url=${encodeURIComponent(query.trim())}`;
-        } else if (classification.type === 'mythbusting') {
+        } else if (classification.type === "mythbusting") {
           // General belief/myth question - go to mythbusting
-          console.log('🔍 Routing to mythbusting (myth/belief detected)');
+          console.log("🔍 Routing to mythbusting (myth/belief detected)");
           window.location.href = `/mythbusting?query=${encodeURIComponent(query)}`;
-        } else if (classification.type === 'factcheck') {
+        } else if (classification.type === "factcheck") {
           // Specific event/news claim - go to AI factchecking
-          console.log('✅ Routing to factcheck (specific event detected)');
+          console.log("✅ Routing to factcheck (specific event detected)");
           window.location.href = `/factcheck-detail?query=${encodeURIComponent(query)}`;
         } else {
           // Default fallback
-          console.log('⚠️ Using default routing');
+          console.log("⚠️ Using default routing");
           window.location.href = `/factcheck-detail?query=${encodeURIComponent(query)}`;
         }
       } catch (error) {
-        console.error('Classification failed, using default routing:', error);
+        console.error("Classification failed, using default routing:", error);
         // Fallback to factcheck on error
         window.location.href = `/factcheck-detail?query=${encodeURIComponent(query)}`;
       } finally {
@@ -638,6 +657,75 @@ export default function HomePage() {
     ]
   );
 
+  // Start image upload simulation and store image data URL for downstream pages
+  const startImageUpload = (file: File) => {
+    setIsUploadingImage(true);
+    setUploadProgress(0);
+    setUploadedFile(null);
+
+    // Simulate upload progress
+    let progress = 0;
+    const interval = window.setInterval(() => {
+      // increment faster at first, then slow near the end
+      progress += Math.round(Math.random() * 12) + 6;
+      if (progress >= 95) progress = 95;
+      setUploadProgress(progress);
+    }, 250);
+
+    // After a short delay, finish upload and read file as dataURL
+    window.setTimeout(
+      () => {
+        window.clearInterval(interval);
+        setUploadProgress(100);
+
+        // Read file into data URL and store in sessionStorage for next pages
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const dataUrl = reader.result as string;
+            sessionStorage.setItem("khoj_uploaded_image_dataurl", dataUrl);
+          } catch (e) {
+            console.warn(
+              "Could not persist uploaded image to sessionStorage",
+              e
+            );
+          }
+
+          setUploadedFile(file);
+          setIsUploadingImage(false);
+          setUploadProgress(0);
+          setIsImageModalOpen(true);
+        };
+        reader.onerror = () => {
+          setIsUploadingImage(false);
+          setUploadProgress(0);
+          alert("আপলোডে সমস্যা হয়েছে — অনুগ্রহ করে আবার চেষ্টা করুন।");
+        };
+        reader.readAsDataURL(file);
+      },
+      1500 + Math.random() * 800
+    ); // total simulated upload time
+  };
+
+  const handleImageOptionSelect = (option: string) => {
+    // When the user picks an option, route appropriately and use the stored image
+    setIsImageModalOpen(false);
+    const dataKey = "khoj_uploaded_image_dataurl";
+
+    if (option === "Image search") {
+      // Navigate to image search and keep image in sessionStorage
+      window.location.href = "/image-search";
+    } else if (option === "AI image detection") {
+      window.location.href = "/image-check";
+    } else if (option === "Photocard news verification") {
+      // Map photocard option to a suitable route; fallback to image-check
+      window.location.href = "/image-check";
+    } else {
+      // default fallback
+      window.location.href = "/image-search";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* AI Classification Loading Overlay */}
@@ -650,20 +738,26 @@ export default function HomePage() {
                 <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
                 <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
               </div>
-              
+
               {/* Loading Text */}
               <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">
-              ফ্যাক্টচেকিং এ পাঠানো হচ্ছে...
+                ফ্যাক্টচেকিং এ পাঠানো হচ্ছে...
               </h3>
               <p className="text-sm text-gray-600 font-tiro-bangla">
-              একটু অপেক্ষা করুন...
+                একটু অপেক্ষা করুন...
               </p>
-              
+
               {/* Progress Dots */}
               <div className="flex justify-center space-x-1 mt-4">
                 <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                <div
+                  className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.1s" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.2s" }}
+                ></div>
               </div>
             </div>
           </div>
@@ -671,12 +765,43 @@ export default function HomePage() {
       )}
 
       {/* Intro Image Popup - Shows on first visit and every 5 minutes */}
-      <IntroImagePopup
+      {/* <IntroImagePopup
         isOpen={showIntroImage}
         onClose={() => {
           setShowIntroImage(false);
         }}
-      />
+      /> */}
+
+      {/* Image upload progress overlay */}
+      {isUploadingImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-6 shadow-2xl max-w-sm mx-4 text-center">
+            <div className="relative w-20 h-20 mx-auto mb-4">
+              <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+              <div
+                className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"
+                style={{ transform: "rotate(0deg)" }}
+              ></div>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">
+              ছবি আপলোড হচ্ছে...
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              অনুগ্রহ করে অপেক্ষা করুন
+            </p>
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+              <div
+                className="h-2 bg-blue-600"
+                style={{
+                  width: `${uploadProgress}%`,
+                  transition: "width 200ms linear",
+                }}
+              />
+            </div>
+            <div className="mt-2 text-xs text-gray-600">{uploadProgress}%</div>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section with Grid Background */}
       <section className="hero-section relative bg-cover bg-center bg-no-repeat text-white py-6 md:py-10">
@@ -778,33 +903,51 @@ export default function HomePage() {
         </div>
         {/* Social Icons - Bottom Right of Hero (not fixed) */}
         <div className="pointer-events-auto absolute right-3 bottom-3 md:right-6 md:bottom-6 flex items-center gap-2 md:gap-3 z-10">
-        <a
-          href="https://www.facebook.com/profile.php?id=61580245735019"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Facebook"
-          className="opacity-90 hover:opacity-100 transition-opacity"
-        >
-          <Image src="/socials/facebook.png" alt="Facebook" width={24} height={24} className="w-6 h-6 md:w-7 md:h-7" />
-        </a>
-        <a
-          href="https://t.me/khojfact"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Telegram"
-          className="opacity-90 hover:opacity-100 transition-opacity"
-        >
-          <Image src="/socials/telegram.png" alt="Telegram" width={24} height={24} className="w-6 h-6 md:w-7 md:h-7" />
-        </a>
-        <a
-          href="https://www.youtube.com/@khoj-factchecker"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="YouTube"
-          className="opacity-90 hover:opacity-100 transition-opacity"
-        >
-          <Image src="/socials/youtube.png" alt="YouTube" width={24} height={24} className="w-6 h-6 md:w-7 md:h-7" />
-        </a>
+          <a
+            href="https://www.facebook.com/profile.php?id=61580245735019"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+            className="opacity-90 hover:opacity-100 transition-opacity"
+          >
+            <Image
+              src="/socials/facebook.png"
+              alt="Facebook"
+              width={24}
+              height={24}
+              className="w-6 h-6 md:w-7 md:h-7"
+            />
+          </a>
+          <a
+            href="https://t.me/khojfact"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Telegram"
+            className="opacity-90 hover:opacity-100 transition-opacity"
+          >
+            <Image
+              src="/socials/telegram.png"
+              alt="Telegram"
+              width={24}
+              height={24}
+              className="w-6 h-6 md:w-7 md:h-7"
+            />
+          </a>
+          <a
+            href="https://www.youtube.com/@khoj-factchecker"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube"
+            className="opacity-90 hover:opacity-100 transition-opacity"
+          >
+            <Image
+              src="/socials/youtube.png"
+              alt="YouTube"
+              width={24}
+              height={24}
+              className="w-6 h-6 md:w-7 md:h-7"
+            />
+          </a>
         </div>
       </section>
 
@@ -1354,6 +1497,13 @@ export default function HomePage() {
           )}
         </button>
       </div>
+
+      {/* Image options modal - shown after successful upload */}
+      <ImageOptionsModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        onSelectOption={handleImageOptionSelect}
+      />
 
       <Footer />
     </div>

@@ -1,272 +1,283 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Footer from '@/components/Footer'
+import { useState, useEffect } from "react";
+import { useLoading } from "@/components/LoadingProvider";
+import { useRouter } from "next/navigation";
+import Footer from "@/components/Footer";
 
 interface SearchResult {
-  success: boolean
-  type: 'image' | 'audio' | 'video'
+  success: boolean;
+  type: "image" | "audio" | "video";
   sources: Array<{
-    url: string
-    title: string
-    description?: string
-    similarity: number
-    publishedDate?: string
-    source: string
+    url: string;
+    title: string;
+    description?: string;
+    similarity: number;
+    publishedDate?: string;
+    source: string;
     tavilyData?: {
-      content: string
-      published_date?: string
-      author?: string
-      image_context?: string
-      surrounding_text?: string
-      page_title?: string
-      excerpt?: string
-    }
-  }>
+      content: string;
+      published_date?: string;
+      author?: string;
+      image_context?: string;
+      surrounding_text?: string;
+      page_title?: string;
+      excerpt?: string;
+    };
+  }>;
   metadata?: {
-    originalSource?: string
-    creationDate?: string
-    author?: string
-    location?: string
-  }
+    originalSource?: string;
+    creationDate?: string;
+    author?: string;
+    location?: string;
+  };
   analysis: {
-    totalSources: number
-    confidence: number
-    processingTime: number
-  }
+    totalSources: number;
+    confidence: number;
+    processingTime: number;
+  };
   factCheckReport?: {
-    title: string
-    originalUploadSource: string
-    earliestTimestamp: string
-    contextualAnalysis: string
-    usageDescription: string
+    title: string;
+    originalUploadSource: string;
+    earliestTimestamp: string;
+    contextualAnalysis: string;
+    usageDescription: string;
     sources: Array<{
-      url: string
-      title: string
-      context: string
-      timestamp?: string
-    }>
-    conclusion: string
-  }
-  message?: string
-  id?: string
-  savedAt?: string
+      url: string;
+      title: string;
+      context: string;
+      timestamp?: string;
+    }>;
+    conclusion: string;
+  };
+  message?: string;
+  id?: string;
+  savedAt?: string;
 }
 
 export default function ImageSearchPage() {
-  const [file, setFile] = useState<File | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [result, setResult] = useState<SearchResult | null>(null)
-  const [error, setError] = useState<string | null>('')
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [uploadProgress, setUploadProgress] = useState<string | null>('')
-  const [isClient, setIsClient] = useState(false)
-  const [savedReports, setSavedReports] = useState<SearchResult[]>([])
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  
-  const router = useRouter()
+  const [file, setFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<SearchResult | null>(null);
+  const [error, setError] = useState<string | null>("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<string | null>("");
+  const [isClient, setIsClient] = useState(false);
+  const [savedReports, setSavedReports] = useState<SearchResult[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const router = useRouter();
+  const loadingCtx = useLoading();
 
   // Ensure client-side rendering to prevent hydration mismatch
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
   // Load saved reports from localStorage
   useEffect(() => {
     if (isClient) {
-      const saved = localStorage.getItem('imageSearchReports')
+      const saved = localStorage.getItem("imageSearchReports");
       if (saved) {
         try {
-          setSavedReports(JSON.parse(saved))
+          setSavedReports(JSON.parse(saved));
         } catch (error) {
-          console.error('Error loading saved reports:', error)
+          console.error("Error loading saved reports:", error);
         }
       }
     }
-  }, [isClient])
+  }, [isClient]);
 
   // Check for file data from sessionStorage
   useEffect(() => {
     if (isClient) {
-      const fileDataStr = sessionStorage.getItem('selectedImageFile')
+      const fileDataStr = sessionStorage.getItem("selectedImageFile");
       if (fileDataStr) {
         try {
-          const fileData = JSON.parse(fileDataStr)
-          
+          const fileData = JSON.parse(fileDataStr);
+
           // Convert base64 back to File object
-          const byteCharacters = atob(fileData.content.split(',')[1])
-          const byteNumbers = new Array(byteCharacters.length)
+          const byteCharacters = atob(fileData.content.split(",")[1]);
+          const byteNumbers = new Array(byteCharacters.length);
           for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i)
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
           }
-          const byteArray = new Uint8Array(byteNumbers)
-          const blob = new Blob([byteArray], { type: fileData.type })
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: fileData.type });
           const actualFile = new File([blob], fileData.name, {
             type: fileData.type,
-            lastModified: fileData.lastModified
-          })
-          
-          setFile(actualFile)
-          setPreviewUrl(fileData.content) // Use the base64 data URL for preview
-          setUploadProgress('ছবি আপলোড হচ্ছে...')
-          
+            lastModified: fileData.lastModified,
+          });
+
+          setFile(actualFile);
+          setPreviewUrl(fileData.content); // Use the base64 data URL for preview
+          setUploadProgress("ছবি আপলোড হচ্ছে...");
+
           // Auto-start search after a short delay
           setTimeout(() => {
-            handleImageSearch(actualFile)
-          }, 1000)
-          
+            handleImageSearch(actualFile);
+          }, 1000);
+
           // Clear sessionStorage
-          sessionStorage.removeItem('selectedImageFile')
+          sessionStorage.removeItem("selectedImageFile");
         } catch (error) {
-          console.error('Error parsing file data:', error)
-          setError('ফাইল ডেটা লোড করতে সমস্যা হয়েছে')
+          console.error("Error parsing file data:", error);
+          setError("ফাইল ডেটা লোড করতে সমস্যা হয়েছে");
         }
       }
     }
-  }, [isClient])
+  }, [isClient]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0]
+    const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      setFile(selectedFile)
-      setError('')
-      setResult(null)
-      
+      setFile(selectedFile);
+      setError("");
+      setResult(null);
+
       // Create preview URL
-      const url = URL.createObjectURL(selectedFile)
-      setPreviewUrl(url)
+      const url = URL.createObjectURL(selectedFile);
+      setPreviewUrl(url);
     }
-  }
+  };
 
   const handleImageSearch = async (fileToSearch: File) => {
-    setIsLoading(true)
-    setError('')
-    setResult(null)
-    setUploadProgress('')
+    setIsLoading(true);
+    setError("");
+    setResult(null);
+    setUploadProgress("");
+
+    try {
+      loadingCtx.setLoading(true);
+    } catch (e) {}
 
     try {
       // Update progress messages
-      setUploadProgress('ছবি আপলোড হচ্ছে...')
-      
-      const formData = new FormData()
-      formData.append('file', fileToSearch)
-      formData.append('type', 'image')
+      setUploadProgress("ছবি আপলোড হচ্ছে...");
 
-      setUploadProgress('ছবি সার্চ করা হচ্ছে...')
-      
-      const response = await fetch('/api/source-search', {
-        method: 'POST',
-        body: formData
-      })
+      const formData = new FormData();
+      formData.append("file", fileToSearch);
+      formData.append("type", "image");
 
-      const data = await response.json()
+      setUploadProgress("ছবি সার্চ করা হচ্ছে...");
+
+      const response = await fetch("/api/source-search", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
 
       if (response.ok) {
-        setResult(data)
-        setUploadProgress('')
+        setResult(data);
+        setUploadProgress("");
         // Save report to localStorage
-        saveReportToLocalStorage(data)
+        saveReportToLocalStorage(data);
       } else {
-        setError(data.error || 'ছবিটির উৎস সন্ধান করতে সমস্যা হয়েছে')
-        setUploadProgress('')
+        setError(data.error || "ছবিটির উৎস সন্ধান করতে সমস্যা হয়েছে");
+        setUploadProgress("");
       }
     } catch (err) {
-      setError('নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।')
-      setUploadProgress('')
+      setError("নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।");
+      setUploadProgress("");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
+      try {
+        loadingCtx.setLoading(false);
+      } catch (e) {}
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!file) {
-      setError('দয়া করে একটি ফাইল নির্বাচন করুন')
-      return
+      setError("দয়া করে একটি ফাইল নির্বাচন করুন");
+      return;
     }
 
-    await handleImageSearch(file)
-  }
+    await handleImageSearch(file);
+  };
 
   const handleDownloadText = () => {
-    if (!result) return
-    
-    const reportText = generateReportText(result)
-    const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' })
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `khoj-image-search-${new Date().toISOString().split('T')[0]}.txt`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(url)
-  }
+    if (!result) return;
+
+    const reportText = generateReportText(result);
+    const blob = new Blob([reportText], { type: "text/plain;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `khoj-image-search-${new Date().toISOString().split("T")[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
 
   const generateReportText = (reportData: SearchResult): string => {
-    let text = 'খোঁজ - ছবি সন্ধান রিপোর্ট\n'
-    text += `প্রতিবেদনের তারিখ: ${new Date().toLocaleDateString('bn-BD')}\n\n`
-    
+    let text = "খোঁজ - ছবি সন্ধান রিপোর্ট\n";
+    text += `প্রতিবেদনের তারিখ: ${new Date().toLocaleDateString("bn-BD")}\n\n`;
+
     if (reportData.factCheckReport) {
-      text += `রিপোর্টের শিরোনাম: ${reportData.factCheckReport.title}\n\n`
-      text += `মূল আপলোড উৎস: ${reportData.factCheckReport.originalUploadSource}\n\n`
-      text += `সর্বপ্রথম দেখা গেছে: ${new Date(reportData.factCheckReport.earliestTimestamp).toLocaleDateString('bn-BD')}\n\n`
-      text += `প্রেক্ষাপট বিশ্লেষণ:\n${reportData.factCheckReport.contextualAnalysis}\n\n`
-      text += `ব্যবহারের বর্ণনা:\n${reportData.factCheckReport.usageDescription}\n\n`
-      
-      text += 'উৎসসমূহ:\n'
+      text += `রিপোর্টের শিরোনাম: ${reportData.factCheckReport.title}\n\n`;
+      text += `মূল আপলোড উৎস: ${reportData.factCheckReport.originalUploadSource}\n\n`;
+      text += `সর্বপ্রথম দেখা গেছে: ${new Date(reportData.factCheckReport.earliestTimestamp).toLocaleDateString("bn-BD")}\n\n`;
+      text += `প্রেক্ষাপট বিশ্লেষণ:\n${reportData.factCheckReport.contextualAnalysis}\n\n`;
+      text += `ব্যবহারের বর্ণনা:\n${reportData.factCheckReport.usageDescription}\n\n`;
+
+      text += "উৎসসমূহ:\n";
       reportData.factCheckReport.sources.forEach((source, index) => {
-        text += `${index + 1}. ${source.title}\n`
-        text += `   প্রেক্ষাপট: ${source.context}\n`
+        text += `${index + 1}. ${source.title}\n`;
+        text += `   প্রেক্ষাপট: ${source.context}\n`;
         if (source.timestamp) {
-          text += `   তারিখ: ${new Date(source.timestamp).toLocaleDateString('bn-BD')}\n`
+          text += `   তারিখ: ${new Date(source.timestamp).toLocaleDateString("bn-BD")}\n`;
         }
-        text += `   লিংক: ${source.url}\n\n`
-      })
-      
-      text += `সিদ্ধান্ত:\n${reportData.factCheckReport.conclusion}\n\n`
+        text += `   লিংক: ${source.url}\n\n`;
+      });
+
+      text += `সিদ্ধান্ত:\n${reportData.factCheckReport.conclusion}\n\n`;
     }
-    
-    text += 'বিশ্লেষণ সারসংক্ষেপ:\n'
-    text += `মোট উৎস: ${reportData.analysis.totalSources}\n`
-    text += `আস্থা: ${reportData.analysis.confidence}%\n`
-    text += `প্রক্রিয়াকরণ সময়: ${reportData.analysis.processingTime} সেকেন্ড\n`
-    
-    return text
-  }
+
+    text += "বিশ্লেষণ সারসংক্ষেপ:\n";
+    text += `মোট উৎস: ${reportData.analysis.totalSources}\n`;
+    text += `আস্থা: ${reportData.analysis.confidence}%\n`;
+    text += `প্রক্রিয়াকরণ সময়: ${reportData.analysis.processingTime} সেকেন্ড\n`;
+
+    return text;
+  };
 
   const saveReportToLocalStorage = (reportData: SearchResult) => {
     const newReport = {
       ...reportData,
       savedAt: new Date().toISOString(),
-      id: Date.now().toString()
-    }
-    
-    const updatedReports = [newReport, ...savedReports]
-    setSavedReports(updatedReports)
-    localStorage.setItem('imageSearchReports', JSON.stringify(updatedReports))
-  }
+      id: Date.now().toString(),
+    };
+
+    const updatedReports = [newReport, ...savedReports];
+    setSavedReports(updatedReports);
+    localStorage.setItem("imageSearchReports", JSON.stringify(updatedReports));
+  };
 
   const deleteReport = (reportId: string) => {
-    const updatedReports = savedReports.filter(report => report.id !== reportId)
-    setSavedReports(updatedReports)
-    localStorage.setItem('imageSearchReports', JSON.stringify(updatedReports))
-  }
+    const updatedReports = savedReports.filter(
+      (report) => report.id !== reportId
+    );
+    setSavedReports(updatedReports);
+    localStorage.setItem("imageSearchReports", JSON.stringify(updatedReports));
+  };
 
   const downloadSavedReport = (reportData: SearchResult) => {
-    const reportText = generateReportText(reportData)
-    const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' })
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `khoj-image-search-${reportData.savedAt?.split('T')[0] || 'unknown'}.txt`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(url)
-  }
+    const reportText = generateReportText(reportData);
+    const blob = new Blob([reportText], { type: "text/plain;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `khoj-image-search-${reportData.savedAt?.split("T")[0] || "unknown"}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
 
   // Loading screen component
   const LoadingScreen = () => (
@@ -279,15 +290,16 @@ export default function ImageSearchPage() {
           একটু অপেক্ষা করুন
         </h2>
         <p className="text-sm text-gray-600 font-tiro-bangla">
-          আপনার আপলোড করা ছবিটি অনলাইনে আর কোথায় কোথায় আছে, খোঁজ তা খুঁজে এনে দিচ্ছে, একটু অপেক্ষা করুন
+          আপনার আপলোড করা ছবিটি অনলাইনে আর কোথায় কোথায় আছে, খোঁজ তা খুঁজে এনে
+          দিচ্ছে, একটু অপেক্ষা করুন
         </p>
       </div>
     </div>
-  )
+  );
 
   // Show loading screen when searching
   if (isLoading) {
-    return <LoadingScreen />
+    return <LoadingScreen />;
   }
 
   return (
@@ -305,9 +317,11 @@ export default function ImageSearchPage() {
       </button>
 
       {/* Collapsible Sidebar */}
-      <div className={`fixed top-0 left-0 h-full w-80 bg-white/95 backdrop-blur-sm border-r border-gray-200/50 transform transition-transform duration-300 z-40 ${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <div
+        className={`fixed top-0 left-0 h-full w-80 bg-white/95 backdrop-blur-sm border-r border-gray-200/50 transform transition-transform duration-300 z-40 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-bold text-gray-800 font-tiro-bangla">
@@ -320,7 +334,7 @@ export default function ImageSearchPage() {
               <span className="text-lg">✕</span>
             </button>
           </div>
-          
+
           {savedReports.length === 0 ? (
             <div className="text-center py-8">
               <span className="text-4xl mb-4 block">📄</span>
@@ -331,10 +345,13 @@ export default function ImageSearchPage() {
           ) : (
             <div className="space-y-4 max-h-[calc(100vh-120px)] overflow-y-auto">
               {savedReports.map((report) => (
-                <div key={report.id} className="bg-gray-50/80 rounded-lg p-4 border border-gray-200/50">
+                <div
+                  key={report.id}
+                  className="bg-gray-50/80 rounded-lg p-4 border border-gray-200/50"
+                >
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-medium text-gray-800 font-tiro-bangla text-sm line-clamp-2">
-                      {report.factCheckReport?.title || 'রিপোর্ট'}
+                      {report.factCheckReport?.title || "রিপোর্ট"}
                     </h3>
                     <button
                       onClick={() => deleteReport(report.id!)}
@@ -343,16 +360,18 @@ export default function ImageSearchPage() {
                       <span className="text-xs">🗑️</span>
                     </button>
                   </div>
-                  
+
                   <p className="text-xs text-gray-600 font-tiro-bangla mb-3">
-                    {report.savedAt ? new Date(report.savedAt).toLocaleDateString('bn-BD') : 'তারিখ অজানা'}
+                    {report.savedAt
+                      ? new Date(report.savedAt).toLocaleDateString("bn-BD")
+                      : "তারিখ অজানা"}
                   </p>
-                  
+
                   <div className="flex space-x-2">
                     <button
                       onClick={() => {
-                        setResult(report)
-                        setIsSidebarOpen(false)
+                        setResult(report);
+                        setIsSidebarOpen(false);
                       }}
                       className="flex-1 px-3 py-2 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors font-tiro-bangla"
                     >
@@ -386,9 +405,9 @@ export default function ImageSearchPage() {
           <div className="relative w-24 h-24 mx-auto mb-6">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-200/80 to-indigo-200/80 blur-xl"></div>
             <div className="relative w-full h-full rounded-3xl bg-white/60 backdrop-blur border border-blue-200 flex items-center justify-center shadow-xl">
-              <img 
-                src="https://i.postimg.cc/d14zRx5D/image.png" 
-                alt="Image Search Icon" 
+              <img
+                src="https://i.postimg.cc/d14zRx5D/image.png"
+                alt="Image Search Icon"
                 className="w-12 h-12 object-contain"
               />
             </div>
@@ -409,7 +428,7 @@ export default function ImageSearchPage() {
               <label className="block text-sm font-medium text-gray-700 mb-3 font-tiro-bangla">
                 ছবি আপলোড করুন
               </label>
-              
+
               {/* File Input */}
               <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:border-gray-300 transition-colors bg-gradient-to-br from-gray-50/60 to-slate-50/60">
                 <input
@@ -424,31 +443,37 @@ export default function ImageSearchPage() {
                   {previewUrl ? (
                     <div className="space-y-4">
                       <div className="inline-block p-2 bg-gradient-to-br from-blue-100/60 to-indigo-100/60 rounded-2xl border border-blue-200">
-                        <img 
-                          src={previewUrl} 
-                          alt="Preview" 
+                        <img
+                          src={previewUrl}
+                          alt="Preview"
                           className="max-w-full h-48 object-contain mx-auto rounded-xl bg-white shadow-inner"
                         />
                       </div>
                       <p className="text-sm text-gray-600 font-tiro-bangla">
-                        {file?.name} - {file?.size ? (file.size / 1024 / 1024).toFixed(2) : '0'} MB
+                        {file?.name} -{" "}
+                        {file?.size
+                          ? (file.size / 1024 / 1024).toFixed(2)
+                          : "0"}{" "}
+                        MB
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       <div className="mb-4">
-                        <img 
-                          src="https://i.postimg.cc/Prm02J3Z/image.png" 
-                          alt="Upload Icon" 
+                        <img
+                          src="https://i.postimg.cc/Prm02J3Z/image.png"
+                          alt="Upload Icon"
                           className="w-12 h-12 object-contain mx-auto"
                         />
                       </div>
                       <div>
                         <p className="text-base font-medium text-gray-800 font-tiro-bangla">
-                          {file ? file.name : 'ছবি আপলোড করুন'}
+                          {file ? file.name : "ছবি আপলোড করুন"}
                         </p>
                         <p className="text-sm text-gray-500 font-tiro-bangla">
-                          {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'ক্লিক করে ছবি নির্বাচন করুন'}
+                          {file
+                            ? `${(file.size / 1024 / 1024).toFixed(2)} MB`
+                            : "ক্লিক করে ছবি নির্বাচন করুন"}
                         </p>
                       </div>
                     </div>
@@ -464,15 +489,27 @@ export default function ImageSearchPage() {
                 disabled={!file || isLoading}
                 className={`px-8 py-3 rounded-xl font-medium transition-all font-tiro-bangla ${
                   !file || isLoading
-                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                    : ''
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : ""
                 }`}
-                style={!file || isLoading ? {} : { background: 'linear-gradient(90deg, rgba(37,99,235,1) 0%, rgba(79,70,229,1) 100%)', color: 'white', boxShadow: '0 10px 20px rgba(79,70,229,0.25)' }}
+                style={
+                  !file || isLoading
+                    ? {}
+                    : {
+                        background:
+                          "linear-gradient(90deg, rgba(37,99,235,1) 0%, rgba(79,70,229,1) 100%)",
+                        color: "white",
+                        boxShadow: "0 10px 20px rgba(79,70,229,0.25)",
+                      }
+                }
               >
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span className="text-sm">আপনার আপলোড করা ছবিটা নিয়ে আমরা ইন্টারনেটে ঘাটাঘাটি করছি...</span>
+                    <span className="text-sm">
+                      আপনার আপলোড করা ছবিটা নিয়ে আমরা ইন্টারনেটে ঘাটাঘাটি
+                      করছি...
+                    </span>
                   </div>
                 ) : (
                   <span className="text-sm">ছবিটা সার্চ করুন</span>
@@ -483,7 +520,9 @@ export default function ImageSearchPage() {
             {/* Progress Message */}
             {uploadProgress && (
               <div className="text-center">
-                <p className="text-sm text-gray-600 font-tiro-bangla">{uploadProgress}</p>
+                <p className="text-sm text-gray-600 font-tiro-bangla">
+                  {uploadProgress}
+                </p>
               </div>
             )}
 
@@ -503,16 +542,16 @@ export default function ImageSearchPage() {
               <h3 className="text-xl font-bold text-gray-800 font-tiro-bangla">
                 সার্চ রেজাল্ট
               </h3>
-              
+
               <div className="flex items-center space-x-3">
                 {/* Start New Search Button */}
                 <button
                   onClick={() => {
-                    setResult(null)
-                    setFile(null)
-                    setPreviewUrl(null)
-                    setError(null)
-                    setUploadProgress(null)
+                    setResult(null);
+                    setFile(null);
+                    setPreviewUrl(null);
+                    setError(null);
+                    setUploadProgress(null);
                   }}
                   className="px-4 py-2 rounded-lg font-medium transition-all bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 font-tiro-bangla text-sm"
                 >
@@ -521,7 +560,7 @@ export default function ImageSearchPage() {
                     <span>নতুন ছবি সার্চ</span>
                   </div>
                 </button>
-                
+
                 {/* Text Download Button */}
                 {result.factCheckReport && (
                   <button
@@ -536,7 +575,7 @@ export default function ImageSearchPage() {
                 )}
               </div>
             </div>
-            
+
             {/* Coming Soon Message for Audio/Video */}
             {result.message && (
               <div className="text-center py-8">
@@ -549,7 +588,7 @@ export default function ImageSearchPage() {
                 </p>
               </div>
             )}
-            
+
             {/* Regular Results */}
             {!result.message && (
               <div className="space-y-6">
@@ -560,16 +599,28 @@ export default function ImageSearchPage() {
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-center">
-                      <div className="text-xl font-bold text-amber-600">{result.analysis.totalSources}</div>
-                      <div className="text-xs text-gray-600 font-tiro-bangla">মোট উৎস</div>
+                      <div className="text-xl font-bold text-amber-600">
+                        {result.analysis.totalSources}
+                      </div>
+                      <div className="text-xs text-gray-600 font-tiro-bangla">
+                        মোট উৎস
+                      </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl font-bold text-amber-600">{result.analysis.confidence}%</div>
-                      <div className="text-xs text-gray-600 font-tiro-bangla">আস্থা</div>
+                      <div className="text-xl font-bold text-amber-600">
+                        {result.analysis.confidence}%
+                      </div>
+                      <div className="text-xs text-gray-600 font-tiro-bangla">
+                        আস্থা
+                      </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl font-bold text-amber-600">{result.analysis.processingTime}s</div>
-                      <div className="text-xs text-gray-600 font-tiro-bangla">প্রক্রিয়াকরণ সময়</div>
+                      <div className="text-xl font-bold text-amber-600">
+                        {result.analysis.processingTime}s
+                      </div>
+                      <div className="text-xs text-gray-600 font-tiro-bangla">
+                        প্রক্রিয়াকরণ সময়
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -581,7 +632,10 @@ export default function ImageSearchPage() {
                   </h4>
                   <div className="space-y-3">
                     {result.sources.map((source, index) => (
-                      <div key={index} className="border border-gray-200/50 rounded-xl p-4 hover:bg-gray-50/50 transition-colors bg-white/50">
+                      <div
+                        key={index}
+                        className="border border-gray-200/50 rounded-xl p-4 hover:bg-gray-50/50 transition-colors bg-white/50"
+                      >
                         <div className="flex justify-between items-start mb-2">
                           <h5 className="font-medium text-gray-800 font-tiro-bangla text-sm">
                             {source.title}
@@ -617,11 +671,13 @@ export default function ImageSearchPage() {
                     <h4 className="text-lg font-bold text-gray-800 mb-4 font-tiro-bangla">
                       {result.factCheckReport.title}
                     </h4>
-                    
+
                     {/* Original Upload Source */}
                     <div className="mb-4 p-4 bg-white/60 rounded-lg border border-blue-100">
-                      <h5 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">মূল আপলোড উৎস:</h5>
-                      <a 
+                      <h5 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">
+                        মূল আপলোড উৎস:
+                      </h5>
+                      <a
                         href={result.factCheckReport.originalUploadSource}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -630,13 +686,18 @@ export default function ImageSearchPage() {
                         {result.factCheckReport.originalUploadSource}
                       </a>
                       <p className="text-xs text-gray-600 mt-1 font-tiro-bangla">
-                        সর্বপ্রথম দেখা গেছে: {new Date(result.factCheckReport.earliestTimestamp).toLocaleDateString('bn-BD')}
+                        সর্বপ্রথম দেখা গেছে:{" "}
+                        {new Date(
+                          result.factCheckReport.earliestTimestamp
+                        ).toLocaleDateString("bn-BD")}
                       </p>
                     </div>
 
                     {/* Contextual Analysis */}
                     <div className="mb-4 p-4 bg-white/60 rounded-lg border border-blue-100">
-                      <h5 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">প্রেক্ষাপট বিশ্লেষণ:</h5>
+                      <h5 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">
+                        প্রেক্ষাপট বিশ্লেষণ:
+                      </h5>
                       <p className="text-sm text-gray-700 font-tiro-bangla leading-relaxed">
                         {result.factCheckReport.contextualAnalysis}
                       </p>
@@ -644,7 +705,9 @@ export default function ImageSearchPage() {
 
                     {/* Usage Description */}
                     <div className="mb-4 p-4 bg-white/60 rounded-lg border border-blue-100">
-                      <h5 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">ব্যবহারের বর্ণনা:</h5>
+                      <h5 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">
+                        ব্যবহারের বর্ণনা:
+                      </h5>
                       <p className="text-sm text-gray-700 font-tiro-bangla leading-relaxed">
                         {result.factCheckReport.usageDescription}
                       </p>
@@ -652,17 +715,24 @@ export default function ImageSearchPage() {
 
                     {/* Sources with Context */}
                     <div className="mb-4">
-                      <h5 className="font-semibold text-gray-800 mb-3 font-tiro-bangla">উৎসসমূহ:</h5>
+                      <h5 className="font-semibold text-gray-800 mb-3 font-tiro-bangla">
+                        উৎসসমূহ:
+                      </h5>
                       <div className="space-y-3">
                         {result.factCheckReport.sources.map((source, index) => (
-                          <div key={index} className="p-3 bg-white/60 rounded-lg border border-blue-100">
+                          <div
+                            key={index}
+                            className="p-3 bg-white/60 rounded-lg border border-blue-100"
+                          >
                             <div className="flex justify-between items-start mb-2">
                               <h6 className="font-medium text-gray-800 font-tiro-bangla text-sm">
                                 {source.title}
                               </h6>
                               {source.timestamp && (
                                 <span className="text-xs text-gray-500 font-tiro-bangla">
-                                  {new Date(source.timestamp).toLocaleDateString('bn-BD')}
+                                  {new Date(
+                                    source.timestamp
+                                  ).toLocaleDateString("bn-BD")}
                                 </span>
                               )}
                             </div>
@@ -684,7 +754,9 @@ export default function ImageSearchPage() {
 
                     {/* Conclusion */}
                     <div className="p-4 bg-white/60 rounded-lg border border-blue-100">
-                      <h5 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">সিদ্ধান্ত:</h5>
+                      <h5 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">
+                        সিদ্ধান্ত:
+                      </h5>
                       <p className="text-sm text-gray-700 font-tiro-bangla leading-relaxed">
                         {result.factCheckReport.conclusion}
                       </p>
@@ -701,15 +773,23 @@ export default function ImageSearchPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                       {result.metadata.originalSource && (
                         <div>
-                          <span className="font-medium text-gray-700 font-tiro-bangla">মূল উৎস:</span>
-                          <span className="ml-2 text-gray-600 font-tiro-bangla">{result.metadata.originalSource}</span>
+                          <span className="font-medium text-gray-700 font-tiro-bangla">
+                            মূল উৎস:
+                          </span>
+                          <span className="ml-2 text-gray-600 font-tiro-bangla">
+                            {result.metadata.originalSource}
+                          </span>
                         </div>
                       )}
                       {result.metadata.creationDate && (
                         <div>
-                          <span className="font-medium text-gray-700 font-tiro-bangla">তৈরির তারিখ:</span>
+                          <span className="font-medium text-gray-700 font-tiro-bangla">
+                            তৈরির তারিখ:
+                          </span>
                           <span className="ml-2 text-gray-600 font-tiro-bangla">
-                            {new Date(result.metadata.creationDate).toLocaleDateString('bn-BD')}
+                            {new Date(
+                              result.metadata.creationDate
+                            ).toLocaleDateString("bn-BD")}
                           </span>
                         </div>
                       )}
@@ -721,8 +801,8 @@ export default function ImageSearchPage() {
           </div>
         )}
       </div>
-      
+
       <Footer />
     </div>
-  )
+  );
 }

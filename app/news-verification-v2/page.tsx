@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
+import { useLoading } from "@/components/LoadingProvider";
 import Link from "next/link";
 import { Info, Download } from "lucide-react";
 import { parseMarkdown, sanitizeHtml } from "@/lib/markdown";
+import GenkitAudioPlayer from "@/components/GenkitAudioPlayer";
 
 interface NewsVerificationResult {
   success: boolean;
@@ -29,6 +31,7 @@ export default function NewsVerificationV2Page() {
   const [result, setResult] = useState<NewsVerificationResult | null>(null);
   const [error, setError] = useState("");
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const loadingCtx = useLoading();
 
   // Get URL from query parameters
   useEffect(() => {
@@ -67,8 +70,8 @@ export default function NewsVerificationV2Page() {
     };
 
     // Create a clean text version of the report (removing HTML tags)
-    const cleanReport = result.report.replace(/<[^>]*>/g, '');
-    
+    const cleanReport = result.report.replace(/<[^>]*>/g, "");
+
     const reportContent = `
 ═══════════════════════════════════════════════════════════════
                     নিউজ যাচাই রিপোর্ট
@@ -93,9 +96,12 @@ ${cleanReport}
 উৎসসমূহ (Sources)
 ═══════════════════════════════════════════════════════════════
 
-${result.sources.map((source, index) => 
-  `${index + 1}. ${source.title}\n   URL: ${source.url}\n   ${source.snippet}\n`
-).join('\n')}
+${result.sources
+  .map(
+    (source, index) =>
+      `${index + 1}. ${source.title}\n   URL: ${source.url}\n   ${source.snippet}\n`
+  )
+  .join("\n")}
 
 ═══════════════════════════════════════════════════════════════
 রিপোর্ট তৈরির তারিখ: ${new Date().toLocaleString("bn-BD")}
@@ -104,15 +110,17 @@ ${result.sources.map((source, index) =>
 `;
 
     // Create a blob and download
-    const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([reportContent], {
+      type: "text/plain;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    
+
     // Create filename with current date
-    const date = new Date().toISOString().split('T')[0];
+    const date = new Date().toISOString().split("T")[0];
     const filename = `খবর_যাচাই_রিপোর্ট_${date}.txt`;
-    
+
     link.download = filename;
     document.body.appendChild(link);
     link.click();
@@ -138,6 +146,11 @@ ${result.sources.map((source, index) =>
     // }
 
     setIsLoading(true);
+    try {
+      loadingCtx?.setLoading(true);
+    } catch (e) {
+      // ignore
+    }
     setError("");
     setResult(null);
 
@@ -159,12 +172,19 @@ ${result.sources.map((source, index) =>
       if (response.ok) {
         setResult(data);
       } else {
-        setError(data.errorBengali || data.error || "নিউজ যাচাই করতে সমস্যা হয়েছে");
+        setError(
+          data.errorBengali || data.error || "নিউজ যাচাই করতে সমস্যা হয়েছে"
+        );
       }
     } catch (err) {
       setError("নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।");
     } finally {
       setIsLoading(false);
+      try {
+        loadingCtx?.setLoading(false);
+      } catch (e) {
+        // ignore
+      }
     }
   };
 
@@ -211,9 +231,9 @@ ${result.sources.map((source, index) =>
         {/* Header */}
         <div className="text-center mb-10">
           <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-blue-200">
-            <img 
-              src="https://i.postimg.cc/02ghqP5Z/image.png" 
-              alt="News Verification Icon" 
+            <img
+              src="https://i.postimg.cc/02ghqP5Z/image.png"
+              alt="News Verification Icon"
               className="w-12 h-12 object-contain"
             />
           </div>
@@ -232,12 +252,14 @@ ${result.sources.map((source, index) =>
               {/* Animated News Icon */}
               <div className="relative mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto border border-blue-200">
-                  <span className="text-blue-600 text-2xl animate-pulse">📰</span>
+                  <span className="text-blue-600 text-2xl animate-pulse">
+                    📰
+                  </span>
                 </div>
                 {/* Pulsing Ring */}
                 <div className="absolute inset-0 rounded-2xl border-2 border-blue-300 animate-ping"></div>
               </div>
-              
+
               {/* Loading Text */}
               <h3 className="text-lg font-semibold text-blue-800 mb-2 font-tiro-bangla">
                 নিউজ যাচাই হচ্ছে...
@@ -245,7 +267,7 @@ ${result.sources.map((source, index) =>
               <p className="text-blue-700 font-tiro-bangla text-sm mb-4">
                 অনুগ্রহ করে অপেক্ষা করুন
               </p>
-              
+
               {/* Progress Steps */}
               <div className="space-y-2 text-sm text-blue-600 font-tiro-bangla">
                 <div className="flex items-center justify-center space-x-2">
@@ -253,11 +275,17 @@ ${result.sources.map((source, index) =>
                   <span>নিউজ আর্টিকেল পড়া হচ্ছে...</span>
                 </div>
                 <div className="flex items-center justify-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                  <div
+                    className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
+                    style={{ animationDelay: "0.5s" }}
+                  ></div>
                   <span>সে খবরটি নিয়ে খোঁজ চালানো হচ্ছে...</span>
                 </div>
                 <div className="flex items-center justify-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+                  <div
+                    className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
+                    style={{ animationDelay: "1s" }}
+                  ></div>
                   <span>রিপোর্ট তৈরি করা হচ্ছে...</span>
                 </div>
               </div>
@@ -309,6 +337,13 @@ ${result.sources.map((source, index) =>
                 <h3 className="text-lg font-semibold text-gray-800 font-tiro-bangla">
                   যাচাইকরণ ফলাফল
                 </h3>
+                {/* Audio player for the report (generate via Google GenKit/TTS) */}
+              </div>
+              <div className="flex flex-col gap-4 justify-between sm:flex-row">
+                <GenkitAudioPlayer
+                  text={sanitizeHtml(parseMarkdown(result.report))}
+                  filename={`news-report-${new Date().toISOString().split("T")[0]}.mp3`}
+                />
                 <button
                   onClick={downloadReport}
                   className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-tiro-bangla text-sm"
@@ -379,7 +414,7 @@ ${result.sources.map((source, index) =>
                     বিস্তারিত রিপোর্ট:
                   </span>
                   <div className="mt-2 p-4 bg-white/50 rounded-lg border border-gray-200">
-                    <div 
+                    <div
                       className="prose prose-sm max-w-none text-gray-800 font-tiro-bangla leading-relaxed"
                       dangerouslySetInnerHTML={{
                         __html: sanitizeHtml(parseMarkdown(result.report)),
@@ -458,43 +493,67 @@ ${result.sources.map((source, index) =>
                   onClick={() => setShowInfoModal(false)}
                   className="text-gray-500 hover:text-gray-700 transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                  <h4 className="font-semibold text-blue-800 mb-2 font-tiro-bangla">HTTP Request</h4>
+                  <h4 className="font-semibold text-blue-800 mb-2 font-tiro-bangla">
+                    HTTP Request
+                  </h4>
                   <p className="text-blue-700 text-sm font-tiro-bangla">
                     সরাসরি নিউজ সাইট থেকে কনটেন্ট নেয়।
                   </p>
                 </div>
-                
+
                 <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                  <h4 className="font-semibold text-green-800 mb-2 font-tiro-bangla"> AI বিশ্লেষণ</h4>
+                  <h4 className="font-semibold text-green-800 mb-2 font-tiro-bangla">
+                    {" "}
+                    AI বিশ্লেষণ
+                  </h4>
                   <p className="text-green-700 text-sm font-tiro-bangla">
-                    কৃত্রিম বুদ্ধিমত্তা দিয়ে কনটেন্ট বিশ্লেষণ করে। এটি নিউজের সত্যতা যাচাই করে এবং একটি বিস্তারিত রিপোর্ট তৈরি করে।
+                    কৃত্রিম বুদ্ধিমত্তা দিয়ে কনটেন্ট বিশ্লেষণ করে। এটি নিউজের
+                    সত্যতা যাচাই করে এবং একটি বিস্তারিত রিপোর্ট তৈরি করে।
                   </p>
                 </div>
-                
+
                 <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                  <h4 className="font-semibold text-purple-800 mb-2 font-tiro-bangla">অনুসন্ধান</h4>
+                  <h4 className="font-semibold text-purple-800 mb-2 font-tiro-bangla">
+                    অনুসন্ধান
+                  </h4>
                   <p className="text-purple-700 text-sm font-tiro-bangla">
-                    অতিরিক্ত তথ্য খোঁজার জন্য বিভিন্ন উৎস থেকে তথ্য সংগ্রহ করে। এটি আরও সঠিক যাচাইকরণের জন্য প্রয়োজনীয়।
+                    অতিরিক্ত তথ্য খোঁজার জন্য বিভিন্ন উৎস থেকে তথ্য সংগ্রহ করে।
+                    এটি আরও সঠিক যাচাইকরণের জন্য প্রয়োজনীয়।
                   </p>
                 </div>
-                
+
                 <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-                  <h4 className="font-semibold text-orange-800 mb-2 font-tiro-bangla">রিপোর্ট</h4>
+                  <h4 className="font-semibold text-orange-800 mb-2 font-tiro-bangla">
+                    রিপোর্ট
+                  </h4>
                   <p className="text-orange-700 text-sm font-tiro-bangla">
-                    চূড়ান্ত ফ্যাক্ট চেক রিপোর্ট তৈরি করে যেখানে সত্যতা, আত্মবিশ্বাসের মাত্রা এবং উৎসসমূহ দেখানো হয়।
+                    চূড়ান্ত ফ্যাক্ট চেক রিপোর্ট তৈরি করে যেখানে সত্যতা,
+                    আত্মবিশ্বাসের মাত্রা এবং উৎসসমূহ দেখানো হয়।
                   </p>
                 </div>
-                
+
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">বিশেষত্ব</h4>
+                  <h4 className="font-semibold text-gray-800 mb-2 font-tiro-bangla">
+                    বিশেষত্ব
+                  </h4>
                   <ul className="text-gray-700 text-sm font-tiro-bangla space-y-1">
                     <li>• সরাসরি নিউজ সাইট থেকে তথ্য নেয়</li>
                     <li>• কৃত্রিম বুদ্ধিমত্ত দিয়ে বুদ্ধিদীপ্ত বিশ্লেষণ</li>
@@ -503,7 +562,7 @@ ${result.sources.map((source, index) =>
                   </ul>
                 </div>
               </div>
-              
+
               <div className="mt-6 text-center">
                 <button
                   onClick={() => setShowInfoModal(false)}

@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, memo, useEffect, useRef, useCallback } from "react";
+import ImageOptionsModal from "@/components/ImageOptionsModal";
 import { useRouter } from "next/navigation";
-import { Search, Mic, MicOff, X } from "lucide-react";
+import { Search, Mic, MicOff, X, ImageUpIcon, XCircle } from "lucide-react";
 import Image from "next/image";
+import { useLoading } from "./LoadingProvider";
 import { useVoiceSearch } from "@/lib/hooks/useVoiceSearch";
 import { isUrl } from "@/lib/utils";
+import { createPortal } from "react-dom";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -33,6 +36,8 @@ const SearchBar = memo(function SearchBar({
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const loadingCtx = useLoading();
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>(undefined);
 
   const {
     isRecording,
@@ -43,23 +48,30 @@ const SearchBar = memo(function SearchBar({
     isSupported,
   } = useVoiceSearch();
 
+  // SOLUTION: Helper function to reset file input
+  const resetFileInput = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }, []);
+
   // Auto-resize textarea function
   const autoResize = useCallback(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = "auto";
       const scrollHeight = textareaRef.current.scrollHeight;
       const maxHeight = 120; // Maximum height in pixels (about 3 lines)
       const minHeight = 56; // Minimum height in pixels
-      
+
       if (scrollHeight > maxHeight) {
         textareaRef.current.style.height = `${maxHeight}px`;
-        textareaRef.current.style.overflowY = 'auto';
+        textareaRef.current.style.overflowY = "auto";
       } else if (scrollHeight < minHeight) {
         textareaRef.current.style.height = `${minHeight}px`;
-        textareaRef.current.style.overflowY = 'hidden';
+        textareaRef.current.style.overflowY = "hidden";
       } else {
         textareaRef.current.style.height = `${scrollHeight}px`;
-        textareaRef.current.style.overflowY = 'hidden';
+        textareaRef.current.style.overflowY = "hidden";
       }
     }
   }, []);
@@ -77,8 +89,8 @@ const SearchBar = memo(function SearchBar({
       "কোনো খবর যাচাই করতে লিংক দিন এখানে",
       "কোনো ছবি এআই জেনারেটেড কীনা জানতে আপলোড করুন",
       "কোনো ছবির উৎস জানতে আপলোড করুন",
-      "যেকোনো গুজব, অপবিজ্ঞান নিয়ে প্রশ্ন করুন",
-      "কোনো লেখা চুরি হয়েছে কিনা তা জানতে এখানে লিখুন",
+      "যেকোনো গুজব, অপবিজ্ঞান নিয়ে প্রশ্ন করুন",
+      "কোনো লেখা চুরি হয়েছে কিনা তা জানতে এখানে লিখুন",
     ];
     const intervalId = window.setInterval(() => {
       setPlaceholderIndex((prev) => (prev + 1) % placeholders.length);
@@ -98,9 +110,9 @@ const SearchBar = memo(function SearchBar({
       const handlePaste = () => {
         setTimeout(autoResize, 10);
       };
-      
-      textarea.addEventListener('paste', handlePaste);
-      return () => textarea.removeEventListener('paste', handlePaste);
+
+      textarea.addEventListener("paste", handlePaste);
+      return () => textarea.removeEventListener("paste", handlePaste);
     }
   }, [autoResize]);
 
@@ -177,23 +189,89 @@ const SearchBar = memo(function SearchBar({
     }
   };
 
-  const handleTextOptionSelect = (option: 'factcheck' | 'plagiarism') => {
+  const handleTextOptionSelect = (option: "factcheck" | "plagiarism") => {
     const text = query.trim();
     if (!text) return;
-    if (option === 'plagiarism') {
+    if (option === "plagiarism") {
       // Per requirement: "আপনি কি এটির ফ্যাক্টচেক করতে চান?" -> /plag-test
-      sessionStorage.setItem('plagiarismText', text);
-      router.push('/plag-test');
+      sessionStorage.setItem("plagiarismText", text);
+      router.push("/plag-test");
     } else {
-      // "এই লেখাটি চুরি করা হয়েছে কিনা তা জানতে চান?" -> AI fact-checker page
+      // "এই লেখাটি চুরি করা হয়েছে কিনা তা জানতে চান?" -> AI fact-checker page
       router.push(`/factcheck-detail?query=${encodeURIComponent(text)}`);
     }
   };
 
-  const handleImageOptionSelect = (option: 'ai-check' | 'image-search') => {
+  const handleImageOptionSelect = async (option: string) => {
     if (!selectedFile) return;
 
-    // Store file in sessionStorage temporarily
+    // For Photocard news verification
+    if (option === "Photocard news verification") {
+      console.log("[SearchBar] Starting Photocard news verification");
+
+      // ensure loading is on (ImageOptionsModal already sets it, but ensure here too)
+      try {
+        loadingCtx.setLoading(true);
+      } catch (e) {}
+
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+
+      try {
+        // First, extract text from the image
+        console.log("[SearchBar] Sending image for text extraction");
+        const extractResponse = await fetch("/api/image-to-text", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!extractResponse.ok) {
+          const body = await extractResponse.text();
+          console.error("[SearchBar] Text extraction failed:", body);
+          try {
+            loadingCtx.setLoading(false);
+          } catch (e) {}
+          alert("Failed to extract text from image");
+          resetFileInput(); // SOLUTION: Reset on error
+          return;
+        }
+
+        const { text } = await extractResponse.json();
+        console.log("[SearchBar] Extracted text:", text);
+
+        if (!text) {
+          console.warn("[SearchBar] No text extracted from image");
+          try {
+            loadingCtx.setLoading(false);
+          } catch (e) {}
+          alert("No text could be extracted from the image");
+          resetFileInput(); // SOLUTION: Reset on error
+          return;
+        }
+
+        // Now send the extracted text to news verification page
+        console.log(
+          "[SearchBar] Sending extracted text to news verification page"
+        );
+        // SOLUTION: Reset before navigation
+        resetFileInput();
+        // Keep the global loading dialog visible; the target page will clear it when done.
+        window.location.href = `/factcheck-detail?query=${encodeURIComponent(text)}`;
+        return;
+      } catch (error) {
+        console.error("[SearchBar] Error processing image:", error);
+        try {
+          loadingCtx.setLoading(false);
+        } catch (e: any) {
+          console.log(e.message);
+        }
+        alert("Error processing image");
+        resetFileInput(); // SOLUTION: Reset on error
+        return;
+      }
+    }
+
+    // For other options, maintain existing behavior
     const reader = new FileReader();
     reader.onload = function (e) {
       const fileData = {
@@ -205,9 +283,14 @@ const SearchBar = memo(function SearchBar({
       };
       sessionStorage.setItem("selectedImageFile", JSON.stringify(fileData));
 
+      // SOLUTION: Reset before navigation
+      resetFileInput();
+
       // Redirect based on selection
-      if (option === 'ai-check') {
+      if (option === "AI image detection") {
         router.push("/image-check");
+      } else if (option === "Image search") {
+        router.push("/image-search");
       } else {
         router.push("/image-search");
       }
@@ -215,16 +298,20 @@ const SearchBar = memo(function SearchBar({
     reader.readAsDataURL(selectedFile);
   };
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    setQuery(value);
-    // Clear selected file when typing
-    if (selectedFile) {
-      setSelectedFile(null);
-    }
-    // Auto-resize after state update
-    setTimeout(autoResize, 0);
-  }, [selectedFile, autoResize]);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const value = e.target.value;
+      setQuery(value);
+      // Clear selected file when typing
+      if (selectedFile) {
+        setSelectedFile(null);
+        resetFileInput(); // SOLUTION: Reset when clearing file
+      }
+      // Auto-resize after state update
+      setTimeout(autoResize, 0);
+    },
+    [selectedFile, autoResize, resetFileInput]
+  );
 
   const handleMicClick = async () => {
     if (isRecording) {
@@ -235,7 +322,7 @@ const SearchBar = memo(function SearchBar({
   };
 
   const handleImageSearchClick = () => {
-    console.log('Attachment/Image Search button clicked!');
+    console.log("Attachment/Image Search button clicked!");
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
@@ -244,10 +331,33 @@ const SearchBar = memo(function SearchBar({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Only allow image files
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
+        resetFileInput(); // SOLUTION: Reset on error
+        return;
+      }
+
       setSelectedFile(file);
       setQuery(`${file.name} - ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url); // This will trigger the preview modal
     }
   };
+
+  // SOLUTION: Modal close handler with file input reset
+  const handleModalClose = useCallback(() => {
+    setShowImageModal(false);
+    resetFileInput(); // SOLUTION: Reset when modal closes
+  }, [resetFileInput]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   return (
     <>
@@ -261,14 +371,18 @@ const SearchBar = memo(function SearchBar({
             ref={textareaRef}
             value={query}
             onChange={handleInputChange}
-            placeholder={dynamicPlaceholder || [
-              "আজকে কী ব্যাপারে যাচাই-বাচাই করতে চান?",
-              "কোনো খবর যাচাই করতে লিংক দিন এখানে",
-              "কোনো ছবি এআই জেনারেটেড কীনা জানতে আপলোড করুন",
-              "কোনো ছবির উৎস জানতে আপলোড করুন",
-              "যেকোনো গুজব, অপবিজ্ঞান নিয়ে প্রশ্ন করুন",
-              "কোনো লেখা চুরি হয়েছে কিনা তা জানতে এখানে লিখুন",
-            ][placeholderIndex] || placeholder}
+            placeholder={
+              dynamicPlaceholder ||
+              [
+                "আজকে কী ব্যাপারে যাচাই-বাচাই করতে চান?",
+                "কোনো খবর যাচাই করতে লিংক দিন এখানে",
+                "কোনো ছবি এআই জেনারেটেড কীনা জানতে আপলোড করুন",
+                "কোনো ছবির উৎস জানতে আপলোড করুন",
+                "যেকোনো গুজব, অপবিজ্ঞান নিয়ে প্রশ্ন করুন",
+                "কোনো লেখা চুরি হয়েছে কিনা তা জানতে এখানে লিখুন",
+              ][placeholderIndex] ||
+              placeholder
+            }
             className="search-input pr-24 md:pr-36 text-sm md:text-base resize-none overflow-hidden"
             autoComplete="off"
             autoCorrect="off"
@@ -276,19 +390,19 @@ const SearchBar = memo(function SearchBar({
             spellCheck="false"
             rows={1}
             style={{
-              WebkitAppearance: 'none',
-              WebkitTapHighlightColor: 'transparent',
-              WebkitTouchCallout: 'none',
-              WebkitUserSelect: 'text',
-              fontSize: '16px',
-              minHeight: '56px',
-              WebkitFontSmoothing: 'antialiased',
-              MozOsxFontSmoothing: 'grayscale',
-              backfaceVisibility: 'hidden',
-              perspective: '1000px',
-              willChange: 'auto',
-              transform: 'translateZ(0)',
-              transition: 'height 0.2s ease-in-out'
+              WebkitAppearance: "none",
+              WebkitTapHighlightColor: "transparent",
+              WebkitTouchCallout: "none",
+              WebkitUserSelect: "text",
+              fontSize: "16px",
+              minHeight: "56px",
+              WebkitFontSmoothing: "antialiased",
+              MozOsxFontSmoothing: "grayscale",
+              backfaceVisibility: "hidden",
+              perspective: "1000px",
+              willChange: "auto",
+              transform: "translateZ(0)",
+              transition: "height 0.2s ease-in-out",
             }}
           />
 
@@ -301,8 +415,6 @@ const SearchBar = memo(function SearchBar({
             className="hidden"
           />
 
-
-
           {/* Attachment Icon */}
           <button
             type="button"
@@ -311,13 +423,7 @@ const SearchBar = memo(function SearchBar({
             title="Upload Image"
             style={{ zIndex: 10 }}
           >
-            <Image
-              src="/attach-file.png"
-              alt="Upload Image"
-              width={16}
-              height={16}
-              className="w-4 h-4 md:w-5 md:h-5 transition-all duration-200"
-            />
+            <ImageUpIcon width={20} height={20} color="black" />
           </button>
 
           {/* Mic Icon */}
@@ -374,51 +480,25 @@ const SearchBar = memo(function SearchBar({
         )}
       </form>
 
-      {/* Image Upload Modal */}
-      {showImageModal && (
-        <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-sm"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
-          onClick={() => setShowImageModal(false)}
-        >
-          <div 
-            className="relative flex flex-col space-y-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              aria-label="Close"
-              onClick={() => setShowImageModal(false)}
-              className="absolute -top-3 -right-3 bg-white rounded-full p-1 border border-gray-200 shadow hover:bg-gray-50"
-            >
-              <X className="w-4 h-4 text-gray-600" />
-            </button>
-            {/* AI ছবি যাচাই Button */}
-            <button
-              onClick={() => handleImageOptionSelect('ai-check')}
-              className="px-8 py-4 bg-white text-gray-800 rounded-xl border-2 border-gray-300 hover:border-blue-500 transition-all duration-200 font-tiro-bangla text-lg font-medium"
-            >
-              AI ছবি যাচাই
-            </button>
-
-            {/* ছবি সার্চ Button */}
-            <button
-              onClick={() => handleImageOptionSelect('image-search')}
-              className="px-8 py-4 bg-white text-gray-800 rounded-xl border-2 border-gray-300 hover:border-orange-500 transition-all duration-200 font-tiro-bangla text-lg font-medium"
-            >
-              ছবি সার্চ
-            </button>
-          </div>
-        </div>
-      )}
+      {/* ImageOptionsModal for image upload actions */}
+      <ImageOptionsModal
+        isOpen={showImageModal && !!previewUrl}
+        onClose={handleModalClose} // SOLUTION: Use handler with reset
+        onSelectOption={handleImageOptionSelect}
+        previewUrl={previewUrl}
+      />
 
       {/* Long Text Modal */}
       {showTextModal && (
         <div
           className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-sm"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}
           onClick={() => setShowTextModal(false)}
         >
-          <div className="relative flex flex-col space-y-4" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="relative flex flex-col space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               aria-label="Close"
               onClick={() => setShowTextModal(false)}
@@ -427,16 +507,16 @@ const SearchBar = memo(function SearchBar({
               <X className="w-4 h-4 text-gray-600" />
             </button>
             <button
-              onClick={() => handleTextOptionSelect('plagiarism')}
+              onClick={() => handleTextOptionSelect("plagiarism")}
               className="px-8 py-4 bg-white text-gray-800 rounded-xl border-2 border-gray-300 hover:border-blue-500 transition-all duration-200 font-tiro-bangla text-lg font-medium"
             >
               আপনি কি এটির ফ্যাক্টচেক করতে চান?
             </button>
             <button
-              onClick={() => handleTextOptionSelect('factcheck')}
+              onClick={() => handleTextOptionSelect("factcheck")}
               className="px-8 py-4 bg-white text-gray-800 rounded-xl border-2 border-gray-300 hover:border-orange-500 transition-all duration-200 font-tiro-bangla text-lg font-medium"
             >
-              এই লেখাটি চুরি করা হয়েছে কিনা তা জানতে চান?
+              এই লেখাটি চুরি করা হয়েছে কিনা তা জানতে চান?
             </button>
           </div>
         </div>

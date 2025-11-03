@@ -125,7 +125,7 @@ function FactCheckDetailContent() {
         };
         setReport(existingReport);
         // Scroll to top when loading existing report
-        setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' }), 0);
+        setTimeout(() => window.scrollTo({ top: 0, behavior: "instant" }), 0);
         return;
       }
 
@@ -184,7 +184,7 @@ function FactCheckDetailContent() {
   // Scroll to top when report is generated (prevents auto-scroll to bottom)
   useEffect(() => {
     if (report && !isLoading) {
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   }, [report, isLoading]);
 
@@ -217,7 +217,6 @@ ${report.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
-
 
   useEffect(() => {
     setUrl(window.location.href);
@@ -256,7 +255,7 @@ ${report.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Promotional Widget - Right Side */}
-        <div className="hidden lg:block absolute -right-12 top-16 w-80">
+        <div className="hidden lg:block absolute -right-[0%] top-16 w-80">
           <PromotionalWidget />
         </div>
 
@@ -302,7 +301,8 @@ ${report.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`
                 ফ্যাক্ট চেকিং রিপোর্ট তৈরি করা হচ্ছে...
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                আপনার দাবি কতোটা জটিল, তার উপর ভিত্তি করে এটি কয়েক সেকেন্ড থেকে সর্বোচ্চ এক মিনিট সময় নিতে পারে
+                আপনার দাবি কতোটা জটিল, তার উপর ভিত্তি করে এটি কয়েক সেকেন্ড থেকে
+                সর্বোচ্চ এক মিনিট সময় নিতে পারে
               </p>
             </div>
           )}
@@ -486,7 +486,7 @@ ${report.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`
               {report.relatedArticles && report.relatedArticles.length > 0 && (
                 <div className="card">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                     সম্পর্কিত নিবন্ধসমূহ:
+                    সম্পর্কিত নিবন্ধসমূহ:
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {report.relatedArticles.map((article) => (
@@ -579,7 +579,7 @@ ${report.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`
         <ShareModal
           isOpen={showShareModal}
           onClose={() => setShowShareModal(false)}
-          url={url}          
+          url={url}
         />
 
         <SearchLimitModal
