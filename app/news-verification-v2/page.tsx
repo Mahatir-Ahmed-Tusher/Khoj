@@ -146,11 +146,11 @@ ${result.sources
     // }
 
     setIsLoading(true);
-    try {
-      loadingCtx?.setLoading(true);
-    } catch (e) {
-      // ignore
-    }
+    // try {
+    //   loadingCtx?.setLoading(true);
+    // } catch (e) {
+    //   // ignore
+    // }
     setError("");
     setResult(null);
 
@@ -180,11 +180,11 @@ ${result.sources
       setError("নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।");
     } finally {
       setIsLoading(false);
-      try {
-        loadingCtx?.setLoading(false);
-      } catch (e) {
-        // ignore
-      }
+      // try {
+      //   loadingCtx?.setLoading(false);
+      // } catch (e) {
+      //   // ignore
+      // }
     }
   };
 
@@ -226,7 +226,7 @@ ${result.sources
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br overflow-x-hiddeb from-blue-50 via-indigo-50 to-purple-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header */}
         <div className="text-center mb-10">
@@ -247,7 +247,7 @@ ${result.sources
 
         {/* Auto-check Status */}
         {isLoading && (
-          <div className="bg-gradient-to-r from-blue-50/90 to-indigo-50/90 backdrop-blur-sm rounded-2xl border border-blue-200/50 p-8 mb-8">
+          <div className="bg-gradient-to-r overflow-x-hidden from-blue-50/90 to-indigo-50/90 backdrop-blur-sm rounded-2xl border border-blue-200/50 p-8 mb-8">
             <div className="text-center">
               {/* Animated News Icon */}
               <div className="relative mb-6">
@@ -332,14 +332,14 @@ ${result.sources
 
           {/* Result */}
           {result && (
-            <div className="mt-8 p-6 bg-gradient-to-br from-gray-50/80 to-slate-50/80 rounded-xl border border-gray-200/50">
+            <div className="mt-8 p-6 bg-gradient-to-br text-justify from-gray-50/80 to-slate-50/80 rounded-xl border border-gray-200/50">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-800 font-tiro-bangla">
                   যাচাইকরণ ফলাফল
                 </h3>
                 {/* Audio player for the report (generate via Google GenKit/TTS) */}
               </div>
-              <div className="flex flex-col gap-4 justify-between sm:flex-row">
+              <div className="flex flex-col my-4 gap-4 justify-between sm:flex-row ">
                 <GenkitAudioPlayer
                   text={sanitizeHtml(parseMarkdown(result.report))}
                   filename={`news-report-${new Date().toISOString().split("T")[0]}.mp3`}
@@ -386,7 +386,7 @@ ${result.sources
                 </div>
 
                 {/* Verdict */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center text-justify justify-between">
                   <span className="text-gray-700 font-tiro-bangla text-sm">
                     ফলাফল:
                   </span>

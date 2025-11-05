@@ -2,6 +2,7 @@
 
 import { LucideDownload, Music } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import Button from "./Button";
 
 interface GenkitAudioPlayerProps {
   text: string;
@@ -9,15 +10,6 @@ interface GenkitAudioPlayerProps {
   voice?: string;
 }
 
-/**
- * GenkitAudioPlayer
- * - Requests /api/gen-audio with the provided text
- * - Plays the returned base64 MP3
- * - Allows downloading the generated audio
- *
- * If server isn't configured with GOOGLE_API_KEY the server will return 501
- * and the component displays an error message.
- */
 export default function GenkitAudioPlayer({
   text,
   filename,
@@ -121,37 +113,28 @@ export default function GenkitAudioPlayer({
   return (
     <div className="flex flex-col gap-4 sm:flex-row">
       <audio
-        className="scale-75 self-start md:scale-100"
+        className="scale-75 w-10 self-start md:scale-100"
         ref={audioElRef}
         src={audioUrl ?? undefined}
         controls
         // style={{ display: audioUrl ? undefined : "none" }}
       />
 
-      <button
+      <Button
         onClick={handlePlay}
+        label={
+          loading ? "জেনারেট হচ্ছে..." : audioUrl ? "অডিও প্লে" : "অডিও জেনারেট"
+        }
+        color="yellow"
         disabled={loading}
-        className="inline-flex items-center space-x-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors font-tiro-bangla text-sm"
-      >
-        <Music />
-        <span>
-          {loading
-            ? "জেনারেট হচ্ছে..."
-            : audioUrl
-              ? "অডিও প্লে"
-              : "অডিও জেনারেট"}
-        </span>
-      </button>
-
-      <button
+        icon={Music}
+      />
+      <Button
+        color="blue"
+        label="অডিও ডাউনলোড"
+        icon={LucideDownload}
         onClick={handleDownload}
-        disabled={!audioBlobRef.current}
-        className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-tiro-bangla text-sm"
-        title="অডিও ডাউনলোড"
-      >
-        <LucideDownload />
-        <span>অডিও ডাউনলোড</span>
-      </button>
+      />
 
       {error && <div className="text-sm text-red-600">{error}</div>}
     </div>

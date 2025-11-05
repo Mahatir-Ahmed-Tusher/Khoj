@@ -1,259 +1,307 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
-import Groq from 'groq-sdk'
-import { searchWithRapidAPIFallback, searchWithRapidAPIFallbackAlternative } from '@/lib/rapidapi-manager'
+import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
+import {
+  searchWithRapidAPIFallback,
+  searchWithRapidAPIFallbackAlternative,
+} from "@/lib/rapidapi-manager";
 
 // Generate fallback references when RapidAPI search fails
 function generateFallbackReferences(query: string) {
   const fallbackSources = [
     {
-      title: 'Scientific American - Latest Research',
-      url: 'https://www.scientificamerican.com',
-      snippet: 'Peer-reviewed scientific research and analysis on various topics including health, technology, and environmental science.'
+      title: "Scientific American - Latest Research",
+      url: "https://www.scientificamerican.com",
+      snippet:
+        "Peer-reviewed scientific research and analysis on various topics including health, technology, and environmental science.",
     },
     {
-      title: 'PubMed - National Library of Medicine',
-      url: 'https://pubmed.ncbi.nlm.nih.gov',
-      snippet: 'Database of biomedical literature with millions of citations from MEDLINE and other life science journals.'
+      title: "PubMed - National Library of Medicine",
+      url: "https://pubmed.ncbi.nlm.nih.gov",
+      snippet:
+        "Database of biomedical literature with millions of citations from MEDLINE and other life science journals.",
     },
     {
-      title: 'Nature - International Journal of Science',
-      url: 'https://www.nature.com',
-      snippet: 'Leading international weekly journal of science publishing the finest peer-reviewed research.'
+      title: "Nature - International Journal of Science",
+      url: "https://www.nature.com",
+      snippet:
+        "Leading international weekly journal of science publishing the finest peer-reviewed research.",
     },
     {
-      title: 'Science Magazine',
-      url: 'https://www.science.org',
-      snippet: 'American Association for the Advancement of Science journal covering all scientific disciplines.'
+      title: "Science Magazine",
+      url: "https://www.science.org",
+      snippet:
+        "American Association for the Advancement of Science journal covering all scientific disciplines.",
     },
     {
-      title: 'World Health Organization (WHO)',
-      url: 'https://www.who.int',
-      snippet: 'United Nations specialized agency for international public health with evidence-based health information.'
+      title: "World Health Organization (WHO)",
+      url: "https://www.who.int",
+      snippet:
+        "United Nations specialized agency for international public health with evidence-based health information.",
     },
     {
-      title: 'NASA - National Aeronautics and Space Administration',
-      url: 'https://www.nasa.gov',
-      snippet: 'U.S. government agency responsible for space exploration and scientific research.'
+      title: "NASA - National Aeronautics and Space Administration",
+      url: "https://www.nasa.gov",
+      snippet:
+        "U.S. government agency responsible for space exploration and scientific research.",
     },
     {
-      title: 'National Geographic',
-      url: 'https://www.nationalgeographic.com',
-      snippet: 'Scientific and educational organization providing reliable information about science, nature, and culture.'
+      title: "National Geographic",
+      url: "https://www.nationalgeographic.com",
+      snippet:
+        "Scientific and educational organization providing reliable information about science, nature, and culture.",
     },
     {
-      title: 'BBC Science',
-      url: 'https://www.bbc.com/news/science_and_environment',
-      snippet: 'BBC News coverage of science, environment, and technology with expert analysis.'
-    }
-  ]
+      title: "BBC Science",
+      url: "https://www.bbc.com/news/science_and_environment",
+      snippet:
+        "BBC News coverage of science, environment, and technology with expert analysis.",
+    },
+  ];
 
   // Add query-specific sources based on the topic
-  const queryLower = query.toLowerCase()
-  
-  if (queryLower.includes('health') || queryLower.includes('medical') || queryLower.includes('disease')) {
+  const queryLower = query.toLowerCase();
+
+  if (
+    queryLower.includes("health") ||
+    queryLower.includes("medical") ||
+    queryLower.includes("disease")
+  ) {
     fallbackSources.push({
-      title: 'Mayo Clinic - Health Information',
-      url: 'https://www.mayoclinic.org',
-      snippet: 'Nonprofit organization committed to clinical practice, education, and research in medical care.'
-    })
-  }
-  
-  if (queryLower.includes('climate') || queryLower.includes('environment') || queryLower.includes('global warming')) {
-    fallbackSources.push({
-      title: 'IPCC - Intergovernmental Panel on Climate Change',
-      url: 'https://www.ipcc.ch',
-      snippet: 'United Nations body for assessing the science related to climate change.'
-    })
-  }
-  
-  if (queryLower.includes('technology') || queryLower.includes('ai') || queryLower.includes('artificial intelligence')) {
-    fallbackSources.push({
-      title: 'MIT Technology Review',
-      url: 'https://www.technologyreview.com',
-      snippet: 'Independent media company owned by MIT, covering emerging technologies and their commercial, social, and political impacts.'
-    })
+      title: "Mayo Clinic - Health Information",
+      url: "https://www.mayoclinic.org",
+      snippet:
+        "Nonprofit organization committed to clinical practice, education, and research in medical care.",
+    });
   }
 
-  return fallbackSources.slice(0, 8) // Ensure exactly 8 sources
+  if (
+    queryLower.includes("climate") ||
+    queryLower.includes("environment") ||
+    queryLower.includes("global warming")
+  ) {
+    fallbackSources.push({
+      title: "IPCC - Intergovernmental Panel on Climate Change",
+      url: "https://www.ipcc.ch",
+      snippet:
+        "United Nations body for assessing the science related to climate change.",
+    });
+  }
+
+  if (
+    queryLower.includes("technology") ||
+    queryLower.includes("ai") ||
+    queryLower.includes("artificial intelligence")
+  ) {
+    fallbackSources.push({
+      title: "MIT Technology Review",
+      url: "https://www.technologyreview.com",
+      snippet:
+        "Independent media company owned by MIT, covering emerging technologies and their commercial, social, and political impacts.",
+    });
+  }
+
+  return fallbackSources.slice(0, 8); // Ensure exactly 8 sources
 }
 
 export async function GET() {
   try {
-    const groqApiKey = process.env.GROQ_API_KEY
-    const geminiApiKey = process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY
-    
+    const groqApiKey = process.env.GROQ_API_KEY;
+    const geminiApiKey =
+      process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY;
+
     if (!groqApiKey && !geminiApiKey) {
-      return NextResponse.json({ 
-        status: 'Mythbusting API is working',
-        message: 'Use POST method with query parameter to analyze claims',
-        error: 'No AI API keys configured',
-        details: 'Need either GROQ_API_KEY or GEMINI_API_KEY',
-        availableKeys: Object.keys(process.env).filter(key => key.includes('GROQ') || key.includes('GEMINI'))
-      })
+      return NextResponse.json({
+        status: "Mythbusting API is working",
+        message: "Use POST method with query parameter to analyze claims",
+        error: "No AI API keys configured",
+        details: "Need either GROQ_API_KEY or GEMINI_API_KEY",
+        availableKeys: Object.keys(process.env).filter(
+          (key) => key.includes("GROQ") || key.includes("GEMINI")
+        ),
+      });
     }
 
-    return NextResponse.json({ 
-      status: 'Mythbusting API is working',
-      message: 'Use POST method with query parameter to analyze claims',
+    return NextResponse.json({
+      status: "Mythbusting API is working",
+      message: "Use POST method with query parameter to analyze claims",
       apiKeyConfigured: true,
-      primaryModel: groqApiKey ? 'Groq GPT-OSS-120B' : 'Gemini 2.5 Flash',
-      fallbackModel: groqApiKey && geminiApiKey ? 'Gemini 2.5 Flash' : 'None',
+      primaryModel: groqApiKey ? "Groq GPT-OSS-120B" : "Gemini 2.5 Flash",
+      fallbackModel: groqApiKey && geminiApiKey ? "Gemini 2.5 Flash" : "None",
       groqAvailable: !!groqApiKey,
-      geminiAvailable: !!geminiApiKey
-    })
+      geminiAvailable: !!geminiApiKey,
+    });
   } catch (error) {
-    return NextResponse.json({ 
-      status: 'Mythbusting API is working',
-      message: 'Use POST method with query parameter to analyze claims',
-      error: 'API key issue: ' + error
-    })
+    return NextResponse.json({
+      status: "Mythbusting API is working",
+      message: "Use POST method with query parameter to analyze claims",
+      error: "API key issue: " + error,
+    });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { query } = await request.json()
+    const { query } = await request.json();
 
     if (!query) {
-      return NextResponse.json({ error: 'Query is required' }, { status: 400 })
+      return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
-    console.log('Mythbusting request received:', query)
+    console.log("Mythbusting request received:", query);
 
     // Step 1: Search for evidence using RapidAPI with fallback
-    let searchResults = null
+    let searchResults = null;
     let evidenceSources: Array<{
-      title: string
-      url: string
-      snippet: string
-    }> = []
-    
+      title: string;
+      url: string;
+      snippet: string;
+    }> = [];
+
     try {
-      console.log('Starting RapidAPI search...')
+      console.log("Starting RapidAPI search...");
       // Try primary RapidAPI search with fallback
-      searchResults = await searchWithRapidAPIFallback(query, 20)
-      
+      searchResults = await searchWithRapidAPIFallback(query, 20);
+
       // If primary fails, try alternative with fallback
       if (!searchResults) {
-        console.log('Primary RapidAPI search failed, trying alternative...')
-        searchResults = await searchWithRapidAPIFallbackAlternative(query, 10)
+        console.log("Primary RapidAPI search failed, trying alternative...");
+        searchResults = await searchWithRapidAPIFallbackAlternative(query, 10);
       }
-      
+
       if (searchResults) {
-        console.log('RapidAPI search successful')
+        console.log("RapidAPI search successful");
       } else {
-        console.log('All RapidAPI searches failed, will use fallback references')
+        console.log(
+          "All RapidAPI searches failed, will use fallback references"
+        );
       }
     } catch (searchError) {
-      console.error('RapidAPI search error:', searchError)
-      console.log('Continuing with fallback references...')
+      console.error("RapidAPI search error:", searchError);
+      console.log("Continuing with fallback references...");
     }
-    
+
     // Extract sources from search results
     if (searchResults && searchResults.results) {
       evidenceSources = searchResults.results
         .slice(0, 8) // Limit to top 8 results
         .map((result: any) => ({
-          title: result.title || result.name || 'Unknown',
-          url: result.url || result.link || result.href || '',
-          snippet: result.snippet || result.description || result.excerpt || ''
+          title: result.title || result.name || "Unknown",
+          url: result.url || result.link || result.href || "",
+          snippet: result.snippet || result.description || result.excerpt || "",
         }))
-        .filter((source: any) => source.url && source.title)
+        .filter((source: any) => source.url && source.title);
     }
 
     // If no evidence sources found, create fallback references based on the query
     if (evidenceSources.length === 0) {
-      console.log('No RapidAPI results found, creating fallback references...')
-      evidenceSources = generateFallbackReferences(query)
+      console.log("No RapidAPI results found, creating fallback references...");
+      evidenceSources = generateFallbackReferences(query);
     }
 
-    console.log(`📚 Found ${evidenceSources.length} evidence sources`)
+    console.log(`📚 Found ${evidenceSources.length} evidence sources`);
 
     // Initialize AI models - Groq first, then Gemini fallback
-    const groqApiKey = process.env.GROQ_API_KEY
-    const geminiApiKey = process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY
-    
+    const groqApiKey = process.env.GROQ_API_KEY;
+    const geminiApiKey =
+      process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY;
+
     if (!groqApiKey && !geminiApiKey) {
-      console.error('No AI API keys configured in environment')
-      return NextResponse.json({ 
-        error: 'No AI API keys configured',
-        details: 'Please check your environment variables. Need either GROQ_API_KEY or GEMINI_API_KEY',
-        availableKeys: Object.keys(process.env).filter(key => key.includes('GROQ') || key.includes('GEMINI'))
-      }, { status: 500 })
+      console.error("No AI API keys configured in environment");
+      return NextResponse.json(
+        {
+          error: "No AI API keys configured",
+          details:
+            "Please check your environment variables. Need either GROQ_API_KEY or GEMINI_API_KEY",
+          availableKeys: Object.keys(process.env).filter(
+            (key) => key.includes("GROQ") || key.includes("GEMINI")
+          ),
+        },
+        { status: 500 }
+      );
     }
-    
-    console.log('Environment check passed - AI API keys are configured')
-    
-    let useGroq = false
-    let groqClient = null
-    let geminiModel = null
-    
+
+    console.log("Environment check passed - AI API keys are configured");
+
+    let useGroq = false;
+    let groqClient = null;
+    let geminiModel = null;
+
     // Try Groq first (primary)
     if (groqApiKey) {
       try {
-        console.log('Initializing Groq client with GPT-OSS-120B...')
-        groqClient = new Groq({ apiKey: groqApiKey })
-        useGroq = true
-        console.log('Successfully initialized Groq client')
+        console.log("Initializing Groq client with GPT-OSS-120B...");
+        groqClient = new Groq({ apiKey: groqApiKey });
+        useGroq = true;
+        console.log("Successfully initialized Groq client");
       } catch (error) {
-        console.error('Groq initialization failed:', error)
-        useGroq = false
+        console.error("Groq initialization failed:", error);
+        useGroq = false;
       }
     } else {
-      console.log('GROQ_API_KEY not found, using Gemini fallback')
+      console.log("GROQ_API_KEY not found, using Gemini fallback");
     }
-    
+
     // Initialize Gemini as fallback
     if (!useGroq && geminiApiKey) {
       try {
-        console.log('Initializing Gemini AI as fallback...')
-        const genAI = new GoogleGenerativeAI(geminiApiKey)
-        geminiModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
-        console.log('Successfully initialized Gemini 2.5 Flash model')
+        console.log("Initializing Gemini AI as fallback...");
+        const genAI = new GoogleGenerativeAI(geminiApiKey);
+        geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        console.log("Successfully initialized Gemini 2.5 Flash model");
       } catch (error) {
-        console.error('Gemini initialization failed:', error)
-        return NextResponse.json({ 
-          error: 'No AI model available', 
-          details: 'Both Groq and Gemini failed to initialize',
-          groqAvailable: !!groqApiKey,
-          geminiAvailable: !!geminiApiKey,
-          last_error: error instanceof Error ? error.message : 'Unknown error'
-        }, { status: 500 })
+        console.error("Gemini initialization failed:", error);
+        return NextResponse.json(
+          {
+            error: "No AI model available",
+            details: "Both Groq and Gemini failed to initialize",
+            groqAvailable: !!groqApiKey,
+            geminiAvailable: !!geminiApiKey,
+            last_error:
+              error instanceof Error ? error.message : "Unknown error",
+          },
+          { status: 500 }
+        );
       }
     } else if (!useGroq && !geminiApiKey) {
-      return NextResponse.json({ 
-        error: 'No AI API keys configured', 
-        details: 'Need either GROQ_API_KEY or GEMINI_API_KEY',
-        availableKeys: Object.keys(process.env).filter(key => key.includes('GROQ') || key.includes('GEMINI'))
-      }, { status: 500 })
+      return NextResponse.json(
+        {
+          error: "No AI API keys configured",
+          details: "Need either GROQ_API_KEY or GEMINI_API_KEY",
+          availableKeys: Object.keys(process.env).filter(
+            (key) => key.includes("GROQ") || key.includes("GEMINI")
+          ),
+        },
+        { status: 500 }
+      );
     }
 
     // Prepare evidence context for AI
-    let evidenceContext = ''
+    let evidenceContext = "";
     if (evidenceSources.length > 0) {
-      evidenceContext = `\n\n**EVIDENCE FROM WEB SEARCH (${evidenceSources.length} sources found):**\n`
+      evidenceContext = `\n\n**EVIDENCE FROM WEB SEARCH (${evidenceSources.length} sources found):**\n`;
       evidenceSources.forEach((source: any, index: number) => {
-        evidenceContext += `[${index + 1}] ${source.title}\nURL: ${source.url}\nSnippet: ${source.snippet}\n\n`
-      })
-      evidenceContext += `\n**INSTRUCTIONS FOR ANALYSIS:**\n`
-      evidenceContext += `- Use these web search results as primary evidence\n`
-      evidenceContext += `- Supplement with your extensive knowledge base\n`
-      evidenceContext += `- Cross-reference information between sources\n`
-      evidenceContext += `- Provide scientific context and background\n`
-      evidenceContext += `- Include counter-arguments if they exist\n`
-      evidenceContext += `- Explain the broader implications\n`
-      evidenceContext += `- When referencing sources, include the source name (e.g., "BBC Science [7] mentions...")\n`
-      evidenceContext += `- ALWAYS include at least 8 references in your SOURCES section\n`
+        evidenceContext += `[${index + 1}] ${source.title}\nURL: ${source.url}\nSnippet: ${source.snippet}\n\n`;
+      });
+      evidenceContext += `\n**INSTRUCTIONS FOR ANALYSIS:**\n`;
+      evidenceContext += `- Use these web search results as primary evidence\n`;
+      evidenceContext += `- Supplement with your extensive knowledge base\n`;
+      evidenceContext += `- Cross-reference information between sources\n`;
+      evidenceContext += `- Provide scientific context and background\n`;
+      evidenceContext += `- Include counter-arguments if they exist\n`;
+      evidenceContext += `- Explain the broader implications\n`;
+      evidenceContext += `- When referencing sources, include the source name (e.g., "BBC Science [7] mentions...")\n`;
+      evidenceContext += `- ALWAYS include at least 8 references in your SOURCES section\n`;
     } else {
-      evidenceContext = '\n\n**Note: No web search results found. Rely on your extensive knowledge base to provide a comprehensive analysis.**'
-      evidenceContext += `\n\n**INSTRUCTIONS FOR ANALYSIS:**\n`
-      evidenceContext += `- Use your comprehensive knowledge base\n`
-      evidenceContext += `- Provide detailed scientific background\n`
-      evidenceContext += `- Include relevant research and studies\n`
-      evidenceContext += `- Explain underlying principles\n`
-      evidenceContext += `- Address common misconceptions\n`
-      evidenceContext += `- ALWAYS include at least 8 references in your SOURCES section\n`
+      evidenceContext =
+        "\n\n**Note: No web search results found. Rely on your extensive knowledge base to provide a comprehensive analysis.**";
+      evidenceContext += `\n\n**INSTRUCTIONS FOR ANALYSIS:**\n`;
+      evidenceContext += `- Use your comprehensive knowledge base\n`;
+      evidenceContext += `- Provide detailed scientific background\n`;
+      evidenceContext += `- Include relevant research and studies\n`;
+      evidenceContext += `- Explain underlying principles\n`;
+      evidenceContext += `- Address common misconceptions\n`;
+      evidenceContext += `- ALWAYS include at least 8 references in your SOURCES section\n`;
     }
 
     // Enhanced system prompt for conversational mythbusting
@@ -300,12 +348,8 @@ CONCLUSION: [Write "তাহলে যেটা দাঁড়ায়" - you
 - Importance for people
 - Advice for the future]
 
-KEY_TAKEAWAYS: [Write 2-3 simple, memorable key messages in Bengali]
+KEY TAKEAWAYS: [Write 2-3 simple, memorable key messages in Bengali]
 
-SOURCES: [List sources with proper hyperlinks in this format:
-- Source Title - [URL]
-- Another Source - [URL]
-Make sure all URLs are properly formatted and clickable]
 
 **Critical Formatting Requirements:**
 - SUMMARY must be a BRIEF gist (2-3 sentences max), NOT a detailed analysis
@@ -322,9 +366,8 @@ Make sure all URLs are properly formatted and clickable]
 - In CONCLUSION section, provide your own expert opinion and final assessment
 - Make the analysis educational but accessible to everyone
 - Write ALL content in Bengali except for technical terms that are better in English
-- Ensure all links in SOURCES section are properly formatted as hyperlinks
 
-Analyze the claim: "`
+Analyze the claim: "`;
 
     const prompt = `${systemPrompt}${query}"
 
@@ -336,216 +379,249 @@ Please provide a comprehensive mythbusting analysis following the exact format a
 Instead of: "This claim is false because..."
 Write: "আপনি হয়তো ভাবছেন এটা সত্যি হতে পারে। আসুন দেখি বিজ্ঞান কী বলে... [detailed explanation]... এখন যদি আমরা ইতিহাসের দিকে তাকাই... [historical context]... কিন্তু এখানে আসল প্রশ্ন হলো... [deep analysis]... তাহলে যেটা দাঁড়ায়, এই দাবিটি মূলত ভুল কারণ..."
 
-Write at least 5-7 detailed paragraphs in DETAILED_ANALYSIS and provide your own expert conclusion in CONCLUSION section.`
+Write at least 5-7 detailed paragraphs in DETAILED_ANALYSIS and provide your own expert conclusion in CONCLUSION section.`;
 
-    console.log('Sending request to AI with evidence...')
-    let text: string
-    let aiModelUsed: string
-    
+    console.log("Sending request to AI with evidence...");
+    let text: string;
+    let aiModelUsed: string;
+
     try {
       if (useGroq && groqClient) {
-        console.log('Using Groq GPT-OSS-120B for mythbusting analysis...')
+        console.log("Using Groq GPT-OSS-120B for mythbusting analysis...");
         const completion = await groqClient.chat.completions.create({
           model: "openai/gpt-oss-120b",
           messages: [
             {
               role: "user",
-              content: prompt
-            }
+              content: prompt,
+            },
           ],
           temperature: 1,
           max_tokens: 8192,
-          top_p: 1
-        })
-        
-        text = completion.choices[0]?.message?.content || ''
-        aiModelUsed = 'Groq GPT-OSS-120B'
-        console.log('Successfully received response from Groq GPT-OSS-120B')
+          top_p: 1,
+        });
+
+        text = completion.choices[0]?.message?.content || "";
+        aiModelUsed = "Groq GPT-OSS-120B";
+        console.log("Successfully received response from Groq GPT-OSS-120B");
       } else if (geminiModel) {
-        console.log('Using Gemini 2.5 Flash for mythbusting analysis...')
-        const result = await geminiModel.generateContent(prompt)
-        const response = await result.response
-        text = response.text()
-        aiModelUsed = 'Gemini 2.5 Flash'
-        console.log('Successfully received response from Gemini 2.5 Flash')
+        console.log("Using Gemini 2.5 Flash for mythbusting analysis...");
+        const result = await geminiModel.generateContent(prompt);
+        const response = await result.response;
+        text = response.text();
+        aiModelUsed = "Gemini 2.5 Flash";
+        console.log("Successfully received response from Gemini 2.5 Flash");
       } else {
-        throw new Error('No AI model available')
+        throw new Error("No AI model available");
       }
 
       if (!text) {
-        console.error('Empty response from AI model')
-        return NextResponse.json({ error: 'Empty response from AI model' }, { status: 500 })
+        console.error("Empty response from AI model");
+        return NextResponse.json(
+          { error: "Empty response from AI model" },
+          { status: 500 }
+        );
       }
-      
     } catch (aiError) {
-      console.error('AI request failed:', aiError)
-      
+      console.error("AI request failed:", aiError);
+
       // Try fallback if Groq failed and Gemini is available
       if (useGroq && geminiModel) {
-        console.log('Groq failed, trying Gemini fallback...')
+        console.log("Groq failed, trying Gemini fallback...");
         try {
-          const result = await geminiModel.generateContent(prompt)
-          const response = await result.response
-          text = response.text()
-          aiModelUsed = 'Gemini 2.5 Flash (fallback)'
-          console.log('Successfully received response from Gemini fallback')
+          const result = await geminiModel.generateContent(prompt);
+          const response = await result.response;
+          text = response.text();
+          aiModelUsed = "Gemini 2.5 Flash (fallback)";
+          console.log("Successfully received response from Gemini fallback");
         } catch (fallbackError) {
-          console.error('Both AI models failed:', fallbackError)
-          return NextResponse.json({ 
-            error: 'Failed to generate content with AI models',
-            details: `Groq error: ${aiError instanceof Error ? aiError.message : 'Unknown'}, Gemini error: ${fallbackError instanceof Error ? fallbackError.message : 'Unknown'}`,
-            models_tried: ['Groq GPT-OSS-120B', 'Gemini 2.5 Flash']
-          }, { status: 500 })
+          console.error("Both AI models failed:", fallbackError);
+          return NextResponse.json(
+            {
+              error: "Failed to generate content with AI models",
+              details: `Groq error: ${aiError instanceof Error ? aiError.message : "Unknown"}, Gemini error: ${fallbackError instanceof Error ? fallbackError.message : "Unknown"}`,
+              models_tried: ["Groq GPT-OSS-120B", "Gemini 2.5 Flash"],
+            },
+            { status: 500 }
+          );
         }
       } else {
-        return NextResponse.json({ 
-          error: 'Failed to generate content with AI model',
-          details: aiError instanceof Error ? aiError.message : 'Unknown error',
-          model_used: useGroq ? 'Groq GPT-OSS-120B' : 'Gemini 2.5 Flash'
-        }, { status: 500 })
+        return NextResponse.json(
+          {
+            error: "Failed to generate content with AI model",
+            details:
+              aiError instanceof Error ? aiError.message : "Unknown error",
+            model_used: useGroq ? "Groq GPT-OSS-120B" : "Gemini 2.5 Flash",
+          },
+          { status: 500 }
+        );
       }
     }
 
-    console.log(`Received response from ${aiModelUsed}, parsing...`)
+    console.log(`Received response from ${aiModelUsed}, parsing...`);
     // Parse the response to extract structured data
-    const parsedResult = parseMythbustingResponse(text, query, evidenceSources)
+    const parsedResult = parseMythbustingResponse(text, query, evidenceSources);
 
-    console.log('Mythbusting analysis completed:', parsedResult.verdict)
-    console.log('Returning evidenceSources:', evidenceSources)
+    console.log("Mythbusting analysis completed:", parsedResult.verdict);
+    console.log("Returning evidenceSources:", evidenceSources);
     return NextResponse.json({
       ...parsedResult,
       evidenceSources: evidenceSources,
       aiModelUsed: aiModelUsed,
-      timestamp: new Date().toISOString()
-    })
-
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
-    console.error('Mythbusting error:', error)
+    console.error("Mythbusting error:", error);
     return NextResponse.json(
-      { error: 'Failed to analyze claim', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: "Failed to analyze claim",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
-    )
+    );
   }
 }
 
-function parseMythbustingResponse(response: string, query: string, evidenceSources: Array<{title: string, url: string, snippet: string}>) {
+function parseMythbustingResponse(
+  response: string,
+  query: string,
+  evidenceSources: Array<{ title: string; url: string; snippet: string }>
+) {
   // Enhanced structure with conclusion section
-  let verdict: 'true' | 'false' | 'misleading' | 'unverified' | 'partially_true' | 'context_dependent' = 'unverified'
-  let summary = 'প্রশ্নের উত্তর বিশ্লেষণ করা হয়েছে।'
-  let detailedAnalysis = response
-  let conclusion = ''
-  let keyTakeaways: string[] = []
-  let sources: string[] = []
+  let verdict:
+    | "true"
+    | "false"
+    | "misleading"
+    | "unverified"
+    | "partially_true"
+    | "context_dependent" = "unverified";
+  let summary = "প্রশ্নের উত্তর বিশ্লেষণ করা হয়েছে।";
+  let detailedAnalysis = response;
+  let conclusion = "";
+  let keyTakeaways: string[] = [];
+  let sources: string[] = [];
 
   try {
     // Try to extract verdict
-    const verdictMatch = response.match(/VERDICT:\s*(true|false|misleading|unverified|partially_true|context_dependent)/i)
+    const verdictMatch = response.match(
+      /VERDICT:\s*(true|false|misleading|unverified|partially_true|context_dependent)/i
+    );
     if (verdictMatch) {
-      verdict = verdictMatch[1].toLowerCase() as any
+      verdict = verdictMatch[1].toLowerCase() as any;
     }
 
     // Try to extract summary - ensure it's brief (2-3 sentences max)
-    const summaryMatch = response.match(/SUMMARY:\s*(.+?)(?=\nDETAILED_ANALYSIS:|$)/is)
+    const summaryMatch = response.match(/SUMMARY:\s*(.+?)/is);
     if (summaryMatch) {
-      summary = summaryMatch[1].trim()
-      
+      summary = summaryMatch[1].trim();
+
       // Ensure summary is brief - truncate if too long
       if (summary.length > 200) {
-        const sentences = summary.split(/[.!?]+/)
-        summary = sentences.slice(0, 2).join('. ').trim() + '.'
+        const sentences = summary.split(/[.!?]+/);
+        summary = sentences.slice(0, 2).join(". ").trim() + ".";
       }
     }
 
     // Try to extract detailed analysis
-    const analysisMatch = response.match(/DETAILED_ANALYSIS:\s*(.+?)(?=\nCONCLUSION:|$)/is)
+    const analysisMatch = response.match(
+      /DETAILED_ANALYSIS:\s*(.+?)(?=\nCONCLUSION:|$)/is
+    );
     if (analysisMatch) {
-      detailedAnalysis = analysisMatch[1].trim()
+      detailedAnalysis = analysisMatch[1].trim();
     }
 
     // Try to extract conclusion
-    const conclusionMatch = response.match(/CONCLUSION:\s*(.+?)(?=\nKEY_TAKEAWAYS:|$)/is)
+    const conclusionMatch = response.match(
+      /CONCLUSION:\s*(.+?)(?=\nKEY_TAKEAWAYS:|$)/is
+    );
     if (conclusionMatch) {
-      conclusion = conclusionMatch[1].trim()
+      conclusion = conclusionMatch[1].trim();
     }
 
     // Try to extract key takeaways
-    const takeawaysMatch = response.match(/KEY_TAKEAWAYS:\s*(.+?)(?=\nSOURCES:|$)/is)
+    const takeawaysMatch = response.match(
+      /KEY_TAKEAWAYS:\s*(.+?)(?=\nSOURCES:|$)/is
+    );
     if (takeawaysMatch) {
-      const takeawaysText = takeawaysMatch[1].trim()
-      keyTakeaways = takeawaysText.split('\n').filter(takeaway => takeaway.trim().length > 0)
+      const takeawaysText = takeawaysMatch[1].trim();
+      keyTakeaways = takeawaysText
+        .split("\n")
+        .filter((takeaway) => takeaway.trim().length > 0);
     }
 
     // Try to extract sources and format them properly with hyperlinks
-    const sourcesMatch = response.match(/SOURCES:\s*(.+?)(?=\n|$)/is)
+    const sourcesMatch = response.match(/SOURCES:\s*(.+?)(?=\n|$)/is);
     if (sourcesMatch) {
-      const sourcesText = sourcesMatch[1].trim()
-      const sourceLines = sourcesText.split('\n').filter(line => line.trim())
-      
+      const sourcesText = sourcesMatch[1].trim();
+      const sourceLines = sourcesText.split("\n").filter((line) => line.trim());
+
       // Format sources with proper hyperlinks
-      sources = sourceLines.map(line => {
+      sources = sourceLines.map((line) => {
         // Check if line already has URL format
-        if (line.includes(' - [') && line.includes(']')) {
-          return line // Already formatted
-        } else if (line.includes(' - ')) {
+        if (line.includes(" - [") && line.includes("]")) {
+          return line; // Already formatted
+        } else if (line.includes(" - ")) {
           // Format: "Title - URL" -> "Title - [URL]"
-          const parts = line.split(' - ')
+          const parts = line.split(" - ");
           if (parts.length === 2) {
-            return `${parts[0].trim()} - [${parts[1].trim()}]`
+            return `${parts[0].trim()} - [${parts[1].trim()}]`;
           }
-        } else if (line.startsWith('http')) {
+        } else if (line.startsWith("http")) {
           // Just URL, create generic title
-          return `Source - [${line.trim()}]`
+          return `Source - [${line.trim()}]`;
         }
-        return line
-      })
+        return line;
+      });
     }
 
     // If no structured format found, try to extract URLs
     if (sources.length === 0) {
-      const urlMatches = response.match(/https?:\/\/[^\s\n]+/g)
+      const urlMatches = response.match(/https?:\/\/[^\s\n]+/g);
       if (urlMatches) {
-        sources = urlMatches.slice(0, 8) // Limit to 8 sources
+        sources = urlMatches.slice(0, 8); // Limit to 8 sources
       }
     }
 
     // If still no sources found, use evidence sources as fallback
     if (sources.length === 0 && evidenceSources.length > 0) {
-      sources = evidenceSources.map(source => `${source.title} - ${source.url}`)
+      sources = evidenceSources.map(
+        (source) => `${source.title} - ${source.url}`
+      );
     }
 
     // Ensure we have at least 8 sources by adding fallback sources if needed
     if (sources.length < 8) {
       const fallbackSources = [
-        'Scientific American - https://www.scientificamerican.com',
-        'PubMed - https://pubmed.ncbi.nlm.nih.gov',
-        'Nature - https://www.nature.com',
-        'Science Magazine - https://www.science.org',
-        'World Health Organization - https://www.who.int',
-        'NASA - https://www.nasa.gov',
-        'National Geographic - https://www.nationalgeographic.com',
-        'BBC Science - https://www.bbc.com/news/science_and_environment'
-      ]
-      
-      const additionalSources = fallbackSources.slice(0, 8 - sources.length)
-      sources = [...sources, ...additionalSources]
+        "Scientific American - https://www.scientificamerican.com",
+        "PubMed - https://pubmed.ncbi.nlm.nih.gov",
+        "Nature - https://www.nature.com",
+        "Science Magazine - https://www.science.org",
+        "World Health Organization - https://www.who.int",
+        "NASA - https://www.nasa.gov",
+        "National Geographic - https://www.nationalgeographic.com",
+        "BBC Science - https://www.bbc.com/news/science_and_environment",
+      ];
+
+      const additionalSources = fallbackSources.slice(0, 8 - sources.length);
+      sources = [...sources, ...additionalSources];
     }
 
     // If no key takeaways found, generate some based on the analysis
     if (keyTakeaways.length === 0) {
       keyTakeaways = [
-        'প্রমাণের উপর ভিত্তি করে সিদ্ধান্ত নিন',
-        'বিভিন্ন দৃষ্টিকোণ থেকে চিন্তা করুন',
-        'নতুন তথ্য পাওয়া গেলে মত পরিবর্তন করতে প্রস্তুত থাকুন'
-      ]
+        "প্রমাণের উপর ভিত্তি করে সিদ্ধান্ত নিন",
+        "বিভিন্ন দৃষ্টিকোণ থেকে চিন্তা করুন",
+        "নতুন তথ্য পাওয়া গেলে মত পরিবর্তন করতে প্রস্তুত থাকুন",
+      ];
     }
 
     // If no conclusion found, create a simple one
     if (!conclusion) {
-      conclusion = 'উপরের বিশ্লেষণ থেকে দেখা যায় যে এই দাবিটি মূলত সত্য/মিথ্যা/অর্ধসত্য। তবে এখানে গুরুত্বপূর্ণ বিষয় হলো প্রমাণের উপর ভিত্তি করে সিদ্ধান্ত নেওয়া।'
+      conclusion =
+        "উপরের বিশ্লেষণ থেকে দেখা যায় যে এই দাবিটি মূলত সত্য/মিথ্যা/অর্ধসত্য। তবে এখানে গুরুত্বপূর্ণ বিষয় হলো প্রমাণের উপর ভিত্তি করে সিদ্ধান্ত নেওয়া।";
     }
-
   } catch (parseError) {
-    console.error('Error parsing mythbusting response:', parseError)
+    console.error("Error parsing mythbusting response:", parseError);
     // Keep default values if parsing fails
   }
 
@@ -556,6 +632,6 @@ function parseMythbustingResponse(response: string, query: string, evidenceSourc
     detailedAnalysis,
     conclusion,
     keyTakeaways,
-    sources
-  }
+    sources,
+  };
 }

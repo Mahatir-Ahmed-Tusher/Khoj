@@ -12,8 +12,8 @@ import {
   Download,
   PanelLeftClose,
   PanelLeftOpen,
-  Share,
   Share2Icon,
+  SearchX,
 } from "lucide-react";
 import { parseMarkdown, sanitizeHtml } from "@/lib/markdown";
 import { SearchHistory, Source } from "@/lib/types";
@@ -26,6 +26,8 @@ import { useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import ShareModal from "@/components/ShareModal";
 import GenkitAudioPlayer from "@/components/GenkitAudioPlayer";
+import Button from "@/components/Button";
+import Toaster from "@/components/Toaster";
 
 interface ChatMessage {
   id: string;
@@ -56,6 +58,9 @@ function MythbustingContent() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [isFromUrl, setIsFromUrl] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [tostMessage, setToastMessage] = useState<String | null>(null);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
   const convex = useConvex();
@@ -212,6 +217,7 @@ function MythbustingContent() {
           ourSiteArticles: existingData.ourSiteArticles,
         };
         setMessages([userMessage, botMessage]);
+        console.log(messages);
         setCurrentReport(existingData);
         return;
       }
@@ -250,6 +256,7 @@ function MythbustingContent() {
     setMessages([userMessage]);
     setInputMessage("");
     setIsLoading(true);
+    console.log(messages);
 
     try {
       const response = await fetch("/api/mythbusting", {
@@ -294,6 +301,7 @@ function MythbustingContent() {
       };
 
       setMessages([userMessage, botMessage]);
+      console.log(messages);
 
       const newReport: SearchHistory = {
         id: Date.now().toString(),
@@ -441,10 +449,12 @@ function MythbustingContent() {
   const copyBotResponse = async (messageText: string) => {
     try {
       await navigator.clipboard.writeText(messageText);
-      alert("উত্তর কপি করা হয়েছে!");
+      setShowToast(true);
+      setToastMessage("উত্তর কপি করা হয়েছে!");
     } catch (error) {
       console.error("Copy failed:", error);
-      alert("কপি করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।");
+      setShowToast(true);
+      setToastMessage("কপি করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।");
     }
   };
 
@@ -606,7 +616,7 @@ ${messageText}
   console.log(messages);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen text-justify bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -825,7 +835,7 @@ ${messageText}
                           ) : (
                             <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
                               {/* Report Header */}
-                              <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 rounded-t-lg">
+                              <div className="flex flex-col bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 rounded-t-lg">
                                 <div className="flex justify-between items-center">
                                   <div>
                                     <h2 className="text-xl font-bold text-gray-900 font-tiro-bangla">
@@ -841,58 +851,47 @@ ${messageText}
                                       </div>
                                     )}
                                   </div>
-                                  <div className="flex space-x-2">
-                                    <button
-                                      onClick={() =>
-                                        copyBotResponse(message.text)
-                                      }
-                                      className="flex items-center space-x-1 bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 rounded border border-gray-300 transition-colors duration-200 font-tiro-bangla text-sm"
-                                    >
-                                      <Copy className="h-4 w-4" />
-                                      <span className="hidden md:inline">
-                                        কপি
-                                      </span>
-                                    </button>
+                                  <div className="flex flex-col gap-6">
+                                    <div className="flex justify-between">
+                                      <Button
+                                        onClick={() =>
+                                          copyBotResponse(message.text)
+                                        }
+                                        icon={Copy}
+                                        color="blue"
+                                        label="কপি"
+                                      />
 
-                                    <button
-                                      id="share-button"
-                                      onClick={() => setShowShareModal(true)}
-                                      className="flex items-center space-x-2 bg-gray-100 text-black px-6 py-3 rounded-lg hover:bg-gray-300 transition-all duration-200 shadow-lg hover:shadow-xl"
-                                    >
-                                      <Share2Icon />
-                                      <span className="hidden md:inline">
-                                        শেয়ার করুন
-                                      </span>
-                                    </button>
-                                    <button
-                                      onClick={clearCurrentReport}
-                                      className="flex items-center space-x-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded transition-colors duration-200 font-tiro-bangla text-sm"
-                                    >
-                                      <Search className="h-4 w-4" />
-                                      <span className="hidden md:inline">
-                                        নতুন সার্চ
-                                      </span>
-                                    </button>
-                                  </div>
-                                  <div className="flex flex-col gap-4 justify-between sm:flex-row">
+                                      <Button
+                                        onClick={() => setShowShareModal(true)}
+                                        icon={Share2Icon}
+                                        label="শেয়ার করুন"
+                                        color="gray"
+                                      />
+                                      <Button
+                                        onClick={() => clearCurrentReport()}
+                                        icon={Search}
+                                        label="নতুন সার্চ"
+                                        color="yellow"
+                                      />
+
+                                      <div className="flex flex-col gap-4 justify-between sm:flex-row">
+                                        <Button
+                                          onClick={() =>
+                                            downloadBotResponse(message.text)
+                                          }
+                                          label="ডাউনলোড"
+                                          color="green"
+                                          icon={Download}
+                                        />
+                                      </div>
+                                    </div>
                                     <GenkitAudioPlayer
                                       text={sanitizeHtml(
                                         parseMarkdown(message.text)
                                       )}
                                       filename={`news-report-${new Date().toISOString().split("T")[0]}.mp3`}
                                     />
-
-                                    <button
-                                      onClick={() =>
-                                        downloadBotResponse(message.text)
-                                      }
-                                      className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded transition-colors duration-200 font-tiro-bangla text-sm"
-                                    >
-                                      <Download className="h-4 w-4" />
-                                      <span className="hidden md:inline">
-                                        ডাউনলোড
-                                      </span>
-                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -1265,6 +1264,11 @@ ${messageText}
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         url={`${url}/${slugId}`}
+      />
+      <Toaster
+        message={tostMessage}
+        show={showToast}
+        onClose={() => setShowToast(false)}
       />
 
       <SearchLimitModal

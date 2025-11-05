@@ -15,10 +15,9 @@ import {
   AlertCircle,
   HelpCircle,
   ChevronRight,
-  Share,
+  Share2,
 } from "lucide-react";
 import { addAIFactCheck } from "@/lib/ai-factcheck-utils";
-import PromotionalWidget from "@/components/PromotionalWidget";
 import { parseMarkdown, sanitizeHtml } from "@/lib/markdown";
 import { useSearchLimit } from "@/lib/hooks/useSearchLimit";
 import SearchLimitModal from "@/components/SearchLimitModal";
@@ -254,16 +253,6 @@ ${report.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Promotional Widget - Right Side */}
-        <div className="hidden lg:block absolute -right-[0%] top-16 w-80">
-          <PromotionalWidget />
-        </div>
-
-        {/* Mobile Widget */}
-        <div className="lg:hidden">
-          <PromotionalWidget />
-        </div>
-
         {/* Main Content */}
         <div className="max-w-4xl mx-auto">
           {/* Search Bar Section */}
@@ -342,7 +331,7 @@ ${report.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`
                       onClick={() => setShowShareModal(true)}
                       className="flex items-center bg-gray-100 text-black p-3 rounded-lg hover:bg-gray-300 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
-                      <Share className="h-5 w-5" />
+                      <Share2 className="h-5 w-5" />
                     </button>
                     <button
                       onClick={downloadReport}

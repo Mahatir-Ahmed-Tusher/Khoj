@@ -187,7 +187,7 @@ ${messageText}
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
               {/* Report Header */}
               <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 rounded-t-lg">
-                <div className="flex justify-between items-center">
+                <div className="flex  justify-between items-center">
                   <div>
                     <h2 className="text-xl font-bold text-gray-900 font-tiro-bangla">
                       বিস্তারিত বিশ্লেষণ
@@ -225,10 +225,10 @@ ${messageText}
                   </div>
                 </div>
                 <div className="flex flex-col gap-4 justify-between sm:flex-row">
-                  <GenkitAudioPlayer
+                  {/* <GenkitAudioPlayer
                     text={sanitizeHtml(parseMarkdown(factCheckData.result))}
                     filename={`news-report-${new Date().toISOString().split("T")[0]}.mp3`}
-                  />
+                  /> */}
                   <button
                     onClick={() =>
                       downloadBotResponse(

@@ -18,6 +18,7 @@ import ShareModal from "@/components/ShareModal";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import GenkitAudioPlayer from "@/components/GenkitAudioPlayer";
 
 export default function FactCheckViewPage() {
   const params = useParams();
@@ -27,8 +28,8 @@ export default function FactCheckViewPage() {
   const [showShareModal, setShowShareModal] = useState(false);
 
   // Query the database for the fact check by ID
-  const factCheckData = useQuery(api.factChecks.getByID, { 
-    id: id as Id<"factChecks"> 
+  const factCheckData = useQuery(api.factChecks.getByID, {
+    id: id as Id<"factChecks">,
   });
 
   const downloadReport = () => {
@@ -82,9 +83,7 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             লোড হচ্ছে...
           </h1>
-          <p className="text-gray-600">
-            ফ্যাক্ট চেক রিপোর্ট লোড করা হচ্ছে
-          </p>
+          <p className="text-gray-600">ফ্যাক্ট চেক রিপোর্ট লোড করা হচ্ছে</p>
         </div>
         <Footer />
       </div>
@@ -93,7 +92,7 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
 
   if (factCheckData === null) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen  bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             ফ্যাক্ট চেক পাওয়া যায়নি
@@ -108,7 +107,7 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen text-justify bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -135,22 +134,23 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
                   </p>
                 </div>
               </div>
-              {/* action buttons  */}
-              <div className="flex gap-4" id="buttons">
-                <button
-                  id="share-button"
-                  onClick={() => setShowShareModal(true)}
-                  className="flex items-center bg-gray-100 text-black p-3 rounded-lg hover:bg-gray-300 transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
-                  <Share2 className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={downloadReport}
-                  className="flex items-center bg-primary-600 text-white p-3 rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
-                  <Download className="h-5 w-5" />
-                </button>
-              </div>
+            </div>
+            {/* action buttons  */}
+            <div className="flex my-6 gap-4" id="buttons">
+              <GenkitAudioPlayer text={factCheckData.result} />
+              <button
+                id="share-button"
+                onClick={() => setShowShareModal(true)}
+                className="flex items-center bg-gray-100 text-black p-3 rounded-lg hover:bg-gray-300 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <Share2 className="h-5 w-5" />
+              </button>
+              <button
+                onClick={downloadReport}
+                className="flex items-center bg-primary-600 text-white p-3 rounded-lg hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <Download className="h-5 w-5" />
+              </button>
             </div>
 
             <div className="mb-6">
@@ -267,7 +267,9 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
                         </p>
                         {/* URL Display */}
                         <div className="mb-3 p-2 bg-gray-50 rounded border">
-                          <p className="text-xs text-gray-500 mb-1 font-medium">লিংক:</p>
+                          <p className="text-xs text-gray-500 mb-1 font-medium">
+                            লিংক:
+                          </p>
                           <p className="text-xs text-blue-600 break-all overflow-hidden">
                             {source.url}
                           </p>

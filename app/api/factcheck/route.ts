@@ -4,97 +4,144 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { Groq } from 'groq-sdk'
 import { PRIORITY_SITES } from '@/lib/utils'
 import { findRelatedArticles } from '@/lib/data'
+import { getSourceTiers, filterSocialMedia, isSocialMediaUrl } from '@/lib/source-tiers'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
 
 // Helper function to create model-specific prompts
-function createModelSpecificPrompt(query: string, crawledContent: any[], modelType: 'gemini' | 'openai' | 'deepseek') {
+function createModelSpecificPrompt(query: string, crawledContent: any[], socialMediaSources: any[], modelType: 'gemini' | 'openai' | 'deepseek') {
   const baseContent = `
 Claim to fact-check: ${query}
 
-Sources found:
+Verified Sources found (DO NOT use social media sources for verification):
 ${crawledContent.map((item: any, index: number) => `
 Source ${index + 1}: ${item.title}
 URL: ${item.url}
 Language: ${item.isEnglish ? 'English' : 'Bengali'}
 Content: ${item.content.substring(0, 1000)}...
 `).join('\n')}
+${socialMediaSources.length > 0 ? `
+Social Media Sources found (DO NOT use these for verification, only mention them):
+${socialMediaSources.map((item: any, index: number) => `
+Social Media Source ${index + 1}: ${item.title}
+URL: ${item.url}
+`).join('\n')}
+**IMPORTANT:** When mentioning these social media sources in the report, use their source numbers: ${socialMediaSources.map((item: any, index: number) => index + 1).join(', ')}
+` : ''}
 `;
 
   // Base prompt in English for all models
   const basePrompt = `${baseContent}
 
-You are an experienced journalist and fact-checker. Create a detailed, human-friendly, and comprehensive report to verify the following claim:
+You are an experienced journalist and fact-checker working for an internationally recognized fact-checking organization. Create a detailed, human-friendly, and comprehensive report following the standard fact-checking process.
 
 **Main Claim:** ${query}
 
-**Your Task:**
-1. Collect information from available sources
-2. Verify the credibility of each source
-3. Find consistency in the information
-4. Make a clear decision
+**You MUST follow the standard fact-checking process:**
+
+## Step 1: Claim Identification
+- Clearly identify what specific claim is being verified
+- Explain the context and scope of the claim
+- State what exactly is being fact-checked (prevent confusion)
+
+## Step 2: Gathering Evidence (Source Collection)
+- You have collected evidence from ${crawledContent.length} sources
+- Present ALL evidence found both FOR and AGAINST the claim
+- Explain what evidence was collected from each source
+- Note that the person/organization making the claim was considered (if applicable)
+- Use numbered source references [1], [2], [3], etc. throughout
+
+## Step 3: Finding the Latest and Most Reliable Data
+- Among the collected evidence, identify the LATEST and MOST RELIABLE data
+- Pay attention to the credibility and past record of data-supplying institutions
+- Avoid or flag data from controversial institutions
+- Explain why certain sources are more reliable than others
+- Note any outdated or potentially erroneous data
+
+## Step 4: Writing the Report
 
 **Report Structure:**
 
-# Claim
-[Write the main claim clearly]
+# দাবি (Claim)
+[Write the main claim clearly and unambiguously. Explain its impact and visibility. State what is being verified.]
 
-# Verdict
-[True/False/Misleading/Unverified - write clearly]
+# সিদ্ধান্ত (Verdict)
+[True/False/Misleading/Unverified - write clearly and prominently]
 
-# Detailed Analysis
-Include the following topics in this section:
+# বিস্তারিত বিশ্লেষণ (Detailed Analysis)
 
-## প্রাথমিক তথ্য সংগ্রহ (Primary Information Collection)
-- What sources we reviewed
-- What information we found from each source
-- How credible the sources are
+## প্রমাণ সংগ্রহ (Evidence Collection)
+- State: "এই দাবিটি যাচাই করতে আমরা খোঁজ-এর কোয়েরি পার্সিং প্রক্রিয়া চালিয়ে মোট ${crawledContent.length}টি নির্ভরযোগ্য ও সবচেয়ে প্রাসঙ্গিক উৎস পর্যালোচনা করেছি।"
+- Detail what sources were reviewed (at least ${crawledContent.length} sources)
+- Explain what information was found from each source
+- Describe the credibility of each source
+- Present evidence FOR the claim
+- Present evidence AGAINST the claim
+- Explain the process of collecting evidence
+
+## সর্বশেষ ও নির্ভরযোগ্য তথ্য (Latest and Most Reliable Data)
+- Identify which data is the most recent and reliable
+- Explain why certain sources are more credible
+- Highlight any discrepancies between sources
+- Note the credibility of institutions providing data
+- Flag any data from controversial or unreliable sources
 
 ## তথ্যের বিশ্লেষণ (Information Analysis)
-- How consistent the found information is with each other
-- Which information is credible and why
-- Which information is questionable and why
+- Analyze how consistent the found information is with each other
+- Explain which information is credible and why
+- Identify which information is questionable and why
+- Cross-reference evidence from multiple sources
 
 ## যুক্তি ও প্রমাণ (Logic and Evidence)
 - Explain step by step the logic for reaching the conclusion
 - Provide evidence behind each argument
-- Use numbered references [1], [2], [3], etc.
+- Use numbered source references [1], [2], [3], etc. consistently
+- Show the reasoning process clearly
 
 ## পটভূমি ও ইতিহাস (Context and History)
-- If relevant, explain the history or context behind the event
-- Explain why this is important
+- If relevant, explain the history or context behind the event/claim
+- Explain why this fact-check is important
+- Provide background information
 
 # সতর্কতা ও সীমাবদ্ধতা (Warnings and Limitations)
-- If any information is unclear or limited
-- If more research is needed
-- If there are questions about source credibility
+- Note if any information is unclear or limited
+- Indicate if more research is needed
+- Address any questions about source credibility
+- Acknowledge any limitations in the fact-checking process
 
 # উপসংহার (Conclusion)
-- Summary of main decision
-- Why this decision was reached
-- What it means for common people
+- Summarize the main decision clearly
+- Explain why this decision was reached
+- Explain what it means for common people
+- Restate the verdict prominently
 
 **Important Instructions:**
 - Write everything in simple, clear, and human-friendly Bengali
 - Explain complex topics simply
-- Provide logic at each step
+- Provide logic at each step following the fact-checking process
 - Be objective and evidence-based
 - If using information from English sources, translate and write in Bengali
 - Write so readers can easily understand
 - Explain complex topics through Q&A or examples
-- **CRITICAL:** Do NOT create "Source List" or "Sources" section yourself. Only use the sources provided above.
-- No need to provide separate source list at the end of the report.
+- **CRITICAL:** You must use ALL provided sources (${crawledContent.length} sources). Reference them with [1], [2], [3], etc.
+- **CRITICAL:** Do NOT create a separate "Source List" or "Sources" section. Sources are already referenced in the report.
 - **Markdown Formatting:** Use only # and ##. Do NOT use ### or ####.
-- **Detailed Writing:** Write at least 3-4 paragraphs in each section.
+- **Detailed Writing:** Write at least 4-5 paragraphs in each major section. The report should be comprehensive and thorough.
 - **Examples and Analysis:** Provide detailed examples and analysis for each point.
+- **Minimum Sources:** You have ${crawledContent.length} sources. Use them all effectively in your analysis.
+- **Evidence Presentation:** Present both supporting and opposing evidence fairly before reaching a conclusion.
 
 **STRICT SOURCE RESTRICTION - SOCIAL MEDIA:**
 - **NEVER use social media links (Facebook, Twitter/X, Instagram, YouTube, TikTok, LinkedIn, Reddit, Telegram, WhatsApp, etc.) as fact-checking sources for verifying information accuracy.**
 - Social media links are NOT acceptable as authoritative sources for fact-checking verification.
-- Social media can ONLY be referenced for contextual purposes (e.g., "This claim was widely shared on social media") or to mention related discussions, but NEVER as a source to verify facts or determine the truthfulness of information.
-- If a source is from social media, it should be completely excluded from the fact-checking analysis and verdict determination.
+- **IMPORTANT:** If social media sources were found (listed above), you MUST mention them in the report using this exact format:
+  "ব্যবহারকারীর এই দাবিটি আমরা এই সামাজিক মাধ্যমগুলোতেও লক্ষ্য করেছি [source number], [source number]"
+  Use the actual source numbers from the social media sources list above (they are numbered 1, 2, 3, etc.).
+  ${socialMediaSources.length > 0 ? `Example: "ব্যবহারকারীর এই দাবিটি আমরা এই সামাজিক মাধ্যমগুলোতেও লক্ষ্য করেছি ${socialMediaSources.map((item: any, index: number) => `[${index + 1}]`).join(', ')}"` : ''}
+- However, these social media sources MUST NOT be counted as verified resources or used to determine the verdict.
+- Social media sources should ONLY be mentioned to acknowledge that the claim exists on social media, but they cannot be used for fact verification.
 - Only use credible news sources, official websites, research papers, government sources, and verified fact-checking organizations for fact verification.
 
 Write the report as if an experienced journalist is writing for their readers - simple, clear, and trustworthy.
@@ -131,11 +178,11 @@ You MUST write an EXTENSIVE, DETAILED, and COMPREHENSIVE report. Do NOT be conci
 }
 
 // Helper function to generate AI report with three-tier fallback: Gemini → GROQ → DeepSeek
-async function generateAIReport(query: string, crawledContent: any[], maxRetries: number = 3): Promise<string> {
+async function generateAIReport(query: string, crawledContent: any[], socialMediaSources: any[], maxRetries: number = 3): Promise<string> {
   // Step 1: Try Gemini first (gemini-2.5-flash)
   console.log('🤖 Trying Gemini (gemini-2.5-flash) first...')
   
-  const geminiPrompt = createModelSpecificPrompt(query, crawledContent, 'gemini')
+  const geminiPrompt = createModelSpecificPrompt(query, crawledContent, socialMediaSources, 'gemini')
   
   // Try Gemini model with retries
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -172,7 +219,7 @@ async function generateAIReport(query: string, crawledContent: any[], maxRetries
   try {
     console.log('🤖 Trying GROQ (openai/gpt-oss-120b)...')
     
-    const groqPrompt = createModelSpecificPrompt(query, crawledContent, 'openai')
+    const groqPrompt = createModelSpecificPrompt(query, crawledContent, socialMediaSources, 'openai')
     
     const chatCompletion = await groq.chat.completions.create({
       "messages": [
@@ -202,7 +249,7 @@ async function generateAIReport(query: string, crawledContent: any[], maxRetries
   try {
     console.log('🔄 GROQ failed, trying DeepSeek (deepseek-r1-0528:free) as final fallback...')
     
-    const deepseekPrompt = createModelSpecificPrompt(query, crawledContent, 'deepseek')
+    const deepseekPrompt = createModelSpecificPrompt(query, crawledContent, socialMediaSources, 'deepseek')
     
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -246,6 +293,248 @@ async function generateAIReport(query: string, crawledContent: any[], maxRetries
   return 'AI সিস্টেমে সমস্যার কারণে বিস্তারিত বিশ্লেষণ প্রদান করা সম্ভব হচ্ছে না।'
 }
 
+/**
+ * Classify query geography (Bangladesh vs International)
+ */
+async function classifyGeography(query: string): Promise<{ type: 'bangladesh' | 'international', confidence: number, reasoning: string }> {
+  try {
+    // Use internal API call - construct URL from request or use relative path
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL || 'http://localhost:3000'
+    const apiUrl = `${baseUrl}/api/classify-geography`
+    
+    console.log(`🌍 Calling geography classification API: ${apiUrl}`)
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Geography classification API failed: ${response.status} - ${errorText}`)
+      throw new Error(`Geography classification API failed: ${response.status}`)
+    }
+
+    const result = await response.json()
+    return result
+  } catch (error) {
+    console.error('Geography classification error:', error)
+    // Fallback: default to bangladesh if classification fails
+    return {
+      type: 'bangladesh',
+      confidence: 0.5,
+      reasoning: 'Classification failed, defaulting to Bangladesh'
+    }
+  }
+}
+
+/**
+ * Search sources using tiered approach
+ */
+async function searchTieredSources(
+  query: string,
+  geography: 'bangladesh' | 'international',
+  maxResults: number = 15,
+  minResults: number = 10
+): Promise<{ results: any[], socialMediaSources: any[], tierBreakdown: { [key: number]: number }, hasBengaliSources: boolean, hasEnglishSources: boolean }> {
+  const tiers = getSourceTiers(geography)
+  const allResults: any[] = []
+  const socialMediaSources: any[] = []
+  const tierBreakdown: { [key: number]: number } = {}
+    let hasBengaliSources = false
+    let hasEnglishSources = false
+
+  console.log(`🌍 Searching ${geography} claim with ${tiers.length} tiers`)
+
+  for (const tier of tiers) {
+    if (allResults.length >= maxResults) {
+      console.log(`✅ Reached max results (${maxResults}), stopping tier search`)
+      break
+    }
+
+    try {
+      console.log(`🔍 Searching Tier ${tier.tier}: ${tier.name} (${tier.domains.length} domains)`)
+      
+      const tierResults = await tavilyManager.search(query, {
+        include_domains: tier.domains,
+        max_results: Math.min(maxResults - allResults.length, 10), // Limit per tier
+        search_depth: "advanced"
+      })
+      
+      if (tierResults.results && tierResults.results.length > 0) {
+        // Separate social media sources from valid sources
+        const socialMedia = tierResults.results.filter((result: any) => isSocialMediaUrl(result.url))
+        const filteredTierResults = filterSocialMedia(tierResults.results)
+        
+        // Track social media sources separately (for mentioning, not for verification)
+        if (socialMedia.length > 0) {
+          const socialMediaWithMetadata = socialMedia.map((result: any) => ({
+            ...result,
+            tier: tier.tier,
+            tierCategory: tier.category,
+            isSocialMedia: true
+          }))
+          socialMediaSources.push(...socialMediaWithMetadata)
+          console.log(`📱 Tier ${tier.tier} found ${socialMedia.length} social media sources (not counted as verified sources)`)
+        }
+        
+        if (filteredTierResults.length > 0) {
+          // Determine language based on tier category
+          const isTierBengali = tier.category === 'bangladesh_news' || 
+                               tier.category === 'bangladesh_factcheck' || 
+                               tier.category === 'local_bangladesh'
+          
+          if (isTierBengali) {
+            hasBengaliSources = true
+          } else {
+            hasEnglishSources = true
+          }
+
+          // Add tier metadata to each result
+          const tieredResults = filteredTierResults.map((result: any) => ({
+            ...result,
+            tier: tier.tier,
+            tierCategory: tier.category
+          }))
+
+          allResults.push(...tieredResults)
+          tierBreakdown[tier.tier] = filteredTierResults.length
+          
+          console.log(`✅ Tier ${tier.tier} found ${filteredTierResults.length} sources (total: ${allResults.length})`)
+        }
+      }
+
+      // Check if we have enough results from this tier (at least 3) before moving to next tier
+      // Only move to next tier if current tier yielded < 3 results
+      if (tierResults.results && tierResults.results.length >= 3 && allResults.length >= 3) {
+        console.log(`✅ Tier ${tier.tier} provided sufficient results, may stop or continue based on total count`)
+        // Continue to next tier only if we haven't reached maxResults
+        if (allResults.length >= maxResults) {
+          break
+        }
+      }
+
+    } catch (error) {
+      console.error(`❌ Tier ${tier.tier} search failed:`, error)
+      // Continue to next tier on error
+      continue
+    }
+  }
+
+  // Always search outside tiers after tier searches to find additional relevant and important results
+  try {
+    const remainingSlots = maxResults - allResults.length
+    if (remainingSlots > 0) {
+      console.log(`🔍 Searching outside tiers for additional relevant results (${remainingSlots} slots available)...`)
+      const generalResults = await tavilyManager.search(query, {
+        max_results: Math.min(remainingSlots + 5, 10), // Get a few extra to filter
+        search_depth: "advanced"
+      })
+      
+      if (generalResults.results && generalResults.results.length > 0) {
+        // Separate social media from general search results
+        const socialMediaGeneral = generalResults.results.filter((result: any) => isSocialMediaUrl(result.url))
+        const filteredGeneral = filterSocialMedia(generalResults.results)
+        
+        // Track social media sources separately
+        if (socialMediaGeneral.length > 0) {
+          const socialMediaWithMetadata = socialMediaGeneral.map((result: any) => ({
+            ...result,
+            tier: 999,
+            tierCategory: 'general',
+            isSocialMedia: true
+          }))
+          socialMediaSources.push(...socialMediaWithMetadata)
+          console.log(`📱 General search found ${socialMediaGeneral.length} social media sources (not counted as verified sources)`)
+        }
+        
+        // Add filtered general results (limit to remaining slots)
+        const generalWithTier = filteredGeneral.slice(0, remainingSlots).map((result: any) => ({
+          ...result,
+          tier: 999, // General search tier
+          tierCategory: 'general'
+        }))
+        
+        if (generalWithTier.length > 0) {
+          allResults.push(...generalWithTier)
+          tierBreakdown[999] = (tierBreakdown[999] || 0) + generalWithTier.length
+          console.log(`✅ General search found ${generalWithTier.length} additional relevant sources outside tiers (total: ${allResults.length})`)
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Failed to search general web:', error)
+  }
+
+  // If we still don't have enough results (minimum required), try additional general search
+  if (allResults.length < minResults) {
+    try {
+      console.log(`⚠️ Still insufficient sources (${allResults.length}/${minResults}), trying extended general search...`)
+      const extendedResults = await tavilyManager.search(query, {
+        max_results: minResults - allResults.length + 5, // Get a few extra
+        search_depth: "advanced"
+      })
+      
+      if (extendedResults.results && extendedResults.results.length > 0) {
+        // Separate social media from extended search results
+        const socialMediaExtended = extendedResults.results.filter((result: any) => isSocialMediaUrl(result.url))
+        const filteredExtended = filterSocialMedia(extendedResults.results)
+        
+        // Track social media sources separately
+        if (socialMediaExtended.length > 0) {
+          const socialMediaWithMetadata = socialMediaExtended.map((result: any) => ({
+            ...result,
+            tier: 999,
+            tierCategory: 'general',
+            isSocialMedia: true
+          }))
+          socialMediaSources.push(...socialMediaWithMetadata)
+          console.log(`📱 Extended search found ${socialMediaExtended.length} social media sources (not counted as verified sources)`)
+        }
+        
+        const extendedWithTier = filteredExtended.map((result: any) => ({
+          ...result,
+          tier: 999,
+          tierCategory: 'general'
+        }))
+        allResults.push(...extendedWithTier)
+        tierBreakdown[999] = (tierBreakdown[999] || 0) + filteredExtended.length
+        console.log(`✅ Extended search found ${filteredExtended.length} additional sources (total: ${allResults.length})`)
+      }
+    } catch (error) {
+      console.error('Failed to search extended general web:', error)
+    }
+  }
+
+  // Sort results by tier priority (lower tier number = higher priority)
+  allResults.sort((a, b) => {
+    if (a.tier !== b.tier) {
+      return a.tier - b.tier
+    }
+    // If same tier, sort by relevance score if available
+    return (b.score || 0) - (a.score || 0)
+  })
+
+  // Ensure we have at least minResults, but don't exceed maxResults
+  const finalResults = allResults.length >= minResults 
+    ? allResults.slice(0, maxResults)
+    : allResults // Use all available if less than minResults
+
+  if (finalResults.length < minResults) {
+    console.warn(`⚠️ Warning: Only found ${finalResults.length} sources (minimum required: ${minResults})`)
+  }
+
+  return {
+    results: finalResults,
+    socialMediaSources: socialMediaSources.slice(0, 10), // Limit social media sources to 10
+    tierBreakdown,
+    hasBengaliSources,
+    hasEnglishSources
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { query } = await request.json()
@@ -254,109 +543,60 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Query is required' }, { status: 400 })
     }
 
+    console.log(`🚀 Starting fact-check for: "${query}"`)
 
-
-    // Step 1: Search within Bangladeshi news sites for current information
-    const bangladeshiNewsSites = [
-      'https://www.prothomalo.com',
-      'https://www.bd-pratidin.com', 
-      'https://www.jugantor.com',
-      'https://www.kalerkantho.com',
-      'https://www.samakal.com',
-      'https://www.thedailystar.net',
-      'https://www.bdnews24.com',
-      'https://www.dhakatribune.com'
-    ]
-
-    let searchResults: any = { results: [] }
-    let hasBengaliSources = false
-    let hasEnglishSources = false
-
-    // Step 1: Search within Bangladeshi news sites for Bengali content
+    // Step 1: Classify geography (Bangladesh vs International)
+    let geography: { type: 'bangladesh' | 'international', confidence: number, reasoning: string }
     try {
-      const bangladeshiResults = await tavilyManager.search(query, {
-        sites: bangladeshiNewsSites,
-        max_results: 15,
-        search_depth: "advanced"
-      })
+      geography = await classifyGeography(query)
+      console.log(`🌍 Geography classified: ${geography.type} (confidence: ${geography.confidence})`)
       
-      if (bangladeshiResults.results && bangladeshiResults.results.length > 0) {
-        searchResults.results = bangladeshiResults.results
-        hasBengaliSources = true
-        console.log(`✅ Found ${bangladeshiResults.results.length} Bengali sources`)
+      // If confidence is too low, default to Bangladesh for safety
+      if (geography.confidence < 0.6) {
+        console.log('⚠️ Low confidence in geography classification, defaulting to Bangladesh')
+        geography = {
+          type: 'bangladesh',
+          confidence: 0.5,
+          reasoning: 'Low confidence classification, defaulting to Bangladesh'
+        }
       }
     } catch (error) {
-      console.error('Failed to search Bangladeshi sites:', error)
-    }
-
-    // Step 2: If insufficient Bengali sources, search for English sources
-    if (!hasBengaliSources || searchResults.results.length < 3) {
-      try {
-        console.log('🔍 Searching for English sources...')
-        const englishResults = await tavilyManager.search(query, {
-          max_results: 15,
-          search_depth: "advanced",
-          include_domains: [
-            'reuters.com', 'bbc.com', 'cnn.com', 'ap.org', 'factcheck.org',
-            'snopes.com', 'politifact.com', 'who.int', 'un.org', 'worldbank.org'
-          ]
-        })
-        
-        if (englishResults.results && englishResults.results.length > 0) {
-          // If we have Bengali sources, append English sources (limit to total of 15)
-          if (hasBengaliSources) {
-            const remainingSlots = 15 - searchResults.results.length
-            if (remainingSlots > 0) {
-              searchResults.results = [...searchResults.results, ...englishResults.results.slice(0, remainingSlots)]
-            }
-          } else {
-            searchResults.results = englishResults.results.slice(0, 15)
-          }
-          hasEnglishSources = true
-          console.log(`✅ Found ${englishResults.results.length} English sources`)
-        }
-      } catch (error) {
-        console.error('Failed to search English sources:', error)
+      console.error('Geography classification failed:', error)
+      // Fallback to Bangladesh
+      geography = {
+        type: 'bangladesh',
+        confidence: 0.5,
+        reasoning: 'Classification failed, defaulting to Bangladesh'
       }
     }
 
-    // Step 3: If still no results, try general search
-    if (!searchResults.results || searchResults.results.length === 0) {
-      try {
-        console.log('🔍 Trying general search...')
-        const generalResults = await tavilyManager.search(query, {
-          max_results: 15,
-          search_depth: "advanced"
-        })
-        
-        if (generalResults.results) {
-          searchResults.results = generalResults.results.slice(0, 15)
-          console.log(`✅ Found ${generalResults.results.length} general sources`)
-        }
-      } catch (error) {
-        console.error('Failed to search general web:', error)
-      }
-    }
+    // Step 2: Search sources using tiered approach (minimum 10, target 15)
+    const { results: searchResults, socialMediaSources, tierBreakdown, hasBengaliSources, hasEnglishSources } = 
+      await searchTieredSources(query, geography.type, 15, 10)
 
-    // Use search results directly without crawling for faster response (limit to 15 most relevant)
-    // Filter out social media sources - they should not be used for fact-checking verification
-    const filteredResults = searchResults.results?.filter((result: any) => {
-      const url = (result.url || '').toLowerCase()
-      const socialMediaDomains = ['facebook.com', 'twitter.com', 'x.com', 'instagram.com', 'youtube.com', 
-                                   'tiktok.com', 'linkedin.com', 'reddit.com', 'telegram.org', 'whatsapp.com',
-                                   'messenger.com', 'pinterest.com', 'snapchat.com', 'viber.com']
-      return !socialMediaDomains.some(domain => url.includes(domain))
-    }) || []
-    
-    const crawledContent = filteredResults.slice(0, 15).map((result: any, index: number) => ({
+    // Step 3: Process results and filter social media (extra safety check)
+    const filteredResults = filterSocialMedia(searchResults)
+
+    // Use all available results (already limited to maxResults in searchTieredSources)
+    const crawledContent = filteredResults.map((result: any, index: number) => ({
       title: result.title,
       url: result.url,
-      content: (result as any).content || (result as any).snippet || 'Content not available',
-      isEnglish: !hasBengaliSources || (hasEnglishSources && index >= filteredResults.length - (hasEnglishSources ? 3 : 0))
-    })) || []
+      content: result.content || result.snippet || 'Content not available',
+      isEnglish: result.tierCategory === 'international_media' || 
+                 result.tierCategory === 'international_factcheck' ||
+                 (!hasBengaliSources && result.tierCategory !== 'bangladesh_news' && result.tierCategory !== 'bangladesh_factcheck' && result.tierCategory !== 'local_bangladesh'),
+      tier: result.tier,
+      tierCategory: result.tierCategory
+    }))
+
+    // Process social media sources for mentioning (not for verification)
+    const processedSocialMediaSources = socialMediaSources.map((item: any) => ({
+      title: item.title,
+      url: item.url
+    }))
 
     // Generate fact-checking report with model-specific prompts
-    const report = await generateAIReport(query, crawledContent)
+    const report = await generateAIReport(query, crawledContent, processedSocialMediaSources)
     
     // Find related articles from our database
     const relatedArticles = findRelatedArticles(query, 3)
@@ -373,9 +613,15 @@ ${query}
 ## বিস্তারিত বিশ্লেষণ
 
 **প্রাথমিক তথ্য সংগ্রহ:**
-আমরা এই দাবিটি যাচাই করার জন্য ${crawledContent.length} টি উৎস পর্যালোচনা করেছি। আমাদের গবেষণায় নিম্নলিখিত উৎসসমূহ অন্তর্ভুক্ত ছিল:
+এই দাবিটি যাচাই করতে আমরা খোঁজ-এর কোয়েরি পার্সিং প্রক্রিয়া চালিয়ে মোট ${crawledContent.length}টি নির্ভরযোগ্য ও সবচেয়ে প্রাসঙ্গিক উৎস পর্যালোচনা করেছি। আমাদের গবেষণায় নিম্নলিখিত উৎসসমূহ অন্তর্ভুক্ত ছিল:
 
 ${crawledContent.map((item: any, index: number) => `- ${item.title} (${item.isEnglish ? 'ইংরেজি উৎস' : 'বাংলা উৎস'})`).join('\n')}
+${processedSocialMediaSources.length > 0 ? `
+
+**সামাজিক মাধ্যম:**
+ব্যবহারকারীর এই দাবিটি আমরা এই সামাজিক মাধ্যমগুলোতেও লক্ষ্য করেছি ${processedSocialMediaSources.map((item: any, index: number) => `[${index + 1}]`).join(', ')}:
+${processedSocialMediaSources.map((item: any, index: number) => `- [${index + 1}] ${item.title}`).join('\n')}
+` : ''}
 
 **তথ্যের বিশ্লেষণ:**
 তবে দুর্ভাগ্যবশত, AI সিস্টেমে সাময়িক সমস্যার কারণে আমরা এই উৎসসমূহ থেকে প্রাপ্ত তথ্যের বিস্তারিত বিশ্লেষণ করতে পারছি না।
@@ -437,7 +683,16 @@ ${crawledContent.map((item: any, index: number) => `- ${item.title} (${item.isEn
       sourceInfo: {
         hasBengaliSources,
         hasEnglishSources,
-        totalSources: crawledContent.length
+        totalSources: crawledContent.length,
+        geography: geography.type,
+        tierBreakdown: {
+          tier1: tierBreakdown[1] || 0,
+          tier2: tierBreakdown[2] || 0,
+          tier3: tierBreakdown[3] || 0,
+          tier4: tierBreakdown[4] || 0,
+          tier5: tierBreakdown[5] || 0,
+          general: tierBreakdown[999] || 0
+        }
       },
       generatedAt: new Date().toISOString()
     })

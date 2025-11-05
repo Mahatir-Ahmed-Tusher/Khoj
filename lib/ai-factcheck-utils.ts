@@ -19,6 +19,15 @@ export interface AIFactCheck {
     hasBengaliSources: boolean;
     hasEnglishSources: boolean;
     totalSources: number;
+    geography?: "bangladesh" | "international";
+    tierBreakdown?: {
+      tier1: number;
+      tier2: number;
+      tier3: number;
+      tier4: number;
+      tier5: number;
+      general: number;
+    };
   };
   generatedAt: string;
   pageUrl: string;

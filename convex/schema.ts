@@ -29,6 +29,17 @@ export default defineSchema({
         hasBengaliSources: v.boolean(),
         hasEnglishSources: v.boolean(),
         totalSources: v.number(),
+        geography: v.optional(v.union(v.literal("bangladesh"), v.literal("international"))),
+        tierBreakdown: v.optional(
+          v.object({
+            tier1: v.number(),
+            tier2: v.number(),
+            tier3: v.number(),
+            tier4: v.number(),
+            tier5: v.number(),
+            general: v.number(),
+          })
+        ),
       })
     ),
     generatedAt: v.string(),
