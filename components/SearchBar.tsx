@@ -193,12 +193,16 @@ const SearchBar = memo(function SearchBar({
     const text = query.trim();
     if (!text) return;
     if (option === "plagiarism") {
-      // Per requirement: "আপনি কি এটির ফ্যাক্টচেক করতে চান?" -> /plag-test
+      // Route to plagiarism test with provided text
       sessionStorage.setItem("plagiarismText", text);
       router.push("/plag-test");
     } else {
-      // "এই লেখাটি চুরি করা হয়েছে কিনা তা জানতে চান?" -> AI fact-checker page
-      router.push(`/factcheck-detail?query=${encodeURIComponent(text)}`);
+      // Route to AI fact-checker page
+      if (onSearch) {
+        onSearch(text);
+      } else {
+        router.push(`/factcheck-detail?query=${encodeURIComponent(text)}`);
+      }
     }
   };
 
@@ -599,13 +603,13 @@ const SearchBar = memo(function SearchBar({
               onClick={() => handleTextOptionSelect("plagiarism")}
               className="px-8 py-4 bg-white text-gray-800 rounded-xl border-2 border-gray-300 hover:border-blue-500 transition-all duration-200 font-tiro-bangla text-lg font-medium"
             >
-              আপনি কি এটির ফ্যাক্টচেক করতে চান?
+              লেখাটি চুরি হয়েছে কিনা তা যাচাই করুন
             </button>
             <button
               onClick={() => handleTextOptionSelect("factcheck")}
               className="px-8 py-4 bg-white text-gray-800 rounded-xl border-2 border-gray-300 hover:border-orange-500 transition-all duration-200 font-tiro-bangla text-lg font-medium"
             >
-              এই লেখাটি চুরি করা হয়েছে কিনা তা জানতে চান?
+              আপনি কি এটির ফ্যাক্টচেক করতে চান?
             </button>
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Footer from "@/components/Footer";
@@ -272,6 +272,14 @@ export default function HomePage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  // Hero GIF popup state
+  const [showHeroGif, setShowHeroGif] = useState(false);
+  const [gifCountdown, setGifCountdown] = useState(5);
+  const [gifActive, setGifActive] = useState(false);
+  const countdownIntervalRef = useRef<number | undefined>(undefined);
+  const hideTimeoutRef = useRef<number | undefined>(undefined);
+  const hasStartedOnceRef = useRef(false);
+  const popupStartMsRef = useRef<number | undefined>(undefined);
 
   // Track visit and check if first visit
   useEffect(() => {
@@ -359,6 +367,59 @@ export default function HomePage() {
       window.clearTimeout(timeoutId);
     };
   }, [isMobile, heroImageIndex]);
+
+  // Timed Hero GIF popup (desktop only): first visit, then every 2.5 minutes; show exactly 5s
+  useEffect(() => {
+    const startPopupCycle = () => {
+      if (window.innerWidth < 768) return; // do not show on mobile
+      if (gifActive) return; // avoid overlapping
+      // Clear any previous timers just in case
+      if (countdownIntervalRef.current)
+        window.clearInterval(countdownIntervalRef.current);
+      if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
+      setGifActive(true);
+      setGifCountdown(5);
+      setShowHeroGif(true);
+      popupStartMsRef.current = Date.now();
+
+      // (No on-screen timer) Keep internal countdown if needed in future
+      if (countdownIntervalRef.current)
+        window.clearInterval(countdownIntervalRef.current);
+
+      // Hide after exactly 5s
+      hideTimeoutRef.current = window.setTimeout(() => {
+        setShowHeroGif(false);
+        setGifActive(false);
+        setGifCountdown(5);
+        if (countdownIntervalRef.current)
+          window.clearInterval(countdownIntervalRef.current);
+        popupStartMsRef.current = undefined;
+      }, 5000);
+      // Extra safety: force hide a bit later in case browser throttles timers
+      window.setTimeout(() => {
+        setShowHeroGif(false);
+        setGifActive(false);
+      }, 6000);
+    };
+
+    // Show once on mount for desktop only
+    if (!hasStartedOnceRef.current && window.innerWidth >= 768) {
+      hasStartedOnceRef.current = true;
+      startPopupCycle();
+    }
+
+    // Reappear every 2.5 minutes (desktop only)
+    const reappearInterval = window.setInterval(() => {
+      if (window.innerWidth >= 768) startPopupCycle();
+    }, 150000);
+
+    return () => {
+      if (reappearInterval) window.clearInterval(reappearInterval);
+      if (countdownIntervalRef.current)
+        window.clearInterval(countdownIntervalRef.current);
+      if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
+    };
+  }, [gifActive]);
 
   // Track scroll position
   useEffect(() => {
@@ -901,6 +962,36 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+        {/* Hero GIF Popup - Bottom Left, no container/border */}
+        {showHeroGif && !isMobile && (
+          <div className="pointer-events-auto absolute left-3 bottom-24 md:left-6 md:bottom-6 z-10">
+            <div className="relative">
+              {/* Close button with countdown */}
+              <button
+                aria-label="Close"
+                onClick={() => {
+                  setShowHeroGif(false);
+                  setGifActive(false);
+                  if (countdownIntervalRef.current)
+                    window.clearInterval(countdownIntervalRef.current);
+                  if (hideTimeoutRef.current)
+                    window.clearTimeout(hideTimeoutRef.current);
+                  popupStartMsRef.current = undefined;
+                }}
+                className="absolute -top-1.5 -right-1.5 bg-black/80 text-white text-[10px] md:text-xs w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center shadow-md hover:bg-black/90 transition-colors"
+              >
+                ×
+              </button>
+              {/* GIF image - larger on desktop */}
+              <img
+                src="/Loading%20Screens/pop-up.gif"
+                alt="Promo"
+                className="block w-44 h-auto md:w-72 select-none"
+                draggable={false}
+              />
+            </div>
+          </div>
+        )}
         {/* Social Icons - Bottom Right of Hero (not fixed) */}
         <div className="pointer-events-auto absolute right-3 bottom-3 md:right-6 md:bottom-6 flex items-center gap-2 md:gap-3 z-10">
           <a

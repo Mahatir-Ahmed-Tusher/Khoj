@@ -14,8 +14,9 @@ export default function Footer() {
               <h3 className="text-lg font-semibold font-tiro-bangla">খোঁজ সম্পর্কে</h3>
             </div>
             <p className="text-gray-300 mb-4 font-tiro-bangla">
-              খোঁজ কৃত্রিম বুদ্ধিমত্তার সাহায্যে যেকোনো দাবির সত্যতা যাচাই করে, দ্রুত ও নির্ভুল তথ্য সামনে আনে।
-              আমাদের লক্ষ্য—বাংলাভাষী সমাজকে ভুয়া তথ্যের অন্ধকার থেকে মুক্ত করে সত্যের আলোয় সচেতন রাখা।
+            খোঁজ বাংলা ভাষার সর্বপ্রথম কৃত্রিম বুদ্ধিমত্তাভিত্তিক ফ্যাক্টচেকিং প্রতিষ্ঠান। 
+            আমাদের লক্ষ্য, বাংলাভাষী সমাজকে ভুয়া তথ্যের অন্ধকার থেকে মুক্ত করে সত্যের আলোয় সচেতন রাখা।
+
             </p>
             <div className="flex space-x-4">
               <a href="https://www.facebook.com/profile.php?id=61580245735019" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white">

@@ -900,9 +900,6 @@ ${messageText}
                               <div className="p-6">
                                 {message.summary && (
                                   <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                    <h3 className="text-lg font-semibold text-blue-900 mb-2 font-tiro-bangla">
-                                      সংক্ষিপ্ত সারাংশ:
-                                    </h3>
                                     <p className="text-blue-800 font-tiro-bangla leading-relaxed">
                                       {message.summary}
                                     </p>

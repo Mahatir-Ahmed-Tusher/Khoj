@@ -183,14 +183,26 @@ export async function POST(request: NextRequest) {
 
     // Extract sources from search results
     if (searchResults && searchResults.results) {
-      evidenceSources = searchResults.results
-        .slice(0, 8) // Limit to top 8 results
-        .map((result: any) => ({
-          title: result.title || result.name || "Unknown",
-          url: result.url || result.link || result.href || "",
-          snippet: result.snippet || result.description || result.excerpt || "",
-        }))
-        .filter((source: any) => source.url && source.title);
+      const toCandidate = (result: any) => ({
+        title: result.title || result.name || "Unknown",
+        url: result.url || result.link || result.href || "",
+        snippet: result.snippet || result.description || result.excerpt || "",
+      });
+
+      const candidates = searchResults.results.map(toCandidate).filter((s: any) => s.url && s.title);
+
+      // Prefer international, English-language sources; filter out Bangla/local (.bd) content
+      const isLikelyBangla = (text: string) => /[\u0980-\u09FF]/.test(text);
+      const isLocalBd = (url: string) => /\.(bd)(\/|$)/i.test(url);
+
+      evidenceSources = candidates
+        .filter((s: any) => !isLocalBd(s.url) && !isLikelyBangla(s.title + " " + s.snippet))
+        .slice(0, 8);
+
+      // Fallback to any candidates if filtering removed all
+      if (evidenceSources.length === 0) {
+        evidenceSources = candidates.slice(0, 8);
+      }
     }
 
     // If no evidence sources found, create fallback references based on the query
@@ -305,14 +317,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Enhanced system prompt for conversational mythbusting
-    const systemPrompt = `You are a friendly, knowledgeable fact-checker who explains complex topics in simple, engaging ways. Your goal is to help ordinary people understand the truth behind claims by telling a clear, interesting story.
+    const systemPrompt = `You are a careful fact-checker writing a Bengali report. Do not use clichéd openings like "আপনি হয়তো ভাবছেন". Keep the tone natural and clear.
 
 **Your Communication Style:**
-- Write like you're talking to a curious friend over coffee
-- Use simple, everyday language that anyone can understand
-- Tell a story rather than listing bullet points
-- Make it interesting and engaging, not dry or academic
-- Connect the dots in a logical, flowing narrative
+- Use simple, everyday Bengali that anyone can understand
+- Flowing narrative; avoid bullet points and tables
+- Natural openings; DO NOT use the phrase "আপনি হয়তো ভাবছেন"
 
 **Your Analysis Approach:**
 - Start with the big picture - what's really going on here?
@@ -326,7 +336,7 @@ export async function POST(request: NextRequest) {
 
 VERDICT: [true/false/misleading/unverified/partially_true/context_dependent]
 
-SUMMARY: [Write a BRIEF 2-3 sentence gist in Bengali that captures the essence - NOT a detailed analysis, just the core finding]
+SUMMARY: [Write a BRIEF 2-3 sentence gist in Bengali (no heading text required in the body, just the summary sentences).]
 
 DETAILED_ANALYSIS: [Write a comprehensive, flowing analysis in Bengali that:
 - Starts and ends naturally
@@ -356,11 +366,14 @@ KEY TAKEAWAYS: [Write 2-3 simple, memorable key messages in Bengali]
 - NO TABLES anywhere in the response
 - NO bullet points or numbered lists in DETAILED_ANALYSIS
 - Write in flowing paragraphs that connect naturally
-- Use conversational tone in Bengali - "আপনি হয়তো ভাবছেন..." "এখানে আসল ঘটনা হলো..."
+- Use conversational tone in Bengali; do NOT use the phrase "আপনি হয়তো ভাবছেন"
 - Include interesting facts and surprising discoveries
 - Make it feel like a friendly conversation, not a formal report
 - Use Bengali expressions and cultural references when appropriate
 - Be comprehensive - don't just rely on search results, use your extensive knowledge
+- Prefer international, English-language sources in SOURCES. Avoid local/regional Bangla-only sources when strong international sources exist.
+- For scientific/medical/technical claims, prioritize peer‑reviewed journals (e.g., Nature, Science, The Lancet, PNAS), reputable organizations (WHO, CDC, NASA, IPCC), credible science magazines (Scientific American, National Geographic, MIT Technology Review), and trustworthy research blogs from institutions.
+- In the SOURCES section, output lines strictly as: Title - URL (http/https link). Include at least 8 items.
 - Provide deep analysis with historical context, scientific background, and cultural implications
 - Write at least 5-7 detailed paragraphs in DETAILED_ANALYSIS section
 - In CONCLUSION section, provide your own expert opinion and final assessment
@@ -373,13 +386,7 @@ Analyze the claim: "`;
 
 ${evidenceContext}
 
-Please provide a comprehensive mythbusting analysis following the exact format above. Use the provided evidence sources when available and reference them properly.
-
-**Example of comprehensive analysis:**
-Instead of: "This claim is false because..."
-Write: "আপনি হয়তো ভাবছেন এটা সত্যি হতে পারে। আসুন দেখি বিজ্ঞান কী বলে... [detailed explanation]... এখন যদি আমরা ইতিহাসের দিকে তাকাই... [historical context]... কিন্তু এখানে আসল প্রশ্ন হলো... [deep analysis]... তাহলে যেটা দাঁড়ায়, এই দাবিটি মূলত ভুল কারণ..."
-
-Write at least 5-7 detailed paragraphs in DETAILED_ANALYSIS and provide your own expert conclusion in CONCLUSION section.`;
+Please provide a comprehensive mythbusting analysis following the exact format above. Use the provided evidence sources when available and reference them properly. The report must be in Bengali.`;
 
     console.log("Sending request to AI with evidence...");
     let text: string;

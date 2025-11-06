@@ -119,13 +119,13 @@ const ImageOptionsModal: React.FC<ImageOptionsModalProps> = ({
 
   const options = [
     {
-      label: "ছবির উৎস সন্ধান",
+      label: "ছবির সার্চ",
       name: "Image search",
       color: "bg-blue-600",
       hoverColor: "hover:bg-blue-700",
     },
     {
-      label: "এআই ছবি যাচাই",
+      label: "AI ছবি যাচাই",
       name: "AI image detection",
       color: "bg-purple-600",
       hoverColor: "hover:bg-purple-700",
