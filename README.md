@@ -1,4 +1,5 @@
-<img width="1892" height="448" alt="image" src="https://github.com/user-attachments/assets/74c854f5-a5ca-4a7b-af71-fa1c71c871be" /> #🔍 Khoj — The World's First AI-Powered Bengali Fact-Checking Platform
+<img width="1892" height="448" alt="image" src="https://github.com/user-attachments/assets/74c854f5-a5ca-4a7b-af71-fa1c71c871be" /> 
+# 🔍 Khoj — The World's First AI-Powered Bengali Fact-Checking Platform
 
 
 
