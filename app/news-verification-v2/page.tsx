@@ -170,6 +170,14 @@ ${result.sources
       const data = await response.json();
 
       if (response.ok) {
+        // Check if redirect to factcheck-detail is needed
+        if (data.redirect && data.claim) {
+          console.log("Redirecting to factcheck-detail with extracted claim:", data.claim);
+          // Redirect to factcheck-detail page with the extracted claim
+          window.location.href = `/factcheck-detail?query=${encodeURIComponent(data.claim)}`;
+          return;
+        }
+        // Otherwise, show result on this page (fallback for old behavior)
         setResult(data);
       } else {
         setError(
@@ -240,54 +248,20 @@ ${result.sources
           <h1 className="text-3xl font-bold text-gray-800 mb-3 font-tiro-bangla tracking-tight">
             খবর যাচাই
           </h1>
-          <p className="text-lg text-gray-600 font-tiro-bangla">
-            খবরের সত্যতা যাচাইয়ের দায়ভার দিন খোঁজ কে
-          </p>
+          
         </div>
 
         {/* Auto-check Status */}
         {isLoading && (
-          <div className="bg-gradient-to-r overflow-x-hidden from-blue-50/90 to-indigo-50/90 backdrop-blur-sm rounded-2xl border border-blue-200/50 p-8 mb-8">
+          <div className="bg-gradient-to-r overflow-x-hidden from-blue-50/90 to-indigo-50/90 backdrop-blur-sm rounded-2xl border border-blue-200/50 p-4 sm:p-8 mb-8">
             <div className="text-center">
-              {/* Animated News Icon */}
-              <div className="relative mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center mx-auto border border-blue-200">
-                  <span className="text-blue-600 text-2xl animate-pulse">
-                    📰
-                  </span>
-                </div>
-                {/* Pulsing Ring */}
-                <div className="absolute inset-0 rounded-2xl border-2 border-blue-300 animate-ping"></div>
-              </div>
-
-              {/* Loading Text */}
-              <h3 className="text-lg font-semibold text-blue-800 mb-2 font-tiro-bangla">
-                নিউজ যাচাই হচ্ছে...
-              </h3>
-              <p className="text-blue-700 font-tiro-bangla text-sm mb-4">
-                অনুগ্রহ করে অপেক্ষা করুন
-              </p>
-
-              {/* Progress Steps */}
-              <div className="space-y-2 text-sm text-blue-600 font-tiro-bangla">
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  <span>নিউজ আর্টিকেল পড়া হচ্ছে...</span>
-                </div>
-                <div className="flex items-center justify-center space-x-2">
-                  <div
-                    className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
-                    style={{ animationDelay: "0.5s" }}
-                  ></div>
-                  <span>সে খবরটি নিয়ে খোঁজ চালানো হচ্ছে...</span>
-                </div>
-                <div className="flex items-center justify-center space-x-2">
-                  <div
-                    className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"
-                    style={{ animationDelay: "1s" }}
-                  ></div>
-                  <span>রিপোর্ট তৈরি করা হচ্ছে...</span>
-                </div>
+              {/* Loading GIF */}
+              <div className="flex items-center justify-center">
+                <img
+                  src="/Loading Screens/loading-screen-news-verification.gif"
+                  alt="Loading animation"
+                  className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg h-auto mx-auto rounded-lg"
+                />
               </div>
             </div>
           </div>

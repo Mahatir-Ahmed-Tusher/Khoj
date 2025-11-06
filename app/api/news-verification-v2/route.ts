@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { tavilyManager } from "@/lib/tavily-manager";
 import puppeteer from "puppeteer";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { Groq } from "groq-sdk";
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -854,355 +855,135 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 2: Search for additional sources using Tavily (same as main fact checker)
-    console.log("Step 2: Searching for additional sources...");
+    // Step 2: Parse query using GPT-OSS-120B for better fact-checking results
+    console.log("Step 2: Parsing query using GPT-OSS-120B for optimized fact-checking...");
     
-    // Create enhanced search query from news content
-    const extractKeyTerms = (text: string) => {
-      // Remove common words and extract meaningful terms
-      const stopWords = ['এবং', 'অথবা', 'কিন্তু', 'তবে', 'যেমন', 'সাথে', 'জন্য', 'থেকে', 'হয়', 'হয়েছে', 'করেছে', 'করেন', 'করেছেন', 'the', 'and', 'or', 'but', 'for', 'with', 'from', 'has', 'have', 'had', 'is', 'are', 'was', 'were'];
-      const words = text.toLowerCase().split(/\s+/).filter(word => 
-        word.length > 3 && 
-        !stopWords.includes(word) && 
-        !/^\d+$/.test(word) && // Remove pure numbers
-        !/^[^\u0980-\u09FF\u0000-\u007F]+$/.test(word) // Remove special characters only
-      );
-      return [...new Set(words)].slice(0, 10); // Remove duplicates and limit to 10 terms
-    };
+    let optimizedClaim: string;
     
-    const titleTerms = extractKeyTerms(newsContent.title);
-    const contentTerms = extractKeyTerms(newsContent.content.substring(0, 500));
-    const allTerms = [...new Set([...titleTerms, ...contentTerms])];
-    
-    // Create multiple search queries for better coverage
-    const searchQueries = [
-      newsContent.title, // Original title
-      `${titleTerms.slice(0, 5).join(' ')}`, // Top 5 terms from title
-      `${allTerms.slice(0, 8).join(' ')}`, // Top 8 combined terms
-      `${newsContent.title} ${newsContent.content.substring(0, 100)}` // Title + first 100 chars
-    ].filter(query => query.trim().length > 10); // Filter out very short queries
-    
-    console.log(`Generated ${searchQueries.length} search queries:`, searchQueries.map(q => q.substring(0, 50) + '...'));
-    
-    // Search within Bangladeshi news sites first
-    const bangladeshiNewsSites = [
-      'https://www.prothomalo.com',
-      'https://www.bd-pratidin.com', 
-      'https://www.jugantor.com',
-      'https://www.kalerkantho.com',
-      'https://www.samakal.com',
-      'https://www.thedailystar.net',
-      'https://www.bdnews24.com',
-      'https://www.dhakatribune.com'
-    ];
-
-    let searchResults: any = { results: [] };
-    let hasBengaliSources = false;
-    let hasEnglishSources = false;
-
-    // Step 1: Search within Bangladeshi news sites for Bengali content using multiple queries
     try {
-      let allBangladeshiResults: any[] = [];
+      const groqApiKey = process.env.GROQ_API_KEY;
       
-      for (const query of searchQueries.slice(0, 2)) { // Use first 2 queries for Bengali sites
-        try {
-          const bangladeshiResults = await tavilyClient.search(query, {
-            sites: bangladeshiNewsSites,
-            max_results: 6,
-            search_depth: "advanced"
-          });
-          
-          if (bangladeshiResults.results && bangladeshiResults.results.length > 0) {
-            allBangladeshiResults.push(...bangladeshiResults.results);
-            console.log(`✅ Found ${bangladeshiResults.results.length} Bengali sources for query: ${query.substring(0, 30)}...`);
-          }
-        } catch (queryError) {
-          console.error(`Failed to search with query: ${query.substring(0, 30)}...`, queryError);
-        }
-      }
-      
-      // Remove duplicates based on URL
-      const uniqueResults = allBangladeshiResults.filter((result, index, self) => 
-        index === self.findIndex(r => r.url === result.url)
-      );
-      
-      if (uniqueResults.length > 0) {
-        searchResults.results = uniqueResults.slice(0, 11);
-        hasBengaliSources = true;
-        console.log(`✅ Total unique Bengali sources found: ${uniqueResults.length}`);
-      }
-    } catch (error) {
-      console.error('Failed to search Bangladeshi sites:', error);
-    }
-
-    // Step 2: If insufficient Bengali sources, search for English sources using multiple queries
-    if (!hasBengaliSources || searchResults.results.length < 3) {
-      try {
-        console.log('🔍 Searching for English sources...');
-        let allEnglishResults: any[] = [];
-        
-        for (const query of searchQueries.slice(0, 3)) { // Use first 3 queries for English sites
-          try {
-            const englishResults = await tavilyClient.search(query, {
-              max_results: 4,
-              search_depth: "advanced",
-              include_domains: [
-                'reuters.com', 'bbc.com', 'cnn.com', 'ap.org', 'factcheck.org',
-                'snopes.com', 'politifact.com', 'who.int', 'un.org', 'worldbank.org'
-              ]
-            });
-            
-            if (englishResults.results && englishResults.results.length > 0) {
-              allEnglishResults.push(...englishResults.results);
-              console.log(`✅ Found ${englishResults.results.length} English sources for query: ${query.substring(0, 30)}...`);
-            }
-          } catch (queryError) {
-            console.error(`Failed to search English with query: ${query.substring(0, 30)}...`, queryError);
-          }
-        }
-        
-        // Remove duplicates based on URL
-        const uniqueEnglishResults = allEnglishResults.filter((result, index, self) => 
-          index === self.findIndex(r => r.url === result.url)
-        );
-        
-        if (uniqueEnglishResults.length > 0) {
-          // If we have Bengali sources, append English sources
-          if (hasBengaliSources) {
-            searchResults.results = [...searchResults.results, ...uniqueEnglishResults.slice(0, 5)];
-          } else {
-            searchResults.results = uniqueEnglishResults.slice(0, 11);
-          }
-          hasEnglishSources = true;
-          console.log(`✅ Total unique English sources found: ${uniqueEnglishResults.length}`);
-        }
-      } catch (error) {
-        console.error('Failed to search English sources:', error);
-      }
-    }
-
-    // Step 3: If still no results, try general search using multiple queries
-    if (!searchResults.results || searchResults.results.length === 0) {
-      try {
-        console.log('🔍 Trying general search...');
-        let allGeneralResults: any[] = [];
-        
-        for (const query of searchQueries.slice(0, 2)) { // Use first 2 queries for general search
-          try {
-            const generalResults = await tavilyClient.search(query, {
-              max_results: 6,
-              search_depth: "advanced"
-            });
-            
-            if (generalResults.results && generalResults.results.length > 0) {
-              allGeneralResults.push(...generalResults.results);
-              console.log(`✅ Found ${generalResults.results.length} general sources for query: ${query.substring(0, 30)}...`);
-            }
-          } catch (queryError) {
-            console.error(`Failed to search general with query: ${query.substring(0, 30)}...`, queryError);
-          }
-        }
-        
-        // Remove duplicates based on URL
-        const uniqueGeneralResults = allGeneralResults.filter((result, index, self) => 
-          index === self.findIndex(r => r.url === result.url)
-        );
-        
-        if (uniqueGeneralResults.length > 0) {
-          searchResults.results = uniqueGeneralResults.slice(0, 11);
-          console.log(`✅ Total unique general sources found: ${uniqueGeneralResults.length}`);
-        }
-      } catch (error) {
-        console.error('Failed to search general web:', error);
-      }
-    }
-
-    // Step 3: Prepare crawled content (same format as main fact checker)
-    const crawledContent = searchResults.results?.slice(0, 11).map((result: any, index: number) => ({
-      title: result.title,
-      url: result.url,
-      content: (result as any).content || (result as any).snippet || 'Content not available',
-      isEnglish: !hasBengaliSources || (hasEnglishSources && index >= searchResults.results.length - 3)
-    })) || [];
-
-    // Add the original news content as the first source
-    crawledContent.unshift({
-      title: newsContent.title,
-      url: newsContent.url,
-      content: newsContent.content,
-      isEnglish: false // Assume Bengali news
-    });
-
-    // Step 4: Generate comprehensive report using the same method as main fact checker
-    console.log("Step 4: Generating comprehensive report...");
-    const report = await generateAIReport(newsContent.title, crawledContent);
-    
-    // Add fallback content if AI failed
-    const finalReport = report === 'AI সিস্টেমে সমস্যার কারণে বিস্তারিত বিশ্লেষণ প্রদান করা সম্ভব হচ্ছে না।' 
-      ? `
-## দাবি
-${newsContent.title}
-
-## সিদ্ধান্ত
-অযাচাইকৃত
-
-## বিস্তারিত বিশ্লেষণ
-
-**প্রাথমিক তথ্য সংগ্রহ:**
-আমরা এই নিউজ আর্টিকেলটি যাচাই করার জন্য ${crawledContent.length} টি উৎস পর্যালোচনা করেছি। আমাদের গবেষণায় নিম্নলিখিত উৎসসমূহ অন্তর্ভুক্ত ছিল:
-
-${crawledContent.map((item: any, index: number) => `- ${item.title} (${item.isEnglish ? 'ইংরেজি উৎস' : 'বাংলা উৎস'})`).join('\n')}
-
-**তথ্যের বিশ্লেষণ:**
-তবে দুর্ভাগ্যবশত, AI সিস্টেমে সাময়িক সমস্যার কারণে আমরা এই উৎসসমূহ থেকে প্রাপ্ত তথ্যের বিস্তারিত বিশ্লেষণ করতে পারছি না।
-
-**যুক্তি ও প্রমাণ:**
-বর্তমানে আমরা যে তথ্যগুলি সংগ্রহ করতে পেরেছি, সেগুলি যথেষ্ট নয় এই নিউজ আর্টিকেলের সত্যতা যাচাই করার জন্য।
-
-## সতর্কতা ও সীমাবদ্ধতা
-- AI সিস্টেমে সাময়িক সমস্যা রয়েছে
-- আরও গবেষণার প্রয়োজন
-- এই নিউজ আর্টিকেলটি আরও যাচাই করা প্রয়োজন
-
-## উপসংহার
-এই নিউজ আর্টিকেল সম্পর্কে এখনই কোন সিদ্ধান্তে পৌঁছানো সম্ভব নয়। আমরা পাঠকদের পরামর্শ দিচ্ছি যে তারা এই বিষয়ে আরও তথ্য সংগ্রহ করুন এবং বিশ্বাসযোগ্য উৎস থেকে যাচাই করে নিন।
-
----
-এই রিপোর্টটি Khoj ফ্যাক্ট চেকার দ্বারা তৈরি করা হয়েছে।
-      `
-      : report;
-
-    // Determine verdict from report content (enhanced logic for better accuracy)
-    const getVerdictFromReport = (reportText: string): 'true' | 'false' | 'misleading' | 'unverified' => {
-      const lowerText = reportText.toLowerCase();
-      
-      // Look for explicit verdict statements first
-      if (lowerText.includes('# সিদ্ধান্ত') || lowerText.includes('# verdict')) {
-        const verdictSection = lowerText.split('# সিদ্ধান্ত')[1]?.split('#')[0] || 
-                              lowerText.split('# verdict')[1]?.split('#')[0] || '';
-        
-        // Check for clear verdict indicators in the verdict section
-        if (verdictSection.includes('সত্য') || verdictSection.includes('true') || 
-            verdictSection.includes('সঠিক') || verdictSection.includes('correct') ||
-            verdictSection.includes('প্রমাণিত') || verdictSection.includes('verified')) {
-          return 'true';
-        } else if (verdictSection.includes('মিথ্যা') || verdictSection.includes('false') || 
-                   verdictSection.includes('ভুল') || verdictSection.includes('incorrect') ||
-                   verdictSection.includes('অসত্য') || verdictSection.includes('untrue') ||
-                   verdictSection.includes('প্রমাণিত নয়') || verdictSection.includes('not verified')) {
-          return 'false';
-        } else if (verdictSection.includes('ভ্রান্ত') || verdictSection.includes('misleading') || 
-                   verdictSection.includes('প্ররোচক') || verdictSection.includes('deceptive') ||
-                   verdictSection.includes('অর্ধসত্য') || verdictSection.includes('half-truth') ||
-                   verdictSection.includes('ভুল তথ্য') || verdictSection.includes('false information')) {
-          return 'misleading';
-        }
-      }
-      
-      // Look for conclusion statements
-      if (lowerText.includes('# উপসংহার') || lowerText.includes('# conclusion')) {
-        const conclusionSection = lowerText.split('# উপসংহার')[1]?.split('#')[0] || 
-                                 lowerText.split('# conclusion')[1]?.split('#')[0] || '';
-        
-        if (conclusionSection.includes('সত্য') || conclusionSection.includes('true') || 
-            conclusionSection.includes('সঠিক') || conclusionSection.includes('correct') ||
-            conclusionSection.includes('প্রমাণিত') || conclusionSection.includes('verified')) {
-          return 'true';
-        } else if (conclusionSection.includes('মিথ্যা') || conclusionSection.includes('false') || 
-                   conclusionSection.includes('ভুল') || conclusionSection.includes('incorrect') ||
-                   conclusionSection.includes('অসত্য') || conclusionSection.includes('untrue') ||
-                   conclusionSection.includes('প্রমাণিত নয়') || conclusionSection.includes('not verified')) {
-          return 'false';
-        } else if (conclusionSection.includes('ভ্রান্ত') || conclusionSection.includes('misleading') || 
-                   conclusionSection.includes('প্ররোচক') || conclusionSection.includes('deceptive') ||
-                   conclusionSection.includes('অর্ধসত্য') || conclusionSection.includes('half-truth') ||
-                   conclusionSection.includes('ভুল তথ্য') || conclusionSection.includes('false information')) {
-          return 'misleading';
-        }
-      }
-      
-      // Enhanced analysis of the entire report content
-      const trueIndicators = [
-        'সত্য', 'true', 'সঠিক', 'correct', 'প্রমাণিত', 'verified', 'নিশ্চিত', 'confirmed',
-        'সত্য বলে প্রমাণিত', 'proven true', 'সঠিক তথ্য', 'accurate information'
-      ];
-      
-      const falseIndicators = [
-        'মিথ্যা', 'false', 'ভুল', 'incorrect', 'অসত্য', 'untrue', 'প্রমাণিত নয়', 'not verified',
-        'মিথ্যা বলে প্রমাণিত', 'proven false', 'ভুল তথ্য', 'false information', 'অপ্রমাণিত', 'unproven'
-      ];
-      
-      const misleadingIndicators = [
-        'ভ্রান্ত', 'misleading', 'প্ররোচক', 'deceptive', 'অর্ধসত্য', 'half-truth',
-        'ভুল তথ্য', 'false information', 'প্ররোচনা', 'misinformation', 'অর্ধসত্য', 'partial truth'
-      ];
-      
-      // Count occurrences of each type
-      const trueCount = trueIndicators.reduce((count, indicator) => 
-        count + (lowerText.split(indicator).length - 1), 0);
-      const falseCount = falseIndicators.reduce((count, indicator) => 
-        count + (lowerText.split(indicator).length - 1), 0);
-      const misleadingCount = misleadingIndicators.reduce((count, indicator) => 
-        count + (lowerText.split(indicator).length - 1), 0);
-      
-      console.log(`Verdict analysis: True=${trueCount}, False=${falseCount}, Misleading=${misleadingCount}`);
-      
-      // Determine verdict based on highest count and context
-      if (trueCount > falseCount && trueCount > misleadingCount && trueCount > 0) {
-        return 'true';
-      } else if (falseCount > trueCount && falseCount > misleadingCount && falseCount > 0) {
-        return 'false';
-      } else if (misleadingCount > trueCount && misleadingCount > falseCount && misleadingCount > 0) {
-        return 'misleading';
-      }
-      
-      // Fallback to general text analysis with stricter criteria
-      if (lowerText.includes('সত্য') || lowerText.includes('true') || 
-          lowerText.includes('সঠিক') || lowerText.includes('correct') ||
-          lowerText.includes('প্রমাণিত') || lowerText.includes('verified')) {
-        return 'true';
-      } else if (lowerText.includes('মিথ্যা') || lowerText.includes('false') || 
-                 lowerText.includes('ভুল') || lowerText.includes('incorrect') ||
-                 lowerText.includes('অসত্য') || lowerText.includes('untrue') ||
-                 lowerText.includes('প্রমাণিত নয়') || lowerText.includes('not verified')) {
-        return 'false';
-      } else if (lowerText.includes('ভ্রান্ত') || lowerText.includes('misleading') || 
-                 lowerText.includes('প্ররোচক') || lowerText.includes('deceptive') ||
-                 lowerText.includes('অর্ধসত্য') || lowerText.includes('half-truth') ||
-                 lowerText.includes('ভুল তথ্য') || lowerText.includes('false information')) {
-        return 'misleading';
+      if (!groqApiKey) {
+        console.warn("⚠️ GROQ_API_KEY not configured, using fallback claim extraction");
+        // Fallback to simple extraction
+        optimizedClaim = newsContent.title || newsContent.content.substring(0, 200);
       } else {
-        return 'unverified';
+        const groqClient = new Groq({ apiKey: groqApiKey });
+        
+        // Create a prompt to extract the main fact-checkable claim from the news content
+        const queryParsingPrompt = `You are an intelligent fact-checking assistant. Your task is to analyze the provided news article content and extract the main fact-checkable claim or statement that should be verified.
+
+**Article Title:** ${newsContent.title}
+
+**Article Content (first 2000 characters):**
+${newsContent.content.substring(0, 2000)}
+
+**Instructions:**
+1. Read the entire article carefully and identify the main claim, statement, or assertion that needs to be fact-checked.
+2. Extract the most important fact-checkable claim from the article. This should be:
+   - A specific, verifiable statement (not a general question)
+   - The main claim or assertion made in the article
+   - Clear and concise (ideally 10-50 words, maximum 200 words)
+   - Focused on what can be fact-checked (specific events, statements, claims, not opinions)
+3. If the article title already contains a clear claim, you can use it or refine it.
+4. If the article is about multiple claims, extract the PRIMARY or MOST IMPORTANT claim.
+5. Write the claim in the same language as the article (Bengali or English).
+6. The output MUST be ONLY the claim text, no explanations, no JSON format, just the claim itself.
+
+**Example:**
+- If article title is "প্রধানমন্ত্রী শেখ হাসিনা নতুন প্রকল্প ঘোষণা করেছেন" and the content confirms this, the claim is: "প্রধানমন্ত্রী শেখ হাসিনা নতুন প্রকল্প ঘোষণা করেছেন"
+- If article is about a specific event, extract the main event claim: "২০২৩ সালের বন্যায় সিলেট সম্পূর্ণভাবে ডুবে গিয়েছিল"
+- If article makes a specific allegation, extract that: "মার্কিন প্রেসিডেন্ট জো বাইডেন বলেছেন যে..."
+
+**Output ONLY the claim text (no explanations, no JSON, no markdown):**`;
+
+        const completion = await groqClient.chat.completions.create({
+          model: "openai/gpt-oss-120b",
+          messages: [
+            {
+              role: "user",
+              content: queryParsingPrompt
+            }
+          ],
+          temperature: 0.3, // Lower temperature for more focused extraction
+          max_tokens: 500,
+          top_p: 1
+        });
+
+        const parsedText = completion.choices[0]?.message?.content || '';
+        console.log("📝 GPT-OSS-120B parsed query:", parsedText);
+        
+        // Clean the response - remove markdown, JSON markers, explanations
+        let cleanedClaim = parsedText.trim();
+        
+        // Remove markdown code blocks if present
+        cleanedClaim = cleanedClaim.replace(/```json\s*|\```/g, '').replace(/```\s*|\```/g, '');
+        
+        // Remove JSON wrapper if present
+        cleanedClaim = cleanedClaim.replace(/^{[\s\S]*?"claim"[\s\S]*?:\s*"([^"]+)"[\s\S]*?}$/i, '$1');
+        cleanedClaim = cleanedClaim.replace(/^{[\s\S]*?"query"[\s\S]*?:\s*"([^"]+)"[\s\S]*?}$/i, '$1');
+        cleanedClaim = cleanedClaim.replace(/^{[\s\S]*?"text"[\s\S]*?:\s*"([^"]+)"[\s\S]*?}$/i, '$1');
+        
+        // Remove quotes if wrapped
+        cleanedClaim = cleanedClaim.replace(/^["']|["']$/g, '');
+        
+        // Remove explanations (lines after empty line or after "Claim:" etc.)
+        const lines = cleanedClaim.split('\n');
+        const claimLines: string[] = [];
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          // Stop if we hit explanation markers
+          if (trimmedLine === '' || 
+              trimmedLine.toLowerCase().startsWith('note:') ||
+              trimmedLine.toLowerCase().startsWith('explanation:') ||
+              trimmedLine.toLowerCase().startsWith('reasoning:') ||
+              trimmedLine.toLowerCase().startsWith('context:')) {
+            break;
+          }
+          // Skip JSON structure lines
+          if (!trimmedLine.startsWith('{') && !trimmedLine.startsWith('}') && 
+              !trimmedLine.includes('"type"') && !trimmedLine.includes('"confidence"')) {
+            claimLines.push(trimmedLine);
+          }
+        }
+        
+        cleanedClaim = claimLines.join(' ').trim();
+        
+        // Validate the parsed claim
+        if (cleanedClaim && cleanedClaim.length > 10 && cleanedClaim.length < 500) {
+          optimizedClaim = cleanedClaim;
+          console.log("✅ Successfully parsed optimized claim using GPT-OSS-120B");
+        } else {
+          console.warn("⚠️ Parsed claim validation failed, using fallback");
+          // Fallback to title or first meaningful sentence
+          optimizedClaim = newsContent.title || newsContent.content.split(/[.!?।]/)[0].substring(0, 200);
+        }
       }
-    };
+    } catch (parseError) {
+      console.error("❌ Query parsing failed:", parseError);
+      // Fallback to simple extraction
+      const firstSentence = newsContent.content.split(/[.!?।]/)[0];
+      optimizedClaim = newsContent.title || (firstSentence.length > 20 ? firstSentence.substring(0, 200) : newsContent.content.substring(0, 200));
+    }
     
-    const verdict = getVerdictFromReport(finalReport);
-
-    console.log("News verification v2 completed successfully");
-
+    console.log("📋 Final optimized claim for fact-checking:", optimizedClaim);
+    
+    // Step 3: Redirect to factcheck-detail with the optimized claim
+    console.log("Step 3: Redirecting to factcheck-detail with optimized claim...");
+    
+    // Return redirect response to factcheck-detail with the optimized claim
     return NextResponse.json(
       {
         success: true,
-        verdict: verdict,
-        confidence: 85, // Default confidence
-        claim: newsContent.title,
-        report: finalReport,
-        sources: crawledContent.map((item: any, index: number) => ({
-          id: index + 1,
-          title: item.title,
-          url: item.url,
-          snippet: item.content.substring(0, 200) + '...',
-          language: item.isEnglish ? 'English' : 'Bengali'
-        })),
-        originalUrl: url,
-        scrapedTitle: newsContent.title,
-        scrapedDomain: newsContent.domain,
-        sourceInfo: {
-          hasBengaliSources,
-          hasEnglishSources,
-          totalSources: crawledContent.length
-        },
-        generatedAt: new Date().toISOString()
+        redirect: true,
+        claim: optimizedClaim,
+        extractedFrom: url,
+        newsContent: {
+          title: newsContent.title,
+          url: newsContent.url,
+          domain: newsContent.domain,
+          content: newsContent.content.substring(0, 500) // First 500 chars for reference
+        }
       },
       {
         headers: {

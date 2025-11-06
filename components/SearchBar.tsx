@@ -202,7 +202,7 @@ const SearchBar = memo(function SearchBar({
     }
   };
 
-  const handleImageOptionSelect = async (option: string) => {
+  const handleImageOptionSelect = async (option: string, croppedImageUrl?: string, userMessage?: string) => {
     if (!selectedFile) return;
 
     // For Photocard news verification
@@ -215,7 +215,24 @@ const SearchBar = memo(function SearchBar({
       } catch (e) {}
 
       const formData = new FormData();
-      formData.append("image", selectedFile);
+      
+      // Use cropped image if available, otherwise use original file
+      if (croppedImageUrl) {
+        // Convert cropped image URL to File
+        try {
+          const response = await fetch(croppedImageUrl);
+          const blob = await response.blob();
+          const croppedFile = new File([blob], selectedFile.name, { type: selectedFile.type || "image/jpeg" });
+          formData.append("image", croppedFile);
+          console.log("[SearchBar] Using cropped image for text extraction");
+        } catch (error) {
+          console.error("[SearchBar] Error converting cropped image to file:", error);
+          // Fallback to original file
+          formData.append("image", selectedFile);
+        }
+      } else {
+        formData.append("image", selectedFile);
+      }
 
       try {
         // First, extract text from the image
@@ -249,14 +266,47 @@ const SearchBar = memo(function SearchBar({
           return;
         }
 
-        // Now send the extracted text to news verification page
+        // Step 2: Parse the extracted text using GPT-OSS-120B for optimized fact-checking
+        console.log("[SearchBar] Parsing extracted text using GPT-OSS-120B...");
+        let optimizedClaim = text; // Default to original text
+        
+        try {
+          const parseResponse = await fetch("/api/parse-query", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ 
+              text: text,
+              source: "photocard-verification",
+              userMessage: userMessage?.trim() || undefined // Pass user message if provided
+            }),
+          });
+
+          if (parseResponse.ok) {
+            const parseData = await parseResponse.json();
+            if (parseData.claim && parseData.claim.length > 10) {
+              optimizedClaim = parseData.claim;
+              console.log("[SearchBar] ✅ Optimized claim:", optimizedClaim);
+            } else {
+              console.warn("[SearchBar] ⚠️ Parsed claim validation failed, using original text");
+            }
+          } else {
+            console.warn("[SearchBar] ⚠️ Query parsing failed, using original extracted text");
+          }
+        } catch (parseError) {
+          console.error("[SearchBar] ❌ Query parsing error:", parseError);
+          // Continue with original text if parsing fails
+        }
+
+        // Now send the optimized claim to fact-checking page
         console.log(
-          "[SearchBar] Sending extracted text to news verification page"
+          "[SearchBar] Sending optimized claim to fact-checking page"
         );
         // SOLUTION: Reset before navigation
         resetFileInput();
         // Keep the global loading dialog visible; the target page will clear it when done.
-        window.location.href = `/factcheck-detail?query=${encodeURIComponent(text)}`;
+        window.location.href = `/factcheck-detail?query=${encodeURIComponent(optimizedClaim)}`;
         return;
       } catch (error) {
         console.error("[SearchBar] Error processing image:", error);
@@ -272,30 +322,69 @@ const SearchBar = memo(function SearchBar({
     }
 
     // For other options, maintain existing behavior
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const fileData = {
-        name: selectedFile.name,
-        size: selectedFile.size,
-        type: selectedFile.type,
-        lastModified: selectedFile.lastModified,
-        content: e.target?.result as string, // Base64 content
+    // Use cropped image if available, otherwise use original file
+    const fileToUse = croppedImageUrl 
+      ? (async () => {
+          try {
+            const response = await fetch(croppedImageUrl);
+            const blob = await response.blob();
+            return new File([blob], selectedFile.name, { type: selectedFile.type || "image/jpeg" });
+          } catch (error) {
+            console.error("[SearchBar] Error converting cropped image to file:", error);
+            return selectedFile;
+          }
+        })()
+      : Promise.resolve(selectedFile);
+
+    fileToUse.then((file) => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const fileData = {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          lastModified: file.lastModified,
+          content: e.target?.result as string, // Base64 content
+        };
+        sessionStorage.setItem("selectedImageFile", JSON.stringify(fileData));
+
+        // SOLUTION: Reset before navigation
+        resetFileInput();
+
+        // Redirect based on selection
+        if (option === "AI image detection") {
+          router.push("/image-check");
+        } else if (option === "Image search") {
+          router.push("/image-search");
+        } else {
+          router.push("/image-search");
+        }
       };
-      sessionStorage.setItem("selectedImageFile", JSON.stringify(fileData));
-
-      // SOLUTION: Reset before navigation
-      resetFileInput();
-
-      // Redirect based on selection
-      if (option === "AI image detection") {
-        router.push("/image-check");
-      } else if (option === "Image search") {
-        router.push("/image-search");
-      } else {
-        router.push("/image-search");
-      }
-    };
-    reader.readAsDataURL(selectedFile);
+      reader.readAsDataURL(file);
+    }).catch((error) => {
+      console.error("[SearchBar] Error processing file:", error);
+      // Fallback to original file
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const fileData = {
+          name: selectedFile.name,
+          size: selectedFile.size,
+          type: selectedFile.type,
+          lastModified: selectedFile.lastModified,
+          content: e.target?.result as string,
+        };
+        sessionStorage.setItem("selectedImageFile", JSON.stringify(fileData));
+        resetFileInput();
+        if (option === "AI image detection") {
+          router.push("/image-check");
+        } else if (option === "Image search") {
+          router.push("/image-search");
+        } else {
+          router.push("/image-search");
+        }
+      };
+      reader.readAsDataURL(selectedFile);
+    });
   };
 
   const handleInputChange = useCallback(

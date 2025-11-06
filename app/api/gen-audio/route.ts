@@ -96,34 +96,70 @@ export async function POST(request: Request) {
     // Text-to-Speech v1 synthesize endpoint (MP3) as a reliable fallback.
     if (!mediaUrl || typeof mediaUrl !== "string") {
       try {
-        const fallbackPayload = {
-          input: { text },
-          voice: { languageCode: "bn-BD", name: voiceName },
-          audioConfig: { audioEncoding: "MP3" },
-        };
+        // Try Bengali voice first, fallback to English if not available
+        const voices = [
+          { languageCode: "bn-BD", name: "bn-BD-Wavenet-A" },
+          { languageCode: "bn-BD", name: "bn-BD-Standard-A" },
+          { languageCode: "en-US", name: "en-US-Wavenet-D" },
+        ];
 
-        const resp = await fetch(
-          `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(fallbackPayload),
+        let lastError: string = "";
+        
+        // Try each voice until one works
+        for (const voiceConfig of voices) {
+          try {
+            const fallbackPayload = {
+              input: { text },
+              voice: voiceConfig,
+              audioConfig: { 
+                audioEncoding: "MP3",
+                speakingRate: 1.0,
+                pitch: 0,
+                volumeGainDb: 0
+              },
+            };
+
+            const resp = await fetch(
+              `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(fallbackPayload),
+              }
+            );
+
+            if (resp.ok) {
+              const data = await resp.json();
+              if (data.audioContent) {
+                console.log(`✅ TTS success with voice: ${voiceConfig.name}`);
+                return NextResponse.json({
+                  audioContent: data.audioContent,
+                  contentType: "audio/mpeg",
+                });
+              }
+            } else {
+              const errorText = await resp.text().catch(() => "");
+              const errorData = errorText ? JSON.parse(errorText) : {};
+              lastError = errorData.error?.message || errorText || `HTTP ${resp.status}`;
+              console.warn(`⚠️ Voice ${voiceConfig.name} failed: ${lastError}`);
+              // Continue to next voice
+            }
+          } catch (voiceErr: any) {
+            lastError = voiceErr instanceof Error ? voiceErr.message : String(voiceErr);
+            console.warn(`⚠️ Voice ${voiceConfig.name} error: ${lastError}`);
+            // Continue to next voice
           }
-        );
-
-        if (!resp.ok) {
-          const textErr = await resp.text().catch(() => "");
-          return NextResponse.json(
-            { error: "TTS provider error", details: textErr },
-            { status: resp.status }
-          );
         }
 
-        const data = await resp.json();
-        return NextResponse.json({
-          audioContent: data.audioContent,
-          contentType: "audio/mpeg",
-        });
+        // If all voices failed, return error with details
+        return NextResponse.json(
+          { 
+            error: "TTS provider error", 
+            details: lastError || "All voice options failed",
+            suggestion: "Please check your API key and ensure Text-to-Speech API is enabled"
+          },
+          { status: 500 }
+        );
       } catch (fallbackErr: any) {
         console.error(
           "Fallback TTS error:",
@@ -132,7 +168,10 @@ export async function POST(request: Request) {
             : String(fallbackErr)
         );
         return NextResponse.json(
-          { error: "TTS generation failed" },
+          { 
+            error: "TTS generation failed",
+            details: fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)
+          },
           { status: 500 }
         );
       }

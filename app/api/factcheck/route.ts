@@ -294,6 +294,101 @@ async function generateAIReport(query: string, crawledContent: any[], socialMedi
 }
 
 /**
+ * Calculate relevance score for a search result against the query
+ */
+function calculateRelevanceScore(result: any, query: string): number {
+  const queryLower = query.toLowerCase()
+  const titleLower = (result.title || '').toLowerCase()
+  const contentLower = (result.content || result.snippet || '').toLowerCase()
+  const urlLower = (result.url || '').toLowerCase()
+  
+  let score = 0
+  
+  // Extract meaningful keywords from query (remove common words)
+  const stopWords = ['এবং', 'অথবা', 'কিন্তু', 'যে', 'এই', 'একটি', 'এক', 'হয়', 'থাকে', 'আছে', 'করেছে', 'করেছেন', 'হবে', 'হবে', 'the', 'is', 'are', 'was', 'were', 'a', 'an', 'and', 'or', 'but', 'that', 'this', 'these', 'those']
+  const queryKeywords = queryLower
+    .split(/\s+/)
+    .filter(word => word.length > 2 && !stopWords.includes(word))
+  
+  if (queryKeywords.length === 0) {
+    // If no meaningful keywords, use full query
+    queryKeywords.push(queryLower)
+  }
+  
+  // Title matches get highest weight
+  queryKeywords.forEach(keyword => {
+    if (titleLower.includes(keyword)) {
+      score += 0.3
+    }
+    if (titleLower === queryLower || titleLower.includes(queryLower)) {
+      score += 0.5 // Exact match bonus
+    }
+  })
+  
+  // Content matches
+  queryKeywords.forEach(keyword => {
+    if (contentLower.includes(keyword)) {
+      score += 0.15
+    }
+  })
+  
+  // URL matches (less weight)
+  queryKeywords.forEach(keyword => {
+    if (urlLower.includes(keyword)) {
+      score += 0.05
+    }
+  })
+  
+  // Check for exact phrase match
+  if (contentLower.includes(queryLower) || titleLower.includes(queryLower)) {
+    score += 0.2
+  }
+  
+  // Penalize very short content (likely irrelevant)
+  if (contentLower.length < 50) {
+    score *= 0.5
+  }
+  
+  // Penalize if title and content don't match query at all
+  let hasAnyMatch = false
+  queryKeywords.forEach(keyword => {
+    if (titleLower.includes(keyword) || contentLower.includes(keyword)) {
+      hasAnyMatch = true
+    }
+  })
+  
+  if (!hasAnyMatch && queryKeywords.length > 0) {
+    score *= 0.2 // Heavy penalty for no matches
+  }
+  
+  return Math.min(1, score)
+}
+
+/**
+ * Filter results by relevance threshold
+ */
+function filterByRelevance(results: any[], query: string, minRelevanceScore: number = 0.15): any[] {
+  const scoredResults = results.map(result => ({
+    ...result,
+    relevanceScore: calculateRelevanceScore(result, query)
+  }))
+  
+  // Filter out low-relevance results
+  const relevantResults = scoredResults.filter(result => result.relevanceScore >= minRelevanceScore)
+  
+  // Sort by relevance score (highest first)
+  relevantResults.sort((a, b) => b.relevanceScore - a.relevanceScore)
+  
+  console.log(`📊 Relevance filtering: ${results.length} → ${relevantResults.length} results (min score: ${minRelevanceScore})`)
+  if (results.length > relevantResults.length) {
+    const filteredOut = results.length - relevantResults.length
+    console.log(`❌ Filtered out ${filteredOut} irrelevant results`)
+  }
+  
+  return relevantResults
+}
+
+/**
  * Classify query geography (Bangladesh vs International)
  */
 async function classifyGeography(query: string): Promise<{ type: 'bangladesh' | 'international', confidence: number, reasoning: string }> {
@@ -577,8 +672,19 @@ export async function POST(request: NextRequest) {
     // Step 3: Process results and filter social media (extra safety check)
     const filteredResults = filterSocialMedia(searchResults)
 
-    // Use all available results (already limited to maxResults in searchTieredSources)
-    const crawledContent = filteredResults.map((result: any, index: number) => ({
+    // Step 4: Filter by relevance to remove irrelevant results
+    let relevantResults = filterByRelevance(filteredResults, query, 0.15)
+    
+    // Ensure we have at least minResults after relevance filtering
+    if (relevantResults.length < 10) {
+      console.log(`⚠️ Only ${relevantResults.length} relevant results found, relaxing relevance threshold...`)
+      // Relax threshold to get more results, but still filter out completely irrelevant ones
+      relevantResults = filterByRelevance(filteredResults, query, 0.1)
+      console.log(`✅ Found ${relevantResults.length} results with relaxed threshold`)
+    }
+
+    // Use all available results (already sorted by relevance)
+    const crawledContent = relevantResults.slice(0, 15).map((result: any, index: number) => ({
       title: result.title,
       url: result.url,
       content: result.content || result.snippet || 'Content not available',
