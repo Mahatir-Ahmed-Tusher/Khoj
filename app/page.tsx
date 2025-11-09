@@ -245,6 +245,7 @@ const FeatureWidget = dynamic(() => import("@/components/FeatureWidget"), {
 const AIFactCheckWidget = dynamic(
   () => import("@/components/AIFactCheckWidget"),
   {
+    ssr: false,
     loading: () => (
       <div className="w-80 h-64 bg-gray-100 rounded-lg animate-pulse" />
     ),
@@ -1565,6 +1566,7 @@ export default function HomePage() {
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
                 className="w-full h-full rounded-lg shadow-lg"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
               ></iframe>
             </div>
           </div>
