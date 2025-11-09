@@ -1,19 +1,19 @@
 "use client";
 
+import { LucideDownload, Music } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import Button from "./Button";
 
 interface GenkitAudioPlayerProps {
   text: string;
   filename?: string; // default download filename
   voice?: string;
-  onOptionsClick?: () => void; // Callback for three-dot menu
 }
 
 export default function GenkitAudioPlayer({
   text,
   filename,
   voice,
-  onOptionsClick,
 }: GenkitAudioPlayerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,18 +42,8 @@ export default function GenkitAudioPlayer({
       });
       if (!resp.ok) {
         const data = await resp.json().catch(() => ({}));
-        let errorMsg = data?.error || `TTS request failed (${resp.status})`;
-        
-        // Add more helpful error messages
-        if (data?.details) {
-          errorMsg += `: ${data.details}`;
-        }
-        if (data?.suggestion) {
-          errorMsg += ` - ${data.suggestion}`;
-        }
-        
-        console.error("TTS API Error:", errorMsg, data);
-        setError(errorMsg);
+        const msg = data?.error || `TTS request failed (${resp.status})`;
+        setError(msg);
         setLoading(false);
         return;
       }
@@ -121,73 +111,32 @@ export default function GenkitAudioPlayer({
   };
 
   return (
-    <div className="flex items-center gap-3 sm:gap-4">
-      {/* Hidden audio element */}
+    <div className="flex flex-col gap-4 sm:flex-row">
       <audio
-        className="hidden"
+        className="scale-60 self-start md:scale-100"
         ref={audioElRef}
         src={audioUrl ?? undefined}
         controls
+        // style={{ display: audioUrl ? undefined : "none" }}
       />
 
-      {/* Audio Play Button */}
-      <button
+      <Button
         onClick={handlePlay}
+        label={
+          loading ? "জেনারেট হচ্ছে..." : audioUrl ? "অডিও প্লে" : "অডিও জেনারেট"
+        }
+        color="yellow"
         disabled={loading}
-        className="flex items-center justify-center p-0 hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200 active:scale-95"
-        aria-label={loading ? "Generating audio" : audioUrl ? "Play audio" : "Generate audio"}
-      >
-        {loading ? (
-          <div className="w-7 h-7 sm:w-8 sm:h-8 border-2 border-gray-700 border-t-transparent rounded-full animate-spin"></div>
-        ) : (
-          <img
-            src="/icons/audio-play.png"
-            alt="Play audio"
-            className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
-            style={{ imageRendering: 'crisp-edges' }}
-          />
-        )}
-      </button>
-
-      {/* Audio Download Button */}
-      <button
+        icon={Music}
+      />
+      <Button
+        color="blue"
+        label="অডিও ডাউনলোড"
+        icon={LucideDownload}
         onClick={handleDownload}
-        disabled={!audioBlobRef.current || loading}
-        className="flex items-center justify-center p-0 hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200 active:scale-95"
-        aria-label="Download audio"
-      >
-        <img
-          src="/icons/audio-download.png"
-          alt="Download audio"
-          className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
-          style={{ imageRendering: 'crisp-edges' }}
-        />
-      </button>
+      />
 
-      {/* Three-dot Options Menu */}
-      {onOptionsClick && (
-        <button
-          onClick={onOptionsClick}
-          className="flex items-center justify-center p-0 hover:opacity-80 transition-opacity duration-200 active:scale-95"
-          aria-label="Options menu"
-        >
-          <svg
-            className="w-7 h-7 sm:w-8 sm:h-8 text-gray-700"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="12" cy="5" r="2" />
-            <circle cx="12" cy="12" r="2" />
-            <circle cx="12" cy="19" r="2" />
-          </svg>
-        </button>
-      )}
-
-      {error && (
-        <div className="text-xs text-red-600 max-w-xs truncate" title={error}>
-          {error}
-        </div>
-      )}
+      {error && <div className="text-sm text-red-600">{error}</div>}
     </div>
   );
 }

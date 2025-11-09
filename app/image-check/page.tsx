@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
-import { useLoading } from "@/components/LoadingProvider";
 import Link from "next/link";
+import { getVerdictLabel, normalizeVerdict, VerdictValue } from "@/lib/utils";
 
 interface ImageCheckResult {
   success: boolean;
-  verdict: "true" | "false" | "misleading" | "unverified";
+  verdict: VerdictValue;
   confidence: "high" | "medium" | "low";
   explanation: string;
   aiGeneratedScore: number;
@@ -26,7 +26,7 @@ export default function ImageCheckPage() {
   const [previewUrl, setPreviewUrl] = useState("");
   const [autoCheckStarted, setAutoCheckStarted] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
-  const loadingCtx = useLoading();
+  // Loading provider removed; use local component state for UI feedback
 
   // Auto-load image from sessionStorage and start check
   useEffect(() => {
@@ -88,9 +88,7 @@ export default function ImageCheckPage() {
     setIsLoading(true);
     setError("");
     setResult(null);
-    try {
-      loadingCtx.setLoading(true);
-    } catch (e) {}
+    // global loading removed; local UI state handles feedback
     try {
       const formData = new FormData();
       formData.append("image", file);
@@ -103,7 +101,11 @@ export default function ImageCheckPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setResult(data);
+        const normalizedData: ImageCheckResult = {
+          ...data,
+          verdict: normalizeVerdict(data.verdict),
+        };
+        setResult(normalizedData);
       } else {
         setError(data.error || "ছবি যাচাই করতে সমস্যা হয়েছে");
       }
@@ -111,9 +113,7 @@ export default function ImageCheckPage() {
       setError("নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।");
     } finally {
       setIsLoading(false);
-      try {
-        loadingCtx.setLoading(false);
-      } catch (e) {}
+      // global loading removed; local UI state handles feedback
     }
   };
 
@@ -146,7 +146,11 @@ export default function ImageCheckPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setResult(data);
+        const normalizedData: ImageCheckResult = {
+          ...data,
+          verdict: normalizeVerdict(data.verdict),
+        };
+        setResult(normalizedData);
       } else {
         setError(data.error || "ছবি যাচাই করতে সমস্যা হয়েছে");
       }
@@ -158,30 +162,19 @@ export default function ImageCheckPage() {
   };
 
   const getVerdictColor = (verdict: string) => {
-    switch (verdict) {
+    switch (normalizeVerdict(verdict)) {
       case "true":
-        return "bg-red-50 text-red-700 border-red-200";
-      case "false":
         return "bg-green-50 text-green-700 border-green-200";
-      case "misleading":
+      case "false":
+        return "bg-red-50 text-red-700 border-red-200";
+      case "unverified":
         return "bg-yellow-50 text-yellow-700 border-yellow-200";
       default:
-        return "bg-gray-50 text-gray-700 border-gray-200";
+        return "bg-yellow-50 text-yellow-700 border-yellow-200";
     }
   };
 
-  const getVerdictText = (verdict: string) => {
-    switch (verdict) {
-      case "true":
-        return "AI দ্বারা তৈরি";
-      case "false":
-        return "প্রকৃত ছবি";
-      case "misleading":
-        return "সন্দেহজনক";
-      default:
-        return "অযাচাইকৃত";
-    }
-  };
+  const getVerdictText = (verdict: string) => getVerdictLabel(verdict);
 
   const handleGenerateReport = async () => {
     if (!result || !result.imageUrl) return;

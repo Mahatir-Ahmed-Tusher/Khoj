@@ -18,6 +18,8 @@ import {
 import { parseMarkdown, sanitizeHtml } from "@/lib/markdown";
 import { SearchHistory, Source } from "@/lib/types";
 import { useSearchLimit } from "@/lib/hooks/useSearchLimit";
+import { getVerdictLabel, normalizeVerdict } from "@/lib/utils";
+
 import SearchLimitModal from "@/components/SearchLimitModal";
 import { useVoiceSearch } from "@/lib/hooks/useVoiceSearch";
 import Image from "next/image";
@@ -28,6 +30,7 @@ import ShareModal from "@/components/ShareModal";
 import GenkitAudioPlayer from "@/components/GenkitAudioPlayer";
 import Button from "@/components/Button";
 import Toaster from "@/components/Toaster";
+import Loading from "@/components/Loading";
 
 interface ChatMessage {
   id: string;
@@ -60,6 +63,7 @@ function MythbustingContent() {
   const [isFromUrl, setIsFromUrl] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [tostMessage, setToastMessage] = useState<String | null>(null);
+  const [hasProcessedUrlQuery, setHasProcessedUrlQuery] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
@@ -75,22 +79,13 @@ function MythbustingContent() {
   // Save to Convex database
   const saveToConvex = async (report: SearchHistory) => {
     console.log("[Convex] saveToConvex called with id:", report.id);
-    // setSlugId(report.id)
     try {
-      // Prepare payload in server schema shape
       const payload = {
         id: report.id,
         query: report.query,
         result: report.response,
         timestamp: report.timestamp.getTime(),
-        verdict:
-          (report.verdict as
-            | "true"
-            | "false"
-            | "misleading"
-            | "unverified"
-            | "partially_true"
-            | "context_dependent") || "unverified",
+        verdict: normalizeVerdict(report.verdict),
         sources: (report.sources || []).map((source: Source) => ({
           id: Number(source.id ?? 0),
           title: source.book_title || source.title || "",
@@ -147,8 +142,7 @@ function MythbustingContent() {
                 url: source.url,
               }) as Source
           ),
-          verdict: convexResult.verdict,
-          // Optional fields may not exist on DB record; keep undefined if missing
+          verdict: normalizeVerdict(convexResult.verdict),
           summary: (convexResult as any).summary,
           conclusion: (convexResult as any).conclusion,
           keyTakeaways: (convexResult as any).keyTakeaways,
@@ -186,200 +180,206 @@ function MythbustingContent() {
     }
   };
 
-  const handleSendMessage = useCallback(async () => {
-    if (!inputMessage.trim() || isLoading) return;
+  const performSearch = useCallback(
+    async (query: string, fromUrl: boolean = false) => {
+      if (!query.trim()) return;
 
-    console.log("handleSendMessage called, isFromUrl:", isFromUrl);
+      console.log(
+        "[performSearch] Starting search for:",
+        query,
+        "fromUrl:",
+        fromUrl
+      );
 
-    // First try: check localStorage + Convex by query
-    try {
-      const existingData = await checkExistingData(inputMessage);
-      if (existingData) {
-        console.log(
-          "[Flow] Using existing data (cache/db). Skipping generation."
+      // First try: check localStorage + Convex by query
+      try {
+        const existingData = await checkExistingData(query);
+        if (existingData) {
+          console.log(
+            "[Flow] Using existing data (cache/db). Skipping generation."
+          );
+          const userMessage: ChatMessage = {
+            id: Date.now().toString(),
+            text: query,
+            isUser: true,
+            timestamp: new Date(),
+          };
+          const botMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            text: existingData.response,
+            isUser: false,
+            timestamp: existingData.timestamp,
+            sources: existingData.sources,
+            verdict: existingData.verdict,
+            summary: existingData.summary,
+            conclusion: existingData.conclusion,
+            keyTakeaways: existingData.keyTakeaways,
+            ourSiteArticles: existingData.ourSiteArticles,
+          };
+          setMessages([userMessage, botMessage]);
+          setCurrentReport(existingData);
+          return;
+        }
+      } catch (e) {
+        console.warn(
+          "[Flow] Existing data check failed, proceeding to generate.",
+          e
         );
-        const userMessage: ChatMessage = {
-          id: Date.now().toString(),
-          text: inputMessage,
-          isUser: true,
-          timestamp: new Date(),
-        };
+      }
+
+      if (!fromUrl) {
+        console.log("Manual search - checking permissions");
+        if (!canSearch()) {
+          console.log("Permission denied for manual search");
+          setShowLimitModal(true);
+          return;
+        }
+
+        const searchRecorded = recordSearch(query, "mythbusting");
+        if (!searchRecorded) {
+          console.log("Search recording failed");
+          setShowLimitModal(true);
+          return;
+        }
+      } else {
+        console.log("URL search - bypassing permissions");
+      }
+
+      const userMessage: ChatMessage = {
+        id: Date.now().toString(),
+        text: query,
+        isUser: true,
+        timestamp: new Date(),
+      };
+
+      setMessages([userMessage]);
+      setIsLoading(true);
+
+      try {
+        const response = await fetch("/api/mythbusting", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: query,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
         const botMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
-          text: existingData.response,
+          text: data.detailedAnalysis || data.response,
           isUser: false,
-          timestamp: existingData.timestamp,
-          sources: existingData.sources,
-          verdict: existingData.verdict,
-          summary: existingData.summary,
-          conclusion: existingData.conclusion,
-          keyTakeaways: existingData.keyTakeaways,
-          ourSiteArticles: existingData.ourSiteArticles,
+          timestamp: new Date(),
+          sources: data.evidenceSources
+            ? data.evidenceSources.map((source: any, index: number) => ({
+                id: index + 1,
+                title: source.title || "",
+                book_title: source.title,
+                page: 1,
+                category: "mythbusting",
+                language: "English",
+                snippet: source.snippet || "",
+                content_preview: source.snippet,
+                url: source.url,
+              }))
+            : [],
+          verdict: normalizeVerdict(data.verdict),
+          summary: data.summary,
+          conclusion: data.conclusion,
+          keyTakeaways: data.keyTakeaways,
+          ourSiteArticles: data.ourSiteArticles || [],
         };
+
         setMessages([userMessage, botMessage]);
-        console.log(messages);
-        setCurrentReport(existingData);
-        return;
+
+        const newReport: SearchHistory = {
+          id: Date.now().toString(),
+          query: query,
+          response: data.detailedAnalysis || data.response,
+          timestamp: new Date(),
+          sources: data.evidenceSources
+            ? data.evidenceSources.map((source: any, index: number) => ({
+                id: index + 1,
+                title: source.title || "",
+                book_title: source.title,
+                page: 1,
+                category: "mythbusting",
+                language: "English",
+                snippet: source.snippet || "",
+                content_preview: source.snippet,
+                url: source.url,
+              }))
+            : [],
+          verdict: normalizeVerdict(data.verdict),
+          summary: data.summary,
+          conclusion: data.conclusion,
+          keyTakeaways: data.keyTakeaways,
+          ourSiteArticles: data.ourSiteArticles || [],
+        };
+
+        setCurrentReport(newReport);
+
+        const updatedHistory = [newReport, ...searchHistory].slice(0, 50);
+        setSearchHistory(updatedHistory);
+        saveSearchHistory(updatedHistory);
+
+        await saveToConvex(newReport);
+        console.log(
+          "[Flow] Saved report to localStorage and Convex",
+          newReport
+        );
+        setSlugId(newReport.id);
+      } catch (error) {
+        console.error("Error sending message:", error);
+
+        const errorMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          text: "দুঃখিত, আপনার প্রশ্নের উত্তর দিতে সমস্যা হচ্ছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+          isUser: false,
+          timestamp: new Date(),
+        };
+        setMessages([userMessage, errorMessage]);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (e) {
-      console.warn(
-        "[Flow] Existing data check failed, proceeding to generate.",
-        e
-      );
-    }
+    },
+    [searchHistory, canSearch, recordSearch, convex]
+  );
 
-    if (!isFromUrl) {
-      console.log("Manual search - checking permissions");
-      if (!canSearch()) {
-        console.log("Permission denied for manual search");
-        setShowLimitModal(true);
-        return;
-      }
-
-      const searchRecorded = recordSearch(inputMessage, "mythbusting");
-      if (!searchRecorded) {
-        console.log("Search recording failed");
-        setShowLimitModal(true);
-        return;
-      }
-    } else {
-      console.log("URL search - bypassing permissions");
-    }
-
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      text: inputMessage,
-      isUser: true,
-      timestamp: new Date(),
-    };
-
-    setMessages([userMessage]);
+  const handleSendMessage = useCallback(() => {
+    if (!inputMessage.trim() || isLoading) return;
+    performSearch(inputMessage, isFromUrl);
     setInputMessage("");
-    setIsLoading(true);
-    console.log(messages);
+    setIsFromUrl(false);
+  }, [inputMessage, isLoading, isFromUrl, performSearch]);
 
-    try {
-      const response = await fetch("/api/mythbusting", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: inputMessage,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      const botMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        text: data.detailedAnalysis || data.response,
-        isUser: false,
-        timestamp: new Date(),
-        sources: data.evidenceSources
-          ? data.evidenceSources.map((source: any, index: number) => ({
-              id: index + 1,
-              title: source.title || "",
-              book_title: source.title,
-              page: 1,
-              category: "mythbusting",
-              language: "English",
-              snippet: source.snippet || "",
-              content_preview: source.snippet,
-              url: source.url,
-            }))
-          : [],
-        verdict: data.verdict,
-        summary: data.summary,
-        conclusion: data.conclusion,
-        keyTakeaways: data.keyTakeaways,
-        ourSiteArticles: data.ourSiteArticles || [],
-      };
-
-      setMessages([userMessage, botMessage]);
-      console.log(messages);
-
-      const newReport: SearchHistory = {
-        id: Date.now().toString(),
-        query: inputMessage,
-        response: data.detailedAnalysis || data.response,
-        timestamp: new Date(),
-        sources: data.evidenceSources
-          ? data.evidenceSources.map((source: any, index: number) => ({
-              id: index + 1,
-              title: source.title || "",
-              book_title: source.title,
-              page: 1,
-              category: "mythbusting",
-              language: "English",
-              snippet: source.snippet || "",
-              content_preview: source.snippet,
-              url: source.url,
-            }))
-          : [],
-        verdict: data.verdict,
-        summary: data.summary,
-        conclusion: data.conclusion,
-        keyTakeaways: data.keyTakeaways,
-        ourSiteArticles: data.ourSiteArticles || [],
-      };
-
-      setCurrentReport(newReport);
-
-      const updatedHistory = [newReport, ...searchHistory].slice(0, 50);
-      setSearchHistory(updatedHistory);
-      saveSearchHistory(updatedHistory);
-
-      // Save to Convex as well
-      await saveToConvex(newReport);
-      console.log("[Flow] Saved report to localStorage and Convex", newReport);
-      setSlugId(newReport.id);
-      console.log("slug id:", slugId);
-    } catch (error) {
-      console.error("Error sending message:", error);
-
-      const errorMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        text: "দুঃখিত, আপনার প্রশ্নের উত্তর দিতে সমস্যা হচ্ছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages([userMessage, errorMessage]);
-    } finally {
-      setIsLoading(false);
-      if (isFromUrl) {
-        setIsFromUrl(false);
-      }
-    }
-  }, [
-    inputMessage,
-    isLoading,
-    canSearch,
-    recordSearch,
-    searchHistory,
-    saveSearchHistory,
-  ]); // Removed isFromUrl from dependencies since we handle it separately
-
+  // Initialize client-side state
   useEffect(() => {
     setIsClient(true);
-    setMessages([]);
     loadSearchHistory();
+  }, []);
+
+  // Handle URL query - SINGLE useEffect
+  useEffect(() => {
+    if (!isClient || hasProcessedUrlQuery) return;
 
     const query = searchParams.get("query");
-    console.log("URL query found:", query);
-    if (query) {
-      setInputMessage(query);
-      setIsFromUrl(true);
-      // Directly call handleSendMessage here instead of relying on isFromUrl effect
-      setTimeout(() => {
-        handleSendMessage();
-      }, 100);
-    }
-  }, [searchParams]); // Remove handleSendMessage from deps since we only want this to run on URL changes
+    if (!query?.trim()) return;
+
+    console.log("[URL Query] Processing:", query);
+    setHasProcessedUrlQuery(true);
+    setInputMessage(query);
+
+    // Perform search directly without relying on inputMessage state
+    performSearch(query, true);
+  }, [isClient, searchParams, hasProcessedUrlQuery, performSearch]);
 
   // Listen for voice search results
   useEffect(() => {
@@ -426,10 +426,6 @@ function MythbustingContent() {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -486,7 +482,6 @@ ${messageText}
       report.id
     );
     try {
-      // Try to fetch the freshest version from Convex by id
       const latest = await convex.query(api.factChecks.getByID, {
         id: report.id,
       });
@@ -544,7 +539,6 @@ ${messageText}
     } catch (error) {
       console.warn("[Convex] getByID failed; using local copy.", error);
     }
-    // Fallback to provided local report
     setCurrentReport(report);
     setMessages([
       {
@@ -559,7 +553,7 @@ ${messageText}
         isUser: false,
         timestamp: report.timestamp,
         sources: report.sources,
-        verdict: report.verdict,
+        verdict: normalizeVerdict(report.verdict),
         summary: report.summary,
         ourSiteArticles: report.ourSiteArticles,
       },
@@ -580,40 +574,18 @@ ${messageText}
     setCurrentReport(null);
   };
 
-  const getVerdictText = (verdict?: string) => {
-    switch (verdict) {
-      case "true":
-        return "সত্য";
-      case "false":
-        return "মিথ্যা";
-      case "misleading":
-        return "ভ্রান্তিমূলক";
-      case "partially_true":
-        return "আংশিক সত্য";
-      case "context_dependent":
-        return "প্রসঙ্গনির্ভর";
-      default:
-        return "অযাচাইকৃত";
-    }
-  };
+  const getVerdictText = (verdict?: string) => getVerdictLabel(verdict);
 
   const getVerdictColor = (verdict?: string) => {
-    switch (verdict) {
+    switch (normalizeVerdict(verdict)) {
       case "true":
         return "bg-green-100 text-green-800";
       case "false":
         return "bg-red-100 text-red-800";
-      case "misleading":
-        return "bg-yellow-100 text-yellow-800";
-      case "partially_true":
-        return "bg-blue-100 text-blue-800";
-      case "context_dependent":
-        return "bg-purple-100 text-purple-800";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-yellow-100 text-yellow-800";
     }
   };
-  console.log(messages);
 
   return (
     <div className="min-h-screen text-justify bg-gray-50">
@@ -886,20 +858,89 @@ ${messageText}
                                         />
                                       </div>
                                     </div>
-                                    <GenkitAudioPlayer
-                                      text={sanitizeHtml(
-                                        parseMarkdown(message.text)
-                                      )}
-                                      filename={`news-report-${new Date().toISOString().split("T")[0]}.mp3`}
-                                    />
                                   </div>
                                 </div>
                               </div>
 
                               {/* Report Content */}
                               <div className="p-6">
-                                {message.summary && (
+                                {currentReport && (
                                   <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                    <h4 className="text-sm font-semibold text-blue-900 mb-3 font-tiro-bangলা flex items-center space-x-2">
+                                      <span>📊</span>
+                                      <span>রিপোর্ট মেটাডাটা</span>
+                                    </h4>
+                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                      <div>
+                                        <p className="text-blue-700 font-medium font-tiro-বাংলা">
+                                          প্রশ্ন:
+                                        </p>
+                                        <p className="text-blue-900 font-tiro-বাংলা">
+                                          {currentReport.query}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-blue-700 font-medium font-tiro-বাংলা">
+                                          ফলাফল:
+                                        </p>
+                                        <p className="text-blue-900 font-tiro-বাংলা">
+                                          {currentReport.verdict
+                                            ? getVerdictText(currentReport.verdict)
+                                            : "অযাচাইকৃত"}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-blue-700 font-medium font-tiro-বাংলা">
+                                          তৈরির তারিখ:
+                                        </p>
+                                        <p
+                                          className="text-blue-900 font-tiro-বাংলা"
+                                          suppressHydrationWarning
+                                        >
+                                          {typeof window !== "undefined"
+                                            ? currentReport.timestamp.toLocaleString(
+                                                "bn-BD"
+                                              )
+                                            : currentReport.timestamp.toISOString()}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-blue-700 font-medium font-tiro-বাংলা">
+                                          উৎস সংখ্যা:
+                                        </p>
+                                        <p className="text-blue-900 font-tiro-বাংলা">
+                                          {currentReport.sources?.length || 0}টি
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-blue-700 font-medium font-tiro-বাংলা">
+                                          মূল বার্তা:
+                                        </p>
+                                        <p className="text-blue-900 font-tiro-বাংলা">
+                                          {currentReport.keyTakeaways?.length || 0}
+                                          টি
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-blue-700 font-medium font-tiro-বাংলা">
+                                          চূড়ান্ত সিদ্ধান্ত:
+                                        </p>
+                                        <p className="text-blue-900 font-tiro-বাংলা">
+                                          {currentReport.conclusion ? "হ্যাঁ" : "না"}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <GenkitAudioPlayer
+                                  text={sanitizeHtml(
+                                    parseMarkdown(message.text)
+                                  )}
+                                  filename={`news-report-${new Date().toISOString().split("T")[0]}.mp3`}
+                                />
+                                {message.summary && (
+                                  <div className="m-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                                     <p className="text-blue-800 font-tiro-bangla leading-relaxed">
                                       {message.summary}
                                     </p>
@@ -962,81 +1003,6 @@ ${messageText}
                                       </ul>
                                     </div>
                                   )}
-
-                                {/* Article Metadata Widget */}
-                                {currentReport && (
-                                  <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                    <h4 className="text-sm font-semibold text-blue-900 mb-3 font-tiro-bangla flex items-center space-x-2">
-                                      <span>📊</span>
-                                      <span>রিপোর্ট মেটাডাটা</span>
-                                    </h4>
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
-                                      <div>
-                                        <p className="text-blue-700 font-medium font-tiro-bangla">
-                                          প্রশ্ন:
-                                        </p>
-                                        <p className="text-blue-900 font-tiro-bangla">
-                                          {currentReport.query}
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <p className="text-blue-700 font-medium font-tiro-bangla">
-                                          ফলাফল:
-                                        </p>
-                                        <p className="text-blue-900 font-tiro-bangla">
-                                          {currentReport.verdict
-                                            ? getVerdictText(
-                                                currentReport.verdict
-                                              )
-                                            : "অযাচাইকৃত"}
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <p className="text-blue-700 font-medium font-tiro-bangla">
-                                          তৈরির তারিখ:
-                                        </p>
-                                        <p
-                                          className="text-blue-900 font-tiro-bangla"
-                                          suppressHydrationWarning
-                                        >
-                                          {typeof window !== "undefined"
-                                            ? currentReport.timestamp.toLocaleString(
-                                                "bn-BD"
-                                              )
-                                            : currentReport.timestamp.toISOString()}
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <p className="text-blue-700 font-medium font-tiro-bangla">
-                                          উৎস সংখ্যা:
-                                        </p>
-                                        <p className="text-blue-900 font-tiro-bangla">
-                                          {currentReport.sources?.length || 0}টি
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <p className="text-blue-700 font-medium font-tiro-bangla">
-                                          মূল বার্তা:
-                                        </p>
-                                        <p className="text-blue-900 font-tiro-bangla">
-                                          {currentReport.keyTakeaways?.length ||
-                                            0}
-                                          টি
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <p className="text-blue-700 font-medium font-tiro-bangla">
-                                          চূড়ান্ত সিদ্ধান্ত:
-                                        </p>
-                                        <p className="text-blue-900 font-tiro-bangla">
-                                          {currentReport.conclusion
-                                            ? "হ্যাঁ"
-                                            : "না"}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
 
                                 {/* Sources Section */}
                                 {message.sources &&
@@ -1137,19 +1103,7 @@ ${messageText}
                       ))
                     )}
 
-                    {isLoading && (
-                      <div className="flex justify-center items-center py-12">
-                        <div className="text-center">
-                          <Loader2 className="h-8 w-8 animate-spin text-gray-600 mx-auto mb-4" />
-                          <p className="text-lg text-gray-600 font-tiro-bangla">
-                            প্রতিবেদন তৈরি হচ্ছে...
-                          </p>
-                          <p className="text-sm text-gray-500 font-tiro-bangla mt-2">
-                            অনুগ্রহ করে অপেক্ষা করুন
-                          </p>
-                        </div>
-                      </div>
-                    )}
+                    {isLoading && <Loading />}
 
                     <div ref={messagesEndRef} />
                   </>

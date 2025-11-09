@@ -1,32 +1,33 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { useParams } from 'next/navigation'
-import Footer from '@/components/Footer'
-import ShareButtons from '@/components/ShareButtons'
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useParams } from "next/navigation";
+import Footer from "@/components/Footer";
+import ShareButtons from "@/components/ShareButtons";
 
 interface BlogPost {
-  id: string
-  title: string
-  author: string
-  thumbnail: string
-  excerpt: string
-  content: string
-  tags: string[]
-  publishDate: string
-  readTime: string
-  slug: string
+  id: string;
+  title: string;
+  author: string;
+  thumbnail: string;
+  excerpt: string;
+  content: string;
+  tags: string[];
+  publishDate: string;
+  readTime: string;
+  slug: string;
 }
 
 const blogPosts: BlogPost[] = [
   {
-    id: '6',
-    title: 'কী কী আছে এই খোঁজ-এ?',
-    author: 'সাগর চন্দ্র দে',
-    thumbnail: 'https://i.postimg.cc/TwF5YmsF/Khoj-features.png',
-    excerpt: 'আজকের এই প্রযুক্তির যুগে চারপাশে তথ্যের অবিরাম স্রোত। কিন্তু সেই স্রোতের ভেতরে আসল তথ্য আর মিথ্যা আলাদা করা কি এত সহজ? ফেসবুকের নিউজফিড, হোয়াটসঅ্যাপ-টেলিগ্রামের গ্রুপ চ্যাট কিংবা বিভিন্ন নিউজ অ্যাপ—সবখানেই ভেসে বেড়ায় মিথ্যা খবর, গুজব আর অর্ধসত্য।',
+    id: "6",
+    title: "কী কী আছে এই খোঁজ-এ?",
+    author: "সাগর চন্দ্র দে",
+    thumbnail: "https://i.postimg.cc/TwF5YmsF/Khoj-features.png",
+    excerpt:
+      "আজকের এই প্রযুক্তির যুগে চারপাশে তথ্যের অবিরাম স্রোত। কিন্তু সেই স্রোতের ভেতরে আসল তথ্য আর অসত্য আলাদা করা কি এত সহজ? ফেসবুকের নিউজফিড, হোয়াটসঅ্যাপ-টেলিগ্রামের গ্রুপ চ্যাট কিংবা বিভিন্ন নিউজ অ্যাপ—সবখানেই ভেসে বেড়ায় অসত্য খবর, গুজব আর অর্ধসত্য।",
     content: `
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <p style="margin: 0 0 10px 0;"><strong>লেখক:</strong> সাগর চন্দ্র দে</p>
@@ -43,11 +44,11 @@ const blogPosts: BlogPost[] = [
       </div>
 
       <p style="margin-bottom: 20px; line-height: 1.8; font-size: 18px; font-weight: 500;">
-        আজকের এই প্রযুক্তির যুগে চারপাশে তথ্যের অবিরাম স্রোত। কিন্তু সেই স্রোতের ভেতরে আসল তথ্য আর মিথ্যা আলাদা করা কি এত সহজ?
+        আজকের এই প্রযুক্তির যুগে চারপাশে তথ্যের অবিরাম স্রোত। কিন্তু সেই স্রোতের ভেতরে আসল তথ্য আর অসত্য আলাদা করা কি এত সহজ?
       </p>
 
       <p style="margin-bottom: 20px; line-height: 1.8;">
-        ফেসবুকের নিউজফিড, হোয়াটসঅ্যাপ-টেলিগ্রামের গ্রুপ চ্যাট কিংবা বিভিন্ন নিউজ অ্যাপ—সবখানেই ভেসে বেড়ায় মিথ্যা খবর, গুজব আর অর্ধসত্য।
+        ফেসবুকের নিউজফিড, হোয়াটসঅ্যাপ-টেলিগ্রামের গ্রুপ চ্যাট কিংবা বিভিন্ন নিউজ অ্যাপ—সবখানেই ভেসে বেড়ায় অসত্য খবর, গুজব আর অর্ধসত্য।
       </p>
 
       <p style="margin-bottom: 20px; line-height: 1.8;">
@@ -156,7 +157,7 @@ const blogPosts: BlogPost[] = [
       </ul>
 
       <p style="margin-bottom: 20px; line-height: 1.8;">
-        খোঁজ শুধু একটি প্ল্যাটফর্ম নয়, এটা বাংলা ভাষায় ডিজিটাল সাক্ষরতা বাড়ানো এবং মিথ্যা তথ্য শনাক্ত করার এক নতুন অধ্যায়। এর হাইব্রিড পাইপলাইন—এআই-চালিত অনুসন্ধান, উৎসের বাছাই এবং তথ্যের সারাংশ—প্রমাণ করে যে সত্য যাচাই করা হতে পারে আরও দ্রুত, আরও সহজ।
+        খোঁজ শুধু একটি প্ল্যাটফর্ম নয়, এটা বাংলা ভাষায় ডিজিটাল সাক্ষরতা বাড়ানো এবং অসত্য তথ্য শনাক্ত করার এক নতুন অধ্যায়। এর হাইব্রিড পাইপলাইন—এআই-চালিত অনুসন্ধান, উৎসের বাছাই এবং তথ্যের সারাংশ—প্রমাণ করে যে সত্য যাচাই করা হতে পারে আরও দ্রুত, আরও সহজ।
       </p>
 
       <p style="margin-bottom: 30px; line-height: 1.8;">
@@ -169,17 +170,18 @@ const blogPosts: BlogPost[] = [
         <li style="margin-bottom: 8px; line-height: 1.6;"><a href="https://bigganblog.org/2025/09/khoj-first-bengali-ai-factchecker/" style="color: #3498db; text-decoration: none;">তুষার. আ. (2025, September 16). খোঁজ, বাংলা ভাষার প্রথম এআই-চালিত ফ্যাক্টচেকারের অভিনব যাত্রা - বিজ্ঞান ব্লগ. বিজ্ঞান ব্লগ. https://bigganblog.org/2025/09/khoj-first-bengali-ai-factchecker/</a></li>
       </ol>
     `,
-    tags: ['খোঁজ', 'এআই', 'ফ্যাক্টচেকিং', 'মিথবাস্টিং', 'মুক্তিযুদ্ধ কর্নার'],
-    publishDate: '২৭ সেপ্টেম্বর, ২০২৫',
-    readTime: '১০ মিনিট',
-    slug: 'khoj-features-overview'
+    tags: ["খোঁজ", "এআই", "ফ্যাক্টচেকিং", "মিথবাস্টিং", "মুক্তিযুদ্ধ কর্নার"],
+    publishDate: "২৭ সেপ্টেম্বর, ২০২৫",
+    readTime: "১০ মিনিট",
+    slug: "khoj-features-overview",
   },
   {
-    id: '5',
-    title: 'অপবিজ্ঞানের যতো বই',
-    author: 'মাহাথির আহমেদ তুষার',
-    thumbnail: 'https://i.postimg.cc/kGM8vQvt/image.png',
-    excerpt: 'চলুন আজকে সিউডোসায়েন্স প্রচার করা কিছু বইয়ের সাথে আপনাদের পরিচয় করাই, যেগুলিতে বাংলা ভাষাভাষীদের মধ্যে প্রচলিত অনেক অপবিজ্ঞানের উৎস রয়েছে৷ অপবিজ্ঞানের উৎস সন্ধান করতে এ প্রবন্ধে আমরা বেছে নিয়েছি কিছু বইকে।',
+    id: "5",
+    title: "অপবিজ্ঞানের যতো বই",
+    author: "মাহাথির আহমেদ তুষার",
+    thumbnail: "https://i.postimg.cc/kGM8vQvt/image.png",
+    excerpt:
+      "চলুন আজকে সিউডোসায়েন্স প্রচার করা কিছু বইয়ের সাথে আপনাদের পরিচয় করাই, যেগুলিতে বাংলা ভাষাভাষীদের মধ্যে প্রচলিত অনেক অপবিজ্ঞানের উৎস রয়েছে৷ অপবিজ্ঞানের উৎস সন্ধান করতে এ প্রবন্ধে আমরা বেছে নিয়েছি কিছু বইকে।",
     content: `
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <p style="margin: 0 0 10px 0;"><strong>লেখক:</strong> মাহাথির আহমেদ তুষার</p>
@@ -358,17 +360,18 @@ const blogPosts: BlogPost[] = [
         </li>
       </ul>
     `,
-    tags: ['অপবিজ্ঞান', 'সিউডোসায়েন্স', 'বিজ্ঞান', 'বই রিভিউ', 'মিথবাস্টিং'],
-    publishDate: '২ ফেব্রুয়ারি, ২০২৫',
-    readTime: '১৫ মিনিট',
-    slug: 'pseudoscience-books-review'
+    tags: ["অপবিজ্ঞান", "সিউডোসায়েন্স", "বিজ্ঞান", "বই রিভিউ", "মিথবাস্টিং"],
+    publishDate: "২ ফেব্রুয়ারি, ২০২৫",
+    readTime: "১৫ মিনিট",
+    slug: "pseudoscience-books-review",
   },
   {
-    id: '1',
-    title: 'সামাজিক মাধ্যমের ভুয়া খবর: চিহ্নিতকরণের কৌশল',
-    author: 'ড. মাজেদুল ইসলাম',
-    thumbnail: 'https://i.postimg.cc/3xZHG36b/image.png',
-    excerpt: 'ইন্টারনেটে গুজব বা মিথ্যা তথ্য একেবারেই নতুন কিছু নয়। আগে থেকেই এগুলো ছিল, তবে আজকের ডিজিটাল বিস্তার সেগুলোকে আরও দ্রুত ও ব্যাপক করে তুলেছে। এই লেখার উদ্দেশ্য হলো—গুরুত্বপূর্ণ বা সিরিয়াস কনটেন্টের আড়ালে লুকানো বিভ্রান্তিকর তথ্য কীভাবে ধরা যায়, সে বিষয়ে কিছু কার্যকরী কৌশল তুলে ধরা।',
+    id: "1",
+    title: "সামাজিক মাধ্যমের ভুয়া খবর: চিহ্নিতকরণের কৌশল",
+    author: "ড. মাজেদুল ইসলাম",
+    thumbnail: "https://i.postimg.cc/3xZHG36b/image.png",
+    excerpt:
+      "ইন্টারনেটে গুজব বা অসত্য তথ্য একেবারেই নতুন কিছু নয়। আগে থেকেই এগুলো ছিল, তবে আজকের ডিজিটাল বিস্তার সেগুলোকে আরও দ্রুত ও ব্যাপক করে তুলেছে। এই লেখার উদ্দেশ্য হলো—গুরুত্বপূর্ণ বা সিরিয়াস কনটেন্টের আড়ালে লুকানো বিভ্রান্তিকর তথ্য কীভাবে ধরা যায়, সে বিষয়ে কিছু কার্যকরী কৌশল তুলে ধরা।",
     content: `
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <p style="margin: 0 0 10px 0;"><strong>লেখক:</strong> ড. মাজেদুল ইসলাম</p>
@@ -384,7 +387,7 @@ const blogPosts: BlogPost[] = [
       </div>
 
       <p style="margin-bottom: 20px; line-height: 1.8; font-size: 18px; font-weight: 500;">
-        ইন্টারনেটে গুজব বা মিথ্যা তথ্য একেবারেই নতুন কিছু নয়। আগে থেকেই এগুলো ছিল, তবে আজকের ডিজিটাল বিস্তার সেগুলোকে আরও দ্রুত ও ব্যাপক করে তুলেছে। বর্তমানে ফেসবুক, টুইটার বা ওয়েবসাইটের অসীম পৌঁছনোর কারণে এসব ভুয়া খবর মানুষের কাছে চোখের পলকে পৌঁছে যাচ্ছে। বাংলাদেশের সাম্প্রতিক আন্দোলন-সংকট থেকে শুরু করে পৃথিবীর নানা প্রান্তে এর প্রমাণ মিলছে।
+        ইন্টারনেটে গুজব বা অসত্য তথ্য একেবারেই নতুন কিছু নয়। আগে থেকেই এগুলো ছিল, তবে আজকের ডিজিটাল বিস্তার সেগুলোকে আরও দ্রুত ও ব্যাপক করে তুলেছে। বর্তমানে ফেসবুক, টুইটার বা ওয়েবসাইটের অসীম পৌঁছনোর কারণে এসব ভুয়া খবর মানুষের কাছে চোখের পলকে পৌঁছে যাচ্ছে। বাংলাদেশের সাম্প্রতিক আন্দোলন-সংকট থেকে শুরু করে পৃথিবীর নানা প্রান্তে এর প্রমাণ মিলছে।
       </p>
       
       <p style="margin-bottom: 30px; line-height: 1.8;">
@@ -394,7 +397,7 @@ const blogPosts: BlogPost[] = [
       <h2 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">বিশ্বাসযোগ্য মাধ্যমের ওপর আস্থা রাখুন</h2>
       
       <p style="margin-bottom: 20px; line-height: 1.8;">
-        যদি নির্ভরযোগ্য উৎসের সঙ্গে আপনার সংযোগ থাকে, তবে মিথ্যা খবর এড়িয়ে চলা অনেক সহজ। নতুন কোনো তথ্য সামনে এলে প্রথমেই দেখে নিন সেটা খ্যাতনামা সংবাদমাধ্যমে প্রকাশিত হয়েছে কিনা। বড় বড় সংবাদ সংস্থার ফ্যাক্ট-চেকিং ব্যবস্থা তুলনামূলকভাবে কঠিন এবং তাদের সম্পাদকীয় ছাঁকনিও শক্তিশালী। প্রতিষ্ঠিত ব্র্যান্ডের জন্য বিভ্রান্তিকর তথ্য ছাপানো তাদের সুনামের জন্য ভয়াবহ হতে পারে, তাই সেখানে একেবারে বানানো খবর প্রকাশিত হওয়ার সম্ভাবনা নেই বললেই চলে।
+        যদি নির্ভরযোগ্য উৎসের সঙ্গে আপনার সংযোগ থাকে, তবে অসত্য খবর এড়িয়ে চলা অনেক সহজ। নতুন কোনো তথ্য সামনে এলে প্রথমেই দেখে নিন সেটা খ্যাতনামা সংবাদমাধ্যমে প্রকাশিত হয়েছে কিনা। বড় বড় সংবাদ সংস্থার ফ্যাক্ট-চেকিং ব্যবস্থা তুলনামূলকভাবে কঠিন এবং তাদের সম্পাদকীয় ছাঁকনিও শক্তিশালী। প্রতিষ্ঠিত ব্র্যান্ডের জন্য বিভ্রান্তিকর তথ্য ছাপানো তাদের সুনামের জন্য ভয়াবহ হতে পারে, তাই সেখানে একেবারে বানানো খবর প্রকাশিত হওয়ার সম্ভাবনা নেই বললেই চলে।
       </p>
       
       <p style="margin-bottom: 30px; line-height: 1.8;">
@@ -404,7 +407,7 @@ const blogPosts: BlogPost[] = [
       <h2 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">প্রতারণামূলক কনটেন্ট চিনে নিন</h2>
       
       <p style="margin-bottom: 20px; line-height: 1.8;">
-        মিথ্যা সংবাদের এক অন্ধকার দিক হলো—ভুয়া ওয়েবসাইট ও ফেক অ্যাকাউন্ট। এসব উৎস আসল প্রতিষ্ঠানের ছদ্মবেশ ধারণ করে। প্রায়ই নামকরা সংবাদমাধ্যমের নাম নকল করে, খুব কাছাকাছি বানানের ওয়েব ঠিকানা ব্যবহার করে বিভ্রান্তিকর খবর ছড়ানো হয়।
+        অসত্য সংবাদের এক অন্ধকার দিক হলো—ভুয়া ওয়েবসাইট ও ফেক অ্যাকাউন্ট। এসব উৎস আসল প্রতিষ্ঠানের ছদ্মবেশ ধারণ করে। প্রায়ই নামকরা সংবাদমাধ্যমের নাম নকল করে, খুব কাছাকাছি বানানের ওয়েব ঠিকানা ব্যবহার করে বিভ্রান্তিকর খবর ছড়ানো হয়।
       </p>
       
       <p style="margin-bottom: 30px; line-height: 1.8;">
@@ -441,17 +444,19 @@ const blogPosts: BlogPost[] = [
         এ ছাড়া অনলাইনে বিভিন্ন ডিপফেক শনাক্তকারী টুলসও পাওয়া যায়। তবুও নিজের সচেতন দৃষ্টি ও নির্ভরযোগ্য তথ্যসূত্রের প্রতি আস্থা রাখার বিকল্প নেই।
       </p>
     `,
-    tags: ['ফ্যাক্টচেকিং', 'ডিজিটাল সাক্ষরতা', 'ভুয়া খবর', 'সামাজিক মাধ্যম'],
-    publishDate: '১০ ডিসেম্বর, ২০২৪',
-    readTime: '৭ মিনিট',
-    slug: 'social-media-fake-news-identification'
+    tags: ["ফ্যাক্টচেকিং", "ডিজিটাল সাক্ষরতা", "ভুয়া খবর", "সামাজিক মাধ্যম"],
+    publishDate: "১০ ডিসেম্বর, ২০২৪",
+    readTime: "৭ মিনিট",
+    slug: "social-media-fake-news-identification",
   },
   {
-    id: '2',
-    title: 'বাংলা ভাষায় প্রথম পূর্ণাঙ্গ এআই-ভিত্তিক ফ্যাক্টচেকিং প্ল্যাটফর্ম হিসেবে "খোঁজ" – একটি বিস্তারিত যাচাই',
-    author: 'খোঁজ টিম (মাহাথির আহমেদ তুষার, সাগর চন্দ্র দে, তানিয়া চৈতি)',
-    thumbnail: 'https://i.postimg.cc/jd1mpLff/Khoj-banner.png',
-    excerpt: 'খোঁজ টিম হিসেবে আমরা বাংলাদেশের ডিজিটাল ল্যান্ডস্কেপে মিথ্যা তথ্যের বিরুদ্ধে লড়াই করার জন্য প্রতিশ্রুতিবদ্ধ। বাংলা ভাষায় কনটেন্টের দ্রুত বৃদ্ধির সাথে সাথে, মিসইনফরমেশনও বাড়ছে – বিশেষ করে সোশ্যাল মিডিয়া, নিউজ পোর্টাল এবং ভাইরাল পোস্টগুলোতে।',
+    id: "2",
+    title:
+      'বাংলা ভাষায় প্রথম পূর্ণাঙ্গ এআই-ভিত্তিক ফ্যাক্টচেকিং প্ল্যাটফর্ম হিসেবে "খোঁজ" – একটি বিস্তারিত যাচাই',
+    author: "খোঁজ টিম (মাহাথির আহমেদ তুষার, সাগর চন্দ্র দে, তানিয়া চৈতি)",
+    thumbnail: "https://i.postimg.cc/jd1mpLff/Khoj-banner.png",
+    excerpt:
+      "খোঁজ টিম হিসেবে আমরা বাংলাদেশের ডিজিটাল ল্যান্ডস্কেপে অসত্য তথ্যের বিরুদ্ধে লড়াই করার জন্য প্রতিশ্রুতিবদ্ধ। বাংলা ভাষায় কনটেন্টের দ্রুত বৃদ্ধির সাথে সাথে, মিসইনফরমেশনও বাড়ছে – বিশেষ করে সোশ্যাল মিডিয়া, নিউজ পোর্টাল এবং ভাইরাল পোস্টগুলোতে।",
     content: `
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <p style="margin: 0 0 10px 0;"><strong>লেখক:</strong> খোঁজ টিম (মাহাথির আহমেদ তুষার, সাগর চন্দ্র দে, তানিয়া চৈতি)</p>
@@ -463,11 +468,11 @@ const blogPosts: BlogPost[] = [
         <span style="background-color: #e3f2fd; color: #1976d2; padding: 6px 12px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; display: inline-block;">এআই</span>
         <span style="background-color: #e8f5e8; color: #2e7d32; padding: 6px 12px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; display: inline-block;">ফ্যাক্টচেকিং</span>
         <span style="background-color: #fff3e0; color: #f57c00; padding: 6px 12px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; display: inline-block;">বাংলা ভাষা</span>
-        <span style="background-color: #fce4ec; color: #c2185b; padding: 6px 12px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; display: inline-block;">মিথ্যা তথ্য প্রতিরোধ</span>
+        <span style="background-color: #fce4ec; color: #c2185b; padding: 6px 12px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; display: inline-block;">অসত্য তথ্য প্রতিরোধ</span>
         <span style="background-color: #f3e5f5; color: #7b1fa2; padding: 6px 12px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; display: inline-block;">ওপেন সোর্স</span>
       </div>
 
-      <p style="margin-bottom: 20px; line-height: 1.8;">খোঁজ টিম হিসেবে আমরা বাংলাদেশের ডিজিটাল ল্যান্ডস্কেপে মিথ্যা তথ্যের বিরুদ্ধে লড়াই করার জন্য প্রতিশ্রুতিবদ্ধ। বাংলা ভাষায় কনটেন্টের দ্রুত বৃদ্ধির সাথে সাথে, মিসইনফরমেশনও বাড়ছে – বিশেষ করে সোশ্যাল মিডিয়া, নিউজ পোর্টাল এবং ভাইরাল পোস্টগুলোতে। আমাদের দাবি: "খোঁজ" হলো বাংলা ভাষায় প্রথম পূর্ণাঙ্গ কৃত্রিম বুদ্ধিমত্তা (এআই)-ভিত্তিক ফ্যাক্টচেকিং প্ল্যাটফর্ম। এই আর্টিকেলে আমরা এই দাবিকে বিস্তারিতভাবে যাচাই করব, প্রমাণ উপস্থাপন করব এবং দেখাব কেন আমরা এটিকে বানিয়েছি। আমরা বিভিন্ন সোর্স থেকে অনুসন্ধান চালিয়েছি, যা থেকে স্পষ্ট হয় যে বাংলা ভাষায় এমন কোনো সম্পূর্ণ এআই-চালিত প্ল্যাটফর্ম আগে ছিল না। এই যাচাইয়ের ভিত্তিতে আমরা ভার্ডিক্ট দিচ্ছি: সত্য (True)।</p>
+      <p style="margin-bottom: 20px; line-height: 1.8;">খোঁজ টিম হিসেবে আমরা বাংলাদেশের ডিজিটাল ল্যান্ডস্কেপে অসত্য তথ্যের বিরুদ্ধে লড়াই করার জন্য প্রতিশ্রুতিবদ্ধ। বাংলা ভাষায় কনটেন্টের দ্রুত বৃদ্ধির সাথে সাথে, মিসইনফরমেশনও বাড়ছে – বিশেষ করে সোশ্যাল মিডিয়া, নিউজ পোর্টাল এবং ভাইরাল পোস্টগুলোতে। আমাদের দাবি: "খোঁজ" হলো বাংলা ভাষায় প্রথম পূর্ণাঙ্গ কৃত্রিম বুদ্ধিমত্তা (এআই)-ভিত্তিক ফ্যাক্টচেকিং প্ল্যাটফর্ম। এই আর্টিকেলে আমরা এই দাবিকে বিস্তারিতভাবে যাচাই করব, প্রমাণ উপস্থাপন করব এবং দেখাব কেন আমরা এটিকে বানিয়েছি। আমরা বিভিন্ন সোর্স থেকে অনুসন্ধান চালিয়েছি, যা থেকে স্পষ্ট হয় যে বাংলা ভাষায় এমন কোনো সম্পূর্ণ এআই-চালিত প্ল্যাটফর্ম আগে ছিল না। এই যাচাইয়ের ভিত্তিতে আমরা ভার্ডিক্ট দিচ্ছি: সত্য (True)।</p>
 
       <p style="margin-bottom: 30px; line-height: 1.8;">এই আর্টিকেলে আমরা বাংলা ভাষার চ্যালেঞ্জগুলো, বিদ্যমান ফ্যাক্টচেকিং ইনিশিয়েটিভসের সীমাবদ্ধতা, খোঁজের অনন্য ফিচারস এবং প্রমাণসমূহ উপস্থাপন করব। সব প্রমাণ বিশ্বাসযোগ্য সোর্স থেকে নেওয়া, এবং রেফারেন্সগুলো [১], [২] ফরম্যাটে নীচে তালিকাভুক্ত করা হবে।</p>
 
@@ -475,7 +480,7 @@ const blogPosts: BlogPost[] = [
 
       <p style="margin-bottom: 20px; line-height: 1.8;">আমাদের দাবি স্পষ্ট: খোঁজ হলো প্রথম প্ল্যাটফর্ম যা বাংলা ভাষায় দাবি যাচাই করার জন্য এআই-কে সম্পূর্ণভাবে ব্যবহার করে, স্ট্রাকচার্ড রিপোর্ট তৈরি করে এবং মাল্টিমিডিয়া যাচাইয়ের সুবিধা দেয়। এটি ওপেন-সোর্স, ইউজার-ফ্রেন্ডলি এবং বাংলাদেশী কনটেক্সটে ডিজাইন করা। কিন্তু কেন আমরা বলছি এটি "প্রথম"? কারণ আমাদের অনুসন্ধান থেকে প্রমাণিত যে বাংলা ভাষায় এআই-ভিত্তিক ফ্যাক্টচেকিংয়ের জন্য কোনো পূর্ববর্তী পূর্ণাঙ্গ প্ল্যাটফর্ম নেই।</p>
 
-      <p style="margin-bottom: 30px; line-height: 1.8;">বাংলা ভাষায় মিথ্যা তথ্যের সমস্যা গুরুতর। বাংলাদেশে সোশ্যাল মিডিয়ায় ছড়ানো রুমরগুলো প্রায়ই রাজনৈতিক অস্থিরতা বা সামাজিক বিভেদ সৃষ্টি করে। একটি গবেষণায় দেখা গেছে যে বাংলা নিউজ আর্টিকেলে ম্যানিপুলেটেড কনটেন্ট শনাক্ত করার জন্য নতুন মডেল প্রয়োজন, কিন্তু এমন কোনো প্ল্যাটফর্ম নেই যা এটি এআই দিয়ে করে [১]। অন্য একটি স্টাডিতে বাংলাদেশে ডিসইনফরমেশনের চ্যালেঞ্জস উল্লেখ করা হয়েছে, যেখানে এআই-কে অস্ত্র হিসেবে ব্যবহার করা হচ্ছে মিথ্যা কনটেন্ট তৈরিতে, কিন্তু প্রতিরোধে নয় [২]।</p>
+      <p style="margin-bottom: 30px; line-height: 1.8;">বাংলা ভাষায় অসত্য তথ্যের সমস্যা গুরুতর। বাংলাদেশে সোশ্যাল মিডিয়ায় ছড়ানো রুমরগুলো প্রায়ই রাজনৈতিক অস্থিরতা বা সামাজিক বিভেদ সৃষ্টি করে। একটি গবেষণায় দেখা গেছে যে বাংলা নিউজ আর্টিকেলে ম্যানিপুলেটেড কনটেন্ট শনাক্ত করার জন্য নতুন মডেল প্রয়োজন, কিন্তু এমন কোনো প্ল্যাটফর্ম নেই যা এটি এআই দিয়ে করে [১]। অন্য একটি স্টাডিতে বাংলাদেশে ডিসইনফরমেশনের চ্যালেঞ্জস উল্লেখ করা হয়েছে, যেখানে এআই-কে অস্ত্র হিসেবে ব্যবহার করা হচ্ছে অসত্য কনটেন্ট তৈরিতে, কিন্তু প্রতিরোধে নয় [২]।</p>
 
       <h2 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">বিদ্যমান ফ্যাক্টচেকিং ইনিশিয়েটিভসের সীমাবদ্ধতা: কেন খোঁজ প্রয়োজনীয়</h2>
 
@@ -497,7 +502,7 @@ const blogPosts: BlogPost[] = [
       
       <p style="margin-bottom: 20px; line-height: 1.8;">জেনারেটিভ এআই ফ্যাক্টচেকারদের সাহায্য করছে, কিন্তু ছোট ভাষা যেমন বাংলায় এর ব্যবহার সীমিত [৮] [৯]। iVerify-এর মতো টুল এআই ব্যবহার করে, কিন্তু গ্লোবাল এবং বাংলা-স্পেসিফিক নয় [১২]। Factiverse AI Editor টেক্সট ফ্যাক্টচেক করে, কিন্তু বাংলা ফোকাস নেই [১৩]।</p>
 
-      <p style="margin-bottom: 30px; line-height: 1.8;">এই ফাঁকি দেখে আমরা খোঁজ বানিয়েছি – বাংলা ভাষায় এআই-কে ব্যবহার করে মিথ্যা তথ্য প্রতিরোধ করার জন্য [১৪]। বাংলা ভাষার জটিলতা (যেমন উপভাষা, সাংস্কৃতিক ন্যুয়ান্স) এবং ডেটাসেটের অভাব এই ধরনের উদ্যোগকে চ্যালেঞ্জিং করে তুলেছে [১১] [১৬]।</p>
+      <p style="margin-bottom: 30px; line-height: 1.8;">এই ফাঁকি দেখে আমরা খোঁজ বানিয়েছি – বাংলা ভাষায় এআই-কে ব্যবহার করে অসত্য তথ্য প্রতিরোধ করার জন্য [১৪]। বাংলা ভাষার জটিলতা (যেমন উপভাষা, সাংস্কৃতিক ন্যুয়ান্স) এবং ডেটাসেটের অভাব এই ধরনের উদ্যোগকে চ্যালেঞ্জিং করে তুলেছে [১১] [১৬]।</p>
 
       <h2 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">খোঁজের অনন্য ফিচারস: কেন এটি প্রথম এবং পূর্ণাঙ্গ</h2>
 
@@ -524,7 +529,7 @@ const blogPosts: BlogPost[] = [
 
       <h2 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">ভার্ডিক্ট: ✅ সত্য (True)</h2>
 
-      <p style="margin-bottom: 30px; line-height: 1.8;">আমাদের বিস্তারিত অনুসন্ধান থেকে প্রমাণিত যে বাংলা ভাষায় কোনো পূর্ববর্তী পূর্ণাঙ্গ এআই-ভিত্তিক ফ্যাক্টচেকিং প্ল্যাটফর্ম নেই। খোঁজ প্রথম কারণ এটি বাংলা-কেন্দ্রিক, এআই-চালিত, এবং সম্পূর্ণ – টেক্সট, ইমেজ, এবং ঐতিহাসিক তথ্য যাচাইয়ের সমন্বিত সমাধান প্রদান করে। এটি শুধু মিথ্যা তথ্য প্রতিরোধই করে না, বরং বাংলাদেশে ডিজিটাল লিটারেসি বাড়ায়। আমরা আশা করি খোঁজ অন্যদের অনুপ্রাণিত করবে এবং ভবিষ্যতে আরও বড় প্রভাব ফেলবে [১৭] [২০]।</p>
+      <p style="margin-bottom: 30px; line-height: 1.8;">আমাদের বিস্তারিত অনুসন্ধান থেকে প্রমাণিত যে বাংলা ভাষায় কোনো পূর্ববর্তী পূর্ণাঙ্গ এআই-ভিত্তিক ফ্যাক্টচেকিং প্ল্যাটফর্ম নেই। খোঁজ প্রথম কারণ এটি বাংলা-কেন্দ্রিক, এআই-চালিত, এবং সম্পূর্ণ – টেক্সট, ইমেজ, এবং ঐতিহাসিক তথ্য যাচাইয়ের সমন্বিত সমাধান প্রদান করে। এটি শুধু অসত্য তথ্য প্রতিরোধই করে না, বরং বাংলাদেশে ডিজিটাল লিটারেসি বাড়ায়। আমরা আশা করি খোঁজ অন্যদের অনুপ্রাণিত করবে এবং ভবিষ্যতে আরও বড় প্রভাব ফেলবে [১৭] [২০]।</p>
 
       <h2 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">রেফারেন্স</h2>
       <ol style="padding-left: 20px; margin-bottom: 30px;">
@@ -550,17 +555,26 @@ const blogPosts: BlogPost[] = [
         <li style="margin-bottom: 8px; line-height: 1.6;"><a href="https://felo.ai/blog/ai-fact-checking-tool/" target="_blank" style="color: #3498db; text-decoration: none;">https://felo.ai/blog/ai-fact-checking-tool/</a></li>
       </ol>
     `,
-    tags: ['খোঁজ', 'এআই', 'ফ্যাক্টচেকিং', 'যাচাই', 'বাংলা ভাষা', 'মিথ্যা তথ্য প্রতিরোধ', 'ওপেন সোর্স'],
-    publishDate: '৫ সেপ্টেম্বর, ২০২৫',
-    readTime: '১২ মিনিট',
-    slug: 'khoj-ai-factchecker-verification'
+    tags: [
+      "খোঁজ",
+      "এআই",
+      "ফ্যাক্টচেকিং",
+      "যাচাই",
+      "বাংলা ভাষা",
+      "অসত্য তথ্য প্রতিরোধ",
+      "ওপেন সোর্স",
+    ],
+    publishDate: "৫ সেপ্টেম্বর, ২০২৫",
+    readTime: "১২ মিনিট",
+    slug: "khoj-ai-factchecker-verification",
   },
   {
-    id: '3',
-    title: 'জলবায়ু পরিবর্তন: বৈজ্ঞানিক তথ্য বনাম ভুল ধারণা',
-    author: 'সালেহা ভুইয়া',
-    thumbnail: 'https://i.postimg.cc/zGV717ND/Your-paragraph-text-5.png',
-    excerpt: 'জলবায়ু পরিবর্তন শুধু বৈজ্ঞানিক ইস্যু নয়—এটি একসাথে রাজনৈতিক, অর্থনৈতিক, সামাজিক ও নৈতিক ইস্যু। পৃথিবীর প্রতিটি মানুষের জীবনে এর প্রভাব রয়েছে, অথচ এখনো অনেকেই একে অবহেলা করে বা ভুল বোঝে।',
+    id: "3",
+    title: "জলবায়ু পরিবর্তন: বৈজ্ঞানিক তথ্য বনাম ভুল ধারণা",
+    author: "সালেহা ভুইয়া",
+    thumbnail: "https://i.postimg.cc/zGV717ND/Your-paragraph-text-5.png",
+    excerpt:
+      "জলবায়ু পরিবর্তন শুধু বৈজ্ঞানিক ইস্যু নয়—এটি একসাথে রাজনৈতিক, অর্থনৈতিক, সামাজিক ও নৈতিক ইস্যু। পৃথিবীর প্রতিটি মানুষের জীবনে এর প্রভাব রয়েছে, অথচ এখনো অনেকেই একে অবহেলা করে বা ভুল বোঝে।",
     content: `
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <p style="margin: 0 0 10px 0;"><strong>লেখক:</strong> সালেহা ভুইয়া</p>
@@ -676,7 +690,7 @@ const blogPosts: BlogPost[] = [
 
       <h2 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">৬. ভুল তথ্য ও বিভ্রান্তি: বড় বাধা</h2>
           <p style="margin-bottom: 20px; line-height: 1.8;">
-            আজকের ডিজিটাল যুগে <strong>মিথ্যা প্রচারণা (misinformation)</strong> বড় সমস্যা। অনেকেই মনে করেন:
+            আজকের ডিজিটাল যুগে <strong>অসত্য প্রচারণা (misinformation)</strong> বড় সমস্যা। অনেকেই মনে করেন:
           </p>
           
           <ul style="margin-bottom: 25px; padding-left: 20px;">
@@ -742,17 +756,18 @@ const blogPosts: BlogPost[] = [
             <strong>পৃথিবী আমাদের একটাই।</strong> ভবিষ্যৎ প্রজন্মকে একটি বাসযোগ্য পৃথিবী উপহার দেওয়ার জন্য আজই আমাদের সচেতন, দায়িত্বশীল ও ঐক্যবদ্ধ হতে হবে।
           </p>
     `,
-    tags: ['জলবায়ু পরিবর্তন', 'পরিবেশ', 'বিজ্ঞান', 'ভুল ধারণা'],
-    publishDate: '৫ আগস্ট, ২০২৫',
-    readTime: '১০ মিনিট',
-    slug: 'climate-change-science-vs-misconceptions'
+    tags: ["জলবায়ু পরিবর্তন", "পরিবেশ", "বিজ্ঞান", "ভুল ধারণা"],
+    publishDate: "৫ আগস্ট, ২০২৫",
+    readTime: "১০ মিনিট",
+    slug: "climate-change-science-vs-misconceptions",
   },
   {
-    id: '4',
-    title: 'খোঁজ, বাংলা ভাষার প্রথম এআই-চালিত ফ্যাক্টচেকারের অভিনব যাত্রা',
-    author: 'খোঁজ টিম',
-    thumbnail: 'https://i.postimg.cc/FFPY2NBX/image.png',
-    excerpt: 'আজকের এই প্রযুক্তির যুগে চারপাশে তথ্যের স্রোত বয়ে চলেছে। কিন্তু তার ভেতরে আসলটা কোথায়, মিথ্যাটা কোথায়, সে পার্থক্য করা কি সহজ? ফেসবুকের নিউজ ফিড, হোয়াটসঅ্যাপ-টেলিগ্রামের গ্রুপ চ্যাট, কিংবা নিউজ অ্যাপ। সব জায়গায় মিথ্যা খবর, গুজব আর অর্ধসত্য ভেসে বেড়ায়।',
+    id: "4",
+    title: "খোঁজ, বাংলা ভাষার প্রথম এআই-চালিত ফ্যাক্টচেকারের অভিনব যাত্রা",
+    author: "খোঁজ টিম",
+    thumbnail: "https://i.postimg.cc/FFPY2NBX/image.png",
+    excerpt:
+      "আজকের এই প্রযুক্তির যুগে চারপাশে তথ্যের স্রোত বয়ে চলেছে। কিন্তু তার ভেতরে আসলটা কোথায়, মিথ্যাটা কোথায়, সে পার্থক্য করা কি সহজ? ফেসবুকের নিউজ ফিড, হোয়াটসঅ্যাপ-টেলিগ্রামের গ্রুপ চ্যাট, কিংবা নিউজ অ্যাপ। সব জায়গায় অসত্য খবর, গুজব আর অর্ধসত্য ভেসে বেড়ায়।",
     content: `
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
         <p style="margin: 0 0 10px 0;"><strong>লেখক:</strong> খোঁজ টিম</p>
@@ -768,7 +783,7 @@ const blogPosts: BlogPost[] = [
       </div>
 
       <p style="margin-bottom: 20px; line-height: 1.8; font-size: 18px; font-weight: 500;">
-        আজকের এই প্রযুক্তির যুগে চারপাশে তথ্যের স্রোত বয়ে চলেছে। কিন্তু তার ভেতরে আসলটা কোথায়, মিথ্যাটা কোথায়, সে পার্থক্য করা কি সহজ? ফেসবুকের নিউজ ফিড, হোয়াটসঅ্যাপ-টেলিগ্রামের গ্রুপ চ্যাট, কিংবা নিউজ অ্যাপ। সব জায়গায় মিথ্যা খবর, গুজব আর অর্ধসত্য ভেসে বেড়ায়। বাংলা ভাষার কোটি মানুষের জন্য এ এক বিশাল চ্যালেঞ্জ। কারণ সত্য যাচাইয়ের নির্ভরযোগ্য ব্যবস্থা না থাকলে এর ফল হতে পারে ভয়াবহ।
+        আজকের এই প্রযুক্তির যুগে চারপাশে তথ্যের স্রোত বয়ে চলেছে। কিন্তু তার ভেতরে আসলটা কোথায়, মিথ্যাটা কোথায়, সে পার্থক্য করা কি সহজ? ফেসবুকের নিউজ ফিড, হোয়াটসঅ্যাপ-টেলিগ্রামের গ্রুপ চ্যাট, কিংবা নিউজ অ্যাপ। সব জায়গায় অসত্য খবর, গুজব আর অর্ধসত্য ভেসে বেড়ায়। বাংলা ভাষার কোটি মানুষের জন্য এ এক বিশাল চ্যালেঞ্জ। কারণ সত্য যাচাইয়ের নির্ভরযোগ্য ব্যবস্থা না থাকলে এর ফল হতে পারে ভয়াবহ।
       </p>
       
       <p style="margin-bottom: 20px; line-height: 1.8;">
@@ -888,7 +903,7 @@ const blogPosts: BlogPost[] = [
       <ul style="margin-bottom: 25px; padding-left: 20px;">
         <li style="margin-bottom: 10px; line-height: 1.6;">কোন সাইট কী বলছে,</li>
         <li style="margin-bottom: 10px; line-height: 1.6;">কোথায় মতভেদ আছে,</li>
-        <li style="margin-bottom: 10px; line-height: 1.6;">আর শেষমেশ দাবিটা সত্য, মিথ্যা নাকি বিতর্কিত।</li>
+        <li style="margin-bottom: 10px; line-height: 1.6;">আর শেষমেশ দাবিটা সত্য, অসত্য নাকি বিতর্কিত।</li>
       </ul>
       
       <p style="margin-bottom: 20px; line-height: 1.8;">
@@ -953,7 +968,7 @@ const blogPosts: BlogPost[] = [
       
       <h2 style="color: #2c3e50; margin-top: 40px; margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;">উপসংহার</h2>
       <p style="margin-bottom: 20px; line-height: 1.8;">
-        খোঁজ শুধু একটি প্ল্যাটফর্ম নয়—এটি বাংলা ভাষায় ডিজিটাল সাক্ষরতা বাড়ানো এবং মিথ্যা তথ্য শনাক্ত করার একটি নতুন উদ্যোগ। এর হাইব্রিড পাইপলাইন—এআই-চালিত অনুসন্ধান, উৎস নির্বাচন এবং সারাংশ—দেখাতে চায়, সত্যতা আরও সহজে যাচাইযোগ্য হতে পারে। আমরা আশা করি, খোঁজ ব্যবহারকারীদের সহায়তা করবে এবং ধীরে ধীরে আরও প্রভাব ফেলবে। সত্যের সন্ধানে থাকা প্রতিটি মুহূর্তে খোঁজ থাকবে আপনার পাশে।
+        খোঁজ শুধু একটি প্ল্যাটফর্ম নয়—এটি বাংলা ভাষায় ডিজিটাল সাক্ষরতা বাড়ানো এবং অসত্য তথ্য শনাক্ত করার একটি নতুন উদ্যোগ। এর হাইব্রিড পাইপলাইন—এআই-চালিত অনুসন্ধান, উৎস নির্বাচন এবং সারাংশ—দেখাতে চায়, সত্যতা আরও সহজে যাচাইযোগ্য হতে পারে। আমরা আশা করি, খোঁজ ব্যবহারকারীদের সহায়তা করবে এবং ধীরে ধীরে আরও প্রভাব ফেলবে। সত্যের সন্ধানে থাকা প্রতিটি মুহূর্তে খোঁজ থাকবে আপনার পাশে।
       </p>
       
       <p style="margin-bottom: 30px; line-height: 1.8;">
@@ -965,24 +980,24 @@ const blogPosts: BlogPost[] = [
         [১] দেখুন এখানে: <a href="http://khoj-bd.com/fact-checking-verification" style="color: #1976d2; text-decoration: none;">khoj-bd.com/fact-checking-verification</a>
       </p>
     `,
-    tags: ['খোঁজ', 'এআই', 'ফ্যাক্টচেকিং', 'ডিজিটাল সাক্ষরতা'],
-    publishDate: '১৫ সেপ্টেম্বর, ২০২৫',
-    readTime: '১২ মিনিট',
-    slug: 'khoj-ai-factchecker-journey'
-  }
-]
+    tags: ["খোঁজ", "এআই", "ফ্যাক্টচেকিং", "ডিজিটাল সাক্ষরতা"],
+    publishDate: "১৫ সেপ্টেম্বর, ২০২৫",
+    readTime: "১২ মিনিট",
+    slug: "khoj-ai-factchecker-journey",
+  },
+];
 
 export default function BlogDetailPage() {
-  const params = useParams()
-  const [post, setPost] = useState<BlogPost | null>(null)
-  const [loading, setLoading] = useState(true)
+  const params = useParams();
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const slug = params?.slug as string
-    const foundPost = blogPosts.find(p => p.slug === slug)
-    setPost(foundPost || null)
-    setLoading(false)
-  }, [params])
+    const slug = params?.slug as string;
+    const foundPost = blogPosts.find((p) => p.slug === slug);
+    setPost(foundPost || null);
+    setLoading(false);
+  }, [params]);
 
   if (loading) {
     return (
@@ -992,14 +1007,16 @@ export default function BlogDetailPage() {
           <p className="text-gray-600 font-tiro-bangla">লোড হচ্ছে...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (!post) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4 font-tiro-bangla">ব্লগ পোস্ট পাওয়া যায়নি</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4 font-tiro-bangla">
+            ব্লগ পোস্ট পাওয়া যায়নি
+          </h1>
           <Link
             href="/blog"
             className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium font-tiro-bangla"
@@ -1008,7 +1025,7 @@ export default function BlogDetailPage() {
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -1017,9 +1034,13 @@ export default function BlogDetailPage() {
       <div className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center space-x-2 text-sm text-gray-500 mb-4 font-tiro-bangla">
-            <Link href="/" className="hover:text-primary-600">হোম</Link>
+            <Link href="/" className="hover:text-primary-600">
+              হোম
+            </Link>
             <span>›</span>
-            <Link href="/blog" className="hover:text-primary-600">ব্লগ</Link>
+            <Link href="/blog" className="hover:text-primary-600">
+              ব্লগ
+            </Link>
             <span>›</span>
             <span className="text-gray-900">{post.title}</span>
           </div>
@@ -1070,16 +1091,16 @@ export default function BlogDetailPage() {
             </div>
 
             {/* Article Content */}
-            <div 
+            <div
               className="prose prose-lg max-w-none font-tiro-bangla"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
 
             {/* Share Buttons */}
             <div className="mt-12 pt-8 border-t border-gray-200">
-              <ShareButtons 
+              <ShareButtons
                 title={post.title}
-                url={`${typeof window !== 'undefined' ? window.location.href : ''}`}
+                url={`${typeof window !== "undefined" ? window.location.href : ""}`}
                 description={post.excerpt}
               />
             </div>
@@ -1096,8 +1117,8 @@ export default function BlogDetailPage() {
           </Link>
         </div>
       </div>
-      
+
       <Footer />
     </div>
-  )
+  );
 }

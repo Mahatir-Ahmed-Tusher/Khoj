@@ -9,7 +9,6 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  HelpCircle,
   Share2,
   Loader2,
 } from "lucide-react";
@@ -18,6 +17,7 @@ import ShareModal from "@/components/ShareModal";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { getVerdictLabel, normalizeVerdict } from "@/lib/utils";
 
 export default function MuktiCornerDetailPage() {
   const params = useParams();
@@ -27,8 +27,8 @@ export default function MuktiCornerDetailPage() {
   const [showShareModal, setShowShareModal] = useState(false);
 
   // Query the database for the mukti corner report by ID
-  const muktiData = useQuery(api.factChecks.getByID, { 
-    id: id as Id<"factChecks"> 
+  const muktiData = useQuery(api.factChecks.getByID, {
+    id: id as Id<"factChecks">,
   });
 
   const downloadReport = () => {
@@ -62,15 +62,13 @@ ${muktiData.sources.map((source) => `${source.id}. ${source.title} - ${source.ur
   };
 
   const getVerdictIcon = (verdict: string) => {
-    switch (verdict) {
+    switch (normalizeVerdict(verdict)) {
       case "true":
         return <CheckCircle className="h-6 w-6 text-green-600" />;
       case "false":
         return <XCircle className="h-6 w-6 text-red-600" />;
-      case "misleading":
-        return <AlertCircle className="h-6 w-6 text-yellow-600" />;
       default:
-        return <HelpCircle className="h-6 w-6 text-gray-600" />;
+        return <AlertCircle className="h-6 w-6 text-yellow-600" />;
     }
   };
 
@@ -82,9 +80,7 @@ ${muktiData.sources.map((source) => `${source.id}. ${source.title} - ${source.ur
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             লোড হচ্ছে...
           </h1>
-          <p className="text-gray-600">
-            Mukti Corner রিপোর্ট লোড করা হচ্ছে
-          </p>
+          <p className="text-gray-600">Mukti Corner রিপোর্ট লোড করা হচ্ছে</p>
         </div>
         <Footer />
       </div>
@@ -107,6 +103,8 @@ ${muktiData.sources.map((source) => `${source.id}. ${source.title} - ${source.ur
     );
   }
 
+  const verdictValue = normalizeVerdict(muktiData.verdict);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -125,7 +123,7 @@ ${muktiData.sources.map((source) => `${source.id}. ${source.title} - ${source.ur
           <div className="card bg-gradient-to-r from-purple-50 to-indigo-50 border-l-4 border-purple-600">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
-                {getVerdictIcon(muktiData.verdict)}
+                {getVerdictIcon(verdictValue)}
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">
                     Mukti Corner বিশ্লেষণ
@@ -133,6 +131,9 @@ ${muktiData.sources.map((source) => `${source.id}. ${source.title} - ${source.ur
                   <p className="text-gray-600 font-tiro-bangla">
                     সংরক্ষিত গবেষণা-ভিত্তিক বিশ্লেষণ
                   </p>
+                  <span className="inline-flex mt-2 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {getVerdictLabel(verdictValue)}
+                  </span>
                 </div>
               </div>
               {/* action buttons  */}
@@ -269,7 +270,9 @@ ${muktiData.sources.map((source) => `${source.id}. ${source.title} - ${source.ur
                         </p>
                         {/* URL Display */}
                         <div className="mb-3 p-2 bg-gray-50 rounded border">
-                          <p className="text-xs text-gray-500 mb-1 font-medium">লিংক:</p>
+                          <p className="text-xs text-gray-500 mb-1 font-medium">
+                            লিংক:
+                          </p>
                           <p className="text-xs text-blue-600 break-all overflow-hidden">
                             {source.url}
                           </p>

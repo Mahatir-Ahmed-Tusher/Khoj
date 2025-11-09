@@ -1,13 +1,14 @@
 // Utility functions for AI FactCheck storage
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
+import { normalizeVerdict, VerdictValue } from "./utils";
 
 export interface AIFactCheck {
   id: string;
   query: string;
   result: string;
   timestamp: number;
-  verdict: "true" | "false" | "misleading" | "unverified";
+  verdict: VerdictValue;
   sources: Array<{
     id: number;
     title: string;
@@ -36,13 +37,13 @@ export interface AIFactCheck {
 export const addAIFactCheck = async (
   query: string,
   result: string,
-  verdict: AIFactCheck["verdict"],
+  verdict: string,
   sources?: any[],
   sourceInfo?: any,
   createFactCheckMutation?: ReturnType<
     typeof useMutation<typeof api.factChecks.create>
   >
-) => {
+): Promise<boolean> => {
   try {
     const stored = localStorage.getItem("ai-fact-checks");
     const existingChecks: AIFactCheck[] = stored ? JSON.parse(stored) : [];
@@ -68,12 +69,14 @@ export const addAIFactCheck = async (
     }
 
     // Create new fact-check
+    const normalizedVerdict = normalizeVerdict(verdict);
+
     const newFactCheck: AIFactCheck = {
       id: Date.now().toString(),
       query,
       result,
       timestamp: Date.now(),
-      verdict,
+      verdict: normalizedVerdict,
       sources: sources || [],
       sourceInfo: sourceInfo || {
         hasBengaliSources: false,
@@ -93,7 +96,10 @@ export const addAIFactCheck = async (
       // Note: useQuery cannot be called here directly because addAIFactCheck is not a React component.
       // Instead, the query should be handled in the component (e.g., page.tsx) before calling addAIFactCheck.
       try {
-        await createFactCheckMutation(newFactCheck);
+        await createFactCheckMutation({
+          ...newFactCheck,
+          verdict: normalizedVerdict,
+        });
         console.log("Successfully saved fact check to Convex DB");
       } catch (error) {
         console.error("Error saving to Convex DB:", error);

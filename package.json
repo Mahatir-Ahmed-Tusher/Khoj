@@ -24,6 +24,7 @@
     "groq-sdk": "^0.3.3",
     "lucide-react": "^0.542.0",
     "marked": "^16.3.0",
+    "newsdataapi": "^1.0.3",
     "next": "^15.5.2",
     "next-auth": "^4.24.11",
     "playwright": "^1.55.0",

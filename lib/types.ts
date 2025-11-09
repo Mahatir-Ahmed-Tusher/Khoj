@@ -11,12 +11,14 @@ interface Source {
   content_preview?: string
 }
 
+import type { VerdictValue } from "./utils"
+
 interface SearchHistory {
   id: string
   query: string
   response: string
   timestamp: Date
-  verdict?: string
+  verdict?: VerdictValue
   summary?: string
   conclusion?: string
   keyTakeaways?: string[]

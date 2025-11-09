@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Calendar, ChevronLeft, ChevronRight, History, Trash2, Clock } from 'lucide-react'
 import { getMythbustingArticles } from '@/lib/data'
-import { FactCheckArticle } from '@/lib/utils'
+import { FactCheckArticle, getVerdictLabel, normalizeVerdict } from '@/lib/utils'
 import { SearchHistory } from '@/lib/types'
 
 interface MythbustingSidebarProps {
@@ -34,6 +34,17 @@ export default function MythbustingSidebar({ className = '', searchHistory = [],
   const startIndex = currentPage * articlesPerPage
   const endIndex = startIndex + articlesPerPage
   const currentArticles = articles.slice(startIndex, endIndex)
+
+  const getHistoryVerdictClasses = (verdict?: string) => {
+    switch (normalizeVerdict(verdict)) {
+      case 'true':
+        return 'bg-green-100 text-green-800'
+      case 'false':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-yellow-100 text-yellow-800'
+    }
+  }
 
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
@@ -184,20 +195,12 @@ export default function MythbustingSidebar({ className = '', searchHistory = [],
                     </p>
                     {report.verdict && (
                       <div className="mt-1">
-                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                          report.verdict === 'true' ? 'bg-green-100 text-green-800' :
-                          report.verdict === 'false' ? 'bg-red-100 text-red-800' :
-                          report.verdict === 'misleading' ? 'bg-yellow-100 text-yellow-800' :
-                          report.verdict === 'partially_true' ? 'bg-blue-100 text-blue-800' :
-                          report.verdict === 'context_dependent' ? 'bg-purple-100 text-purple-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {report.verdict === 'true' ? 'সত্য' :
-                           report.verdict === 'false' ? 'মিথ্যা' :
-                           report.verdict === 'misleading' ? 'ভ্রান্তিমূলক' :
-                           report.verdict === 'partially_true' ? 'আংশিক সত্য' :
-                           report.verdict === 'context_dependent' ? 'প্রসঙ্গনির্ভর' :
-                           'অযাচাইকৃত'}
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${getHistoryVerdictClasses(
+                            report.verdict
+                          )}`}
+                        >
+                          {getVerdictLabel(report.verdict)}
                         </span>
                       </div>
                     )}

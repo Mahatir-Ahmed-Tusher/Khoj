@@ -7,14 +7,7 @@ export default defineSchema({
     query: v.string(),
     result: v.string(),
     timestamp: v.number(),
-    verdict: v.union(
-      v.literal("true"),
-      v.literal("false"),
-      v.literal("misleading"),
-      v.literal("unverified"),
-      v.literal("partially_true"),
-      v.literal("context_dependent")
-    ),
+    verdict: v.union(v.literal("true"), v.literal("false"), v.literal("unverified")),
     sources: v.array(
       v.object({
         id: v.number(),
@@ -29,7 +22,9 @@ export default defineSchema({
         hasBengaliSources: v.boolean(),
         hasEnglishSources: v.boolean(),
         totalSources: v.number(),
-        geography: v.optional(v.union(v.literal("bangladesh"), v.literal("international"))),
+        geography: v.optional(
+          v.union(v.literal("bangladesh"), v.literal("international"))
+        ),
         tierBreakdown: v.optional(
           v.object({
             tier1: v.number(),
@@ -46,5 +41,3 @@ export default defineSchema({
     pageUrl: v.string(),
   }),
 });
-
-

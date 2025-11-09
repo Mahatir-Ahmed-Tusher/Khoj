@@ -14,6 +14,7 @@ import ShareModal from '@/components/ShareModal'
 // Convex client for on-demand queries/mutations
 import { useConvex } from 'convex/react'
 import { api } from '@/convex/_generated/api'
+import { getVerdictLabel, normalizeVerdict } from '@/lib/utils'
 
 interface ChatMessage {
   id: string
@@ -75,6 +76,17 @@ export default function MuktiCornerPage() {
   // Initialize Convex client
   const convex = useConvex()
 
+const getVerdictPillClasses = (verdict?: string) => {
+  switch (normalizeVerdict(verdict)) {
+    case 'true':
+      return 'bg-green-100 text-green-800'
+    case 'false':
+      return 'bg-red-100 text-red-800'
+    default:
+      return 'bg-yellow-100 text-yellow-800'
+  }
+}
+
   // Save to Convex database
   const saveToConvex = useCallback(async (report: SearchHistory) => {
     console.log('[Mukti Corner] saveToConvex called with id:', report.id)
@@ -85,14 +97,7 @@ export default function MuktiCornerPage() {
         query: report.query,
         result: report.response,
         timestamp: report.timestamp.getTime(),
-        verdict: (() => {
-          const verdict = report.verdict || 'unverified'
-          // Map unsupported verdicts to supported ones
-          if (verdict === 'partially_true' || verdict === 'context_dependent') {
-            return 'misleading' // Map to misleading as closest match
-          }
-          return verdict as 'true' | 'false' | 'misleading' | 'unverified'
-        })(),
+        verdict: normalizeVerdict(report.verdict),
         sources: (report.sources || []).map((source: any) => ({
           id: Number(source.id ?? 0),
           title: source.book_title || source.title || '',
@@ -262,7 +267,7 @@ export default function MuktiCornerPage() {
         })) : [],
         category: selectedCategory,
         subcategory: selectedSubcategory,
-        verdict: data.verdict,
+        verdict: normalizeVerdict(data.verdict),
         summary: data.summary,
         ourSiteArticles: data.ourSiteArticles || []
       }
@@ -287,7 +292,7 @@ export default function MuktiCornerPage() {
           content_preview: source.snippet,
           url: source.url
         })) : [],
-        verdict: data.verdict,
+        verdict: normalizeVerdict(data.verdict),
         summary: data.summary,
         ourSiteArticles: data.ourSiteArticles || []
       }
@@ -686,16 +691,12 @@ ${messageText}
                                 </p>
                                 {message.verdict && (
                                   <div className="mt-2">
-                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                                      message.verdict === 'accurate' ? 'bg-green-100 text-green-800' :
-                                      message.verdict === 'misleading' ? 'bg-red-100 text-red-800' :
-                                      message.verdict === 'partially_accurate' ? 'bg-yellow-100 text-yellow-800' :
-                                      'bg-gray-100 text-gray-800'
-                                    }`}>
-                                      {message.verdict === 'accurate' ? 'সঠিক' :
-                                       message.verdict === 'misleading' ? 'ভুল' :
-                                       message.verdict === 'partially_accurate' ? 'আংশিক সঠিক' :
-                                       'যাচাইকৃত নয়'}
+                                    <span
+                                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getVerdictPillClasses(
+                                        message.verdict
+                                      )}`}
+                                    >
+                                      {getVerdictLabel(message.verdict)}
                                     </span>
                                   </div>
                                 )}

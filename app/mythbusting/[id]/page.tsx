@@ -9,35 +9,19 @@ import { api } from "@/convex/_generated/api";
 import ShareModal from "@/components/ShareModal";
 import { Id } from "@/convex/_generated/dataModel";
 import GenkitAudioPlayer from "@/components/GenkitAudioPlayer";
+import { getVerdictLabel, normalizeVerdict } from "@/lib/utils";
 
 // Helper functions for verdict display
-const getVerdictText = (verdict?: string) => {
-  switch (verdict) {
-    case "true":
-      return "সত্য";
-    case "false":
-      return "মিথ্যা";
-    case "misleading":
-      return "ভ্রান্তিমূলক";
-    case "partially_true":
-      return "আংশিক সত্য";
-    default:
-      return "অযাচাইকৃত";
-  }
-};
+const getVerdictText = (verdict?: string) => getVerdictLabel(verdict);
 
 const getVerdictColor = (verdict?: string) => {
-  switch (verdict) {
+  switch (normalizeVerdict(verdict)) {
     case "true":
       return "bg-green-100 text-green-800";
     case "false":
       return "bg-red-100 text-red-800";
-    case "misleading":
-      return "bg-yellow-100 text-yellow-800";
-    case "partially_true":
-      return "bg-blue-100 text-blue-800";
     default:
-      return "bg-gray-100 text-gray-800";
+      return "bg-yellow-100 text-yellow-800";
   }
 };
 
@@ -141,6 +125,8 @@ ${messageText}
     );
   }
 
+  const verdictValue = normalizeVerdict(factCheckData.verdict);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -196,10 +182,10 @@ ${messageText}
                       <div className="mt-2">
                         <span
                           className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getVerdictColor(
-                            factCheckData.verdict
+                            verdictValue
                           )}`}
                         >
-                          {getVerdictText(factCheckData.verdict)}
+                          {getVerdictText(verdictValue)}
                         </span>
                       </div>
                     )}
@@ -225,10 +211,6 @@ ${messageText}
                   </div>
                 </div>
                 <div className="flex flex-col gap-4 justify-between sm:flex-row">
-                  {/* <GenkitAudioPlayer
-                    text={sanitizeHtml(parseMarkdown(factCheckData.result))}
-                    filename={`news-report-${new Date().toISOString().split("T")[0]}.mp3`}
-                  /> */}
                   <button
                     onClick={() =>
                       downloadBotResponse(
@@ -253,6 +235,12 @@ ${messageText}
                     dangerouslySetInnerHTML={{
                       __html: sanitizeHtml(parseMarkdown(factCheckData.result)),
                     }}
+                  />
+                </div>
+                <div className="m-6">
+                  <GenkitAudioPlayer
+                    text={sanitizeHtml(parseMarkdown(factCheckData.result))}
+                    filename={`news-report-${new Date().toISOString().split("T")[0]}.mp3`}
                   />
                 </div>
 

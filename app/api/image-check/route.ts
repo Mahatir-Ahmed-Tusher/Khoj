@@ -259,7 +259,7 @@ export async function POST(request: NextRequest) {
       const aiGeneratedScore = result.type?.ai_generated || 0;
 
       // Determine the result based on the score
-      let verdict = "unverified";
+      let verdict: "true" | "false" | "unverified" = "unverified";
       let confidence = "low";
       let explanation = "";
 
@@ -272,9 +272,10 @@ export async function POST(request: NextRequest) {
         confidence = "medium";
         explanation = "এই ছবিটি AI দ্বারা তৈরি হওয়ার সম্ভাবনা বেশি।";
       } else if (aiGeneratedScore >= 0.4) {
-        verdict = "misleading";
+        verdict = "unverified";
         confidence = "medium";
-        explanation = "এই ছবিটি AI দ্বারা তৈরি হওয়ার কিছু লক্ষণ দেখা যাচ্ছে।";
+        explanation =
+          "এই ছবিটি AI দ্বারা তৈরি হওয়ার কিছু লক্ষণ দেখা যাচ্ছে, নিশ্চিত বলা যাচ্ছে না।";
       } else if (aiGeneratedScore >= 0.2) {
         verdict = "false";
         confidence = "medium";

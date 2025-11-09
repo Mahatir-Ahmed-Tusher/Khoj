@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
-import { useLoading } from "@/components/LoadingProvider";
 import Link from "next/link";
 import { Info, Download } from "lucide-react";
 import { parseMarkdown, sanitizeHtml } from "@/lib/markdown";
 import GenkitAudioPlayer from "@/components/GenkitAudioPlayer";
+import { getVerdictLabel, normalizeVerdict, VerdictValue } from "@/lib/utils";
 
 interface NewsVerificationResult {
   success: boolean;
-  verdict: "true" | "false" | "misleading";
+  verdict: VerdictValue;
   confidence: number;
   claim: string;
   report: string;
@@ -31,7 +31,7 @@ export default function NewsVerificationV2Page() {
   const [result, setResult] = useState<NewsVerificationResult | null>(null);
   const [error, setError] = useState("");
   const [showInfoModal, setShowInfoModal] = useState(false);
-  const loadingCtx = useLoading();
+  // Loading provider removed; local loading state (isLoading) is used instead
 
   // Get URL from query parameters
   useEffect(() => {
@@ -49,19 +49,6 @@ export default function NewsVerificationV2Page() {
 
   const downloadReport = () => {
     if (!result) return;
-
-    const getVerdictText = (verdict: string) => {
-      switch (verdict) {
-        case "true":
-          return "সত্য";
-        case "false":
-          return "মিথ্যা";
-        case "misleading":
-          return "ভ্রান্ত তথ্য";
-        default:
-          return "অযাচাইকৃত";
-      }
-    };
 
     const getConfidenceText = (confidence: number) => {
       if (confidence >= 80) return "উচ্চ";
@@ -83,7 +70,7 @@ export default function NewsVerificationV2Page() {
 ডোমেইন: ${result.scrapedDomain}
 
 ═══════════════════════════════════════════════════════════════
-ফলাফল (Verdict): ${getVerdictText(result.verdict)}
+ফলাফল (Verdict): ${getVerdictLabel(result.verdict)}
 আত্মবিশ্বাস (Confidence): ${getConfidenceText(result.confidence)} (${result.confidence}%)
 
 ═══════════════════════════════════════════════════════════════
@@ -172,13 +159,20 @@ ${result.sources
       if (response.ok) {
         // Check if redirect to factcheck-detail is needed
         if (data.redirect && data.claim) {
-          console.log("Redirecting to factcheck-detail with extracted claim:", data.claim);
+          console.log(
+            "Redirecting to factcheck-detail with extracted claim:",
+            data.claim
+          );
           // Redirect to factcheck-detail page with the extracted claim
           window.location.href = `/factcheck-detail?query=${encodeURIComponent(data.claim)}`;
           return;
         }
         // Otherwise, show result on this page (fallback for old behavior)
-        setResult(data);
+        const normalizedResult: NewsVerificationResult = {
+          ...data,
+          verdict: normalizeVerdict(data.verdict),
+        };
+        setResult(normalizedResult);
       } else {
         setError(
           data.errorBengali || data.error || "নিউজ যাচাই করতে সমস্যা হয়েছে"
@@ -202,28 +196,15 @@ ${result.sources
   };
 
   const getVerdictColor = (verdict: string) => {
-    switch (verdict) {
+    switch (normalizeVerdict(verdict)) {
       case "true":
         return "bg-green-100 text-green-800 border-green-200";
       case "false":
         return "bg-red-100 text-red-800 border-red-200";
-      case "misleading":
+      case "unverified":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getVerdictText = (verdict: string) => {
-    switch (verdict) {
-      case "true":
-        return "সত্য";
-      case "false":
-        return "মিথ্যা";
-      case "misleading":
-        return "ভ্রান্তিমূলক";
-      default:
-        return "অযাচাইকৃত";
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
     }
   };
 
@@ -248,7 +229,6 @@ ${result.sources
           <h1 className="text-3xl font-bold text-gray-800 mb-3 font-tiro-bangla tracking-tight">
             খবর যাচাই
           </h1>
-          
         </div>
 
         {/* Auto-check Status */}
@@ -314,10 +294,6 @@ ${result.sources
                 {/* Audio player for the report (generate via Google GenKit/TTS) */}
               </div>
               <div className="flex flex-col my-4 gap-4 justify-between sm:flex-row ">
-                <GenkitAudioPlayer
-                  text={sanitizeHtml(parseMarkdown(result.report))}
-                  filename={`news-report-${new Date().toISOString().split("T")[0]}.mp3`}
-                />
                 <button
                   onClick={downloadReport}
                   className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-tiro-bangla text-sm"
@@ -328,6 +304,12 @@ ${result.sources
               </div>
 
               <div className="space-y-4">
+                <div className="m-6">
+                  <GenkitAudioPlayer
+                    text={sanitizeHtml(parseMarkdown(result.report))}
+                    filename={`news-report-${new Date().toISOString().split("T")[0]}.mp3`}
+                  />
+                </div>
                 {/* Original Article Info */}
                 <div className="bg-white/50 rounded-lg p-4 border border-gray-200">
                   <h4 className="font-medium text-gray-800 mb-2 font-tiro-bangla">
@@ -367,7 +349,7 @@ ${result.sources
                   <span
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium border ${getVerdictColor(result.verdict)}`}
                   >
-                    {getVerdictText(result.verdict)}
+                    {getVerdictLabel(result.verdict)}
                   </span>
                 </div>
 

@@ -9,11 +9,11 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  HelpCircle,
   Trash2,
 } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { getVerdictLabel, normalizeVerdict } from "@/lib/utils";
 
 export default function FactCheckViewAllPage() {
   // Query all fact checks from database
@@ -21,7 +21,7 @@ export default function FactCheckViewAllPage() {
 
   const downloadAllFactChecks = () => {
     if (!factChecksData) return;
-    
+
     const dataStr = JSON.stringify(factChecksData, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
@@ -33,41 +33,26 @@ export default function FactCheckViewAllPage() {
   };
 
   const getVerdictColor = (verdict: string) => {
-    switch (verdict) {
+    switch (normalizeVerdict(verdict)) {
       case "true":
         return "bg-green-100 text-green-800";
       case "false":
         return "bg-red-100 text-red-800";
-      case "misleading":
-        return "bg-yellow-100 text-yellow-800";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-yellow-100 text-yellow-800";
     }
   };
 
-  const getVerdictText = (verdict: string) => {
-    switch (verdict) {
-      case "true":
-        return "সত্য";
-      case "false":
-        return "মিথ্যা";
-      case "misleading":
-        return "ভ্রান্তিমূলক";
-      default:
-        return "অযাচাইকৃত";
-    }
-  };
+  const getVerdictText = (verdict: string) => getVerdictLabel(verdict);
 
   const getVerdictIcon = (verdict: string) => {
-    switch (verdict) {
+    switch (normalizeVerdict(verdict)) {
       case "true":
         return <CheckCircle className="h-5 w-5 text-green-600" />;
       case "false":
         return <XCircle className="h-5 w-5 text-red-600" />;
-      case "misleading":
-        return <AlertCircle className="h-5 w-5 text-yellow-600" />;
       default:
-        return <HelpCircle className="h-5 w-5 text-gray-600" />;
+        return <AlertCircle className="h-5 w-5 text-yellow-600" />;
     }
   };
 
@@ -198,7 +183,6 @@ export default function FactCheckViewAllPage() {
             </div>
           ))}
         </div>
-
       </div>
 
       <Footer />

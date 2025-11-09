@@ -5,137 +5,480 @@ import {
   searchWithRapidAPIFallback,
   searchWithRapidAPIFallbackAlternative,
 } from "@/lib/rapidapi-manager";
+import { normalizeVerdict, type VerdictValue } from "@/lib/utils";
 
-// Generate fallback references when RapidAPI search fails
-function generateFallbackReferences(query: string) {
-  const fallbackSources = [
-    {
-      title: "Scientific American - Latest Research",
-      url: "https://www.scientificamerican.com",
-      snippet:
-        "Peer-reviewed scientific research and analysis on various topics including health, technology, and environmental science.",
-    },
-    {
-      title: "PubMed - National Library of Medicine",
-      url: "https://pubmed.ncbi.nlm.nih.gov",
-      snippet:
-        "Database of biomedical literature with millions of citations from MEDLINE and other life science journals.",
-    },
-    {
-      title: "Nature - International Journal of Science",
-      url: "https://www.nature.com",
-      snippet:
-        "Leading international weekly journal of science publishing the finest peer-reviewed research.",
-    },
-    {
-      title: "Science Magazine",
-      url: "https://www.science.org",
-      snippet:
-        "American Association for the Advancement of Science journal covering all scientific disciplines.",
-    },
-    {
-      title: "World Health Organization (WHO)",
-      url: "https://www.who.int",
-      snippet:
-        "United Nations specialized agency for international public health with evidence-based health information.",
-    },
-    {
-      title: "NASA - National Aeronautics and Space Administration",
-      url: "https://www.nasa.gov",
-      snippet:
-        "U.S. government agency responsible for space exploration and scientific research.",
-    },
-    {
-      title: "National Geographic",
-      url: "https://www.nationalgeographic.com",
-      snippet:
-        "Scientific and educational organization providing reliable information about science, nature, and culture.",
-    },
-    {
-      title: "BBC Science",
-      url: "https://www.bbc.com/news/science_and_environment",
-      snippet:
-        "BBC News coverage of science, environment, and technology with expert analysis.",
-    },
-  ];
+const MAX_SOURCES = 16;
+const RAPID_API_RESULT_LIMIT = 40;
+const MIN_REFERENCE_COUNT = 10;
 
-  // Add query-specific sources based on the topic
-  const queryLower = query.toLowerCase();
+const isBanglaText = (text: string) => /[\u0980-\u09FF]/.test(text || "");
 
-  if (
-    queryLower.includes("health") ||
-    queryLower.includes("medical") ||
-    queryLower.includes("disease")
-  ) {
-    fallbackSources.push({
-      title: "Mayo Clinic - Health Information",
-      url: "https://www.mayoclinic.org",
-      snippet:
-        "Nonprofit organization committed to clinical practice, education, and research in medical care.",
+const getHostname = (url: string) => {
+  try {
+    const parsed = new URL(url.startsWith("http") ? url : `https://${url}`);
+    return parsed.hostname.toLowerCase();
+  } catch (error) {
+    return "";
+  }
+};
+
+const normalizeUrl = (url: string) => {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.hostname.replace(/^www\./, "").toLowerCase()}${parsed.pathname.replace(/\/$/, "")}`;
+  } catch (error) {
+    return url.trim().toLowerCase();
+  }
+};
+
+const RESTRICTED_DOMAINS = [
+  "facebook.com",
+  "twitter.com",
+  "x.com",
+  "tiktok.com",
+  "instagram.com",
+  "quora.com",
+  "reddit.com",
+  "whatsapp.com",
+  "telegram.org",
+  "youtube.com",
+  "blogspot.com",
+];
+
+const isRestrictedDomain = (hostname: string) =>
+  RESTRICTED_DOMAINS.some((domain) => hostname.endsWith(domain));
+
+const cleanText = (text: string) =>
+  (text || "")
+    .replace(/\s+/g, " ")
+    .replace(/\[[0-9]+\]/g, "")
+    .trim();
+
+async function searchRapidApiForEvidence(query: string) {
+  let searchResults = await searchWithRapidAPIFallback(query, RAPID_API_RESULT_LIMIT);
+
+  if (!searchResults) {
+    searchResults = await searchWithRapidAPIFallbackAlternative(query, 15);
+  }
+
+  if (!searchResults?.results?.length) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+
+  return searchResults.results
+    .map((result: any) => {
+      const url = result.url || result.link || result.href || "";
+      const title = cleanText(result.title || result.name || "Unknown");
+      const snippet = cleanText(result.snippet || result.description || result.excerpt || "");
+
+      if (!url || !title || seen.has(url)) {
+        return null;
+      }
+
+      const hostname = getHostname(url);
+      if (!hostname || hostname.startsWith("bn.")) {
+        return null;
+      }
+
+      if (isRestrictedDomain(hostname)) {
+        return null;
+      }
+
+      const isEnglish = !isBanglaText(title + " " + snippet);
+
+      if (!isEnglish) {
+        return null;
+      }
+
+      seen.add(url);
+
+      return {
+        title,
+        url,
+        snippet,
+        isEnglish,
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 40) as Array<{
+    title: string;
+    url: string;
+    snippet: string;
+    isEnglish: boolean;
+  }>;
+}
+
+async function fetchArticleContent(url: string) {
+  try {
+    const jinaUrl = `https://r.jina.ai/${url.startsWith("http") ? url : `https://${url}`}`;
+    const response = await fetch(jinaUrl, { next: { revalidate: 60 } });
+
+    if (!response.ok) {
+      return "";
+    }
+
+    const text = await response.text();
+    return cleanText(text).slice(0, 6000);
+  } catch (error) {
+    console.error("Failed to fetch article content:", url, error);
+    return "";
+  }
+}
+
+async function buildEvidenceCorpus(query: string) {
+  const candidates = await searchRapidApiForEvidence(query);
+
+  const corpus: Array<{
+    id: number;
+    title: string;
+    url: string;
+    snippet: string;
+    content: string;
+    isEnglish: boolean;
+  }> = [];
+
+  for (const candidate of candidates) {
+    if (corpus.length >= MAX_SOURCES) {
+      break;
+    }
+
+    const content = await fetchArticleContent(candidate.url);
+
+    if (!content || content.length < 300) {
+      continue;
+    }
+
+    corpus.push({
+      id: corpus.length + 1,
+      title: candidate.title,
+      url: candidate.url,
+      snippet: candidate.snippet,
+      content,
+      isEnglish: candidate.isEnglish,
     });
   }
 
-  if (
-    queryLower.includes("climate") ||
-    queryLower.includes("environment") ||
-    queryLower.includes("global warming")
-  ) {
-    fallbackSources.push({
-      title: "IPCC - Intergovernmental Panel on Climate Change",
-      url: "https://www.ipcc.ch",
-      snippet:
-        "United Nations body for assessing the science related to climate change.",
-    });
+  return corpus;
+}
+
+function buildEvidenceContext(
+  evidence: ReturnType<typeof buildEvidenceCorpus> extends Promise<infer T>
+    ? T
+    : never
+) {
+  if (!evidence.length) {
+    return "\n\n**EVIDENCE:**\n- No trustworthy sources were retrieved. Provide an unverified conclusion and explain the lack of evidence.";
   }
 
-  if (
-    queryLower.includes("technology") ||
-    queryLower.includes("ai") ||
-    queryLower.includes("artificial intelligence")
-  ) {
-    fallbackSources.push({
-      title: "MIT Technology Review",
-      url: "https://www.technologyreview.com",
-      snippet:
-        "Independent media company owned by MIT, covering emerging technologies and their commercial, social, and political impacts.",
-    });
+  const lines = evidence
+    .map(
+      (source) =>
+        `[${source.id}] ${source.title}\nURL: ${source.url}\nSnippet: ${source.snippet.slice(0, 500)}\nExtract: ${source.content.slice(0, 1000)}\n`
+    )
+    .join("\n");
+
+  return `\n\n**EVIDENCE (Use these sources when citing with [n]):**\n${lines}`;
+}
+
+function createModelPrompt(
+  query: string,
+  evidence: Array<{
+    id: number;
+    title: string;
+    url: string;
+    snippet: string;
+    content: string;
+    isEnglish: boolean;
+  }>
+) {
+  const evidenceContext = buildEvidenceContext(evidence);
+
+  const sourcesList = evidence
+    .map((source) => `- [${source.id}] ${source.title} (${source.url})`)
+    .join("\n");
+
+  return `You are a meticulous fact-checking analyst. Follow every instruction below exactly. Write the entire report in fluent, reader-friendly Bengali while keeping the structure identical to the template. The body of the report must contain only paragraphs (no bullet lists or tables). Use only the supplied evidence plus trustworthy internal knowledge—never invent data or sources.
+
+FORMAT TEMPLATE (all headings and paragraph text must remain in Bengali):
+
+# 🧠 মিথবাস্টিং রিপোর্ট
+
+## ১. দাবি (Claim)
+Write one or two paragraphs that clearly restate the claim in Bengali.
+
+## ২. প্রেক্ষাপট (Context)
+Describe where, when, and how the claim spread in Bengali paragraphs.
+
+## ৩. সংক্ষিপ্ত ফলাফল (Fact-Check Summary)
+✅ রায় (Verdict): সত্য (True) / অসত্য (False) / বিভ্রান্তিকর (Unverified)
+Explain the reasoning for the verdict in two to three full Bengali paragraphs. Do NOT place reference numbers inside the body text.
+
+## ৪. বিশ্লেষণ (Analysis)
+### ৪.১ বৈজ্ঞানিক ব্যাখ্যা
+Provide at least two Bengali paragraphs summarizing scientific research or evidence.
+### ৪.২ সাধারণ ভুল ধারণা
+Provide at least two Bengali paragraphs explaining why people believe the claim and what reality shows.
+### ৪.৩ বিশেষজ্ঞ মতামত
+Provide at least two Bengali paragraphs quoting or summarizing international experts or institutions.
+
+## ৫. উপসংহার (Conclusion)
+Summarize the overall findings and give reader guidance in Bengali paragraphs.
+
+## ৬. Reference Box
+List at least ${MIN_REFERENCE_COUNT} credible international/English sources, one per line, using the exact format "[ক্রমিক] উৎসের শিরোনাম - https://example.com". Links must be official publications (no social media, forums, or personal blogs). Do not reference them inline within the report body.
+
+CRITICAL INSTRUCTIONS:
+- Output everything (headings and paragraphs) in polished Bengali, but keep the template text exactly as shown.
+- Verdict must be one of: সত্য (True), অসত্য (False), or বিভ্রান্তিকর (Unverified).
+- Only #, ##, ### headings may be used; do not add other heading levels.
+- Absolutely no bullet lists, numbered lists, or tables inside the report body.
+- If fewer than ${MIN_REFERENCE_COUNT} qualifying sources exist, explain that clearly and set the verdict to বিভ্রান্তিকর (Unverified).
+- Reject any social-media or user-generated sites.
+
+Claim: ${query}
+${evidenceContext}
+
+Available evidence sources (use these for the Reference Box only):
+${sourcesList}`;
+}
+
+function createKnowledgePrompt(query: string) {
+  return `You are an expert science communicator. No dependable external search results were retrieved, so rely on vetted internal knowledge and well-established international science sources. Produce the full report in elegant Bengali while exactly following the template below. Never fabricate institutions or links; only cite real, authoritative publications with working URLs.
+
+FORMAT TEMPLATE (all headings and paragraphs must remain in Bengali):
+
+# 🧠 মিথবাস্টিং রিপোর্ট
+
+## ১. দাবি (Claim)
+Restate the claim in one or two Bengali paragraphs.
+
+## ২. প্রেক্ষাপট (Context)
+Describe the discussion context and any evidence gaps in Bengali paragraphs.
+
+## ৩. সংক্ষিপ্ত ফলাফল (Fact-Check Summary)
+**✅ রায় (Verdict):** সত্য (True) / অসত্য (False) / বিভ্রান্তিকর (Unverified)
+Provide at least two Bengali paragraphs that justify the verdict scientifically. Do not place reference markers inside the text.
+
+## ৪. বিশ্লেষণ (Analysis)
+### ৪.১ বৈজ্ঞানিক ব্যাখ্যা
+Summarize the scientific consensus in detailed Bengali paragraphs.
+### ৪.২ সাধারণ ভুল ধারণা
+Explain why the myth persists and how to correct it, using Bengali paragraphs.
+### ৪.৩ বিশেষজ্ঞ মতামত
+Summarize international expert or institutional statements in Bengali paragraphs.
+
+## ৫. উপসংহার (Conclusion)
+Offer a concise Bengali summary and guidance for readers.
+
+## ৬. Reference Box
+List at least ${MIN_REFERENCE_COUNT} authoritative global sources, each as "[ক্রমিক] উৎসের শিরোনাম - https://example.com". Only use official institutional or peer-reviewed links—no social media or informal blogs.
+
+CRITICAL INSTRUCTIONS:
+- Keep the entire narrative in polished Bengali while following the template literally.
+- Verdict must be one of: সত্য (True), অসত্য (False), বিভ্রান্তিকর (Unverified).
+- Do not include bullets, numbered lists, or tables in the report body.
+- References appear only in the Reference Box and each must be a valid, verifiable hyperlink.
+- If sufficient sources are unavailable, state that clearly and set the verdict to বিভ্রান্তিকর (Unverified).
+
+Claim: ${query}`;
+}
+
+async function generateStructuredReport(
+  query: string,
+  evidence: Array<{
+    id: number;
+    title: string;
+    url: string;
+    snippet: string;
+    content: string;
+    isEnglish: boolean;
+  }>
+) {
+  const prompt = createModelPrompt(query, evidence);
+
+  const groqApiKey = process.env.GROQ_API_KEY;
+  const geminiApiKey = process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY;
+
+  if (!groqApiKey && !geminiApiKey) {
+    throw new Error("No AI API keys configured");
   }
 
-  return fallbackSources.slice(0, 8); // Ensure exactly 8 sources
+  const tryGroq = async () => {
+    if (!groqApiKey) return null;
+    try {
+      const client = new Groq({ apiKey: groqApiKey });
+      const completion = await client.chat.completions.create({
+        model: "openai/gpt-oss-120b",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 6000,
+      });
+      return completion.choices?.[0]?.message?.content || null;
+    } catch (error) {
+      console.error("Groq generation failed:", error);
+      return null;
+    }
+  };
+
+  const tryGemini = async () => {
+    if (!geminiApiKey) return null;
+    try {
+      const genAI = new GoogleGenerativeAI(geminiApiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const result = await model.generateContent(prompt);
+      return result.response.text() || null;
+    } catch (error) {
+      console.error("Gemini generation failed:", error);
+      return null;
+    }
+  };
+
+  return (await tryGroq()) || (await tryGemini());
+}
+
+async function generateKnowledgeFallbackReport(query: string) {
+  const prompt = createKnowledgePrompt(query);
+
+  const groqApiKey = process.env.GROQ_API_KEY;
+  const geminiApiKey = process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY;
+
+  if (!groqApiKey && !geminiApiKey) {
+    throw new Error("No AI API keys configured");
+  }
+
+  const tryGroq = async () => {
+    if (!groqApiKey) return null;
+    try {
+      const client = new Groq({ apiKey: groqApiKey });
+      const completion = await client.chat.completions.create({
+        model: "openai/gpt-oss-120b",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.6,
+        max_tokens: 6000,
+      });
+      return completion.choices?.[0]?.message?.content || null;
+    } catch (error) {
+      console.error("Groq knowledge fallback failed:", error);
+      return null;
+    }
+  };
+
+  const tryGemini = async () => {
+    if (!geminiApiKey) return null;
+    try {
+      const genAI = new GoogleGenerativeAI(geminiApiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const result = await model.generateContent(prompt);
+      return result.response.text() || null;
+    } catch (error) {
+      console.error("Gemini knowledge fallback failed:", error);
+      return null;
+    }
+  };
+
+  return (await tryGroq()) || (await tryGemini());
+}
+
+function parseStructuredReport(
+  report: string,
+  evidence: Array<{ id: number; title: string; url: string; snippet?: string }>
+) {
+  const fullReport = report.trim();
+
+  const verdictMatch = fullReport.match(/✅\s*রায়\s*\(Verdict\)\s*:\s*([^\n]+)/);
+  const verdictRaw = verdictMatch ? verdictMatch[1].trim() : "";
+  const verdict = normalizeVerdict(verdictRaw);
+
+  const summarySectionMatch = fullReport.match(/## ৩\. সংক্ষিপ্ত ফলাফল[\s\S]*?(?=## ৪\.)/);
+  const summary = summarySectionMatch
+    ? summarySectionMatch[0]
+        .replace(/## ৩\. সংক্ষিপ্ত ফলাফল[\s\S]*?\n/, "")
+        .trim()
+    : "";
+
+  const conclusionSectionMatch = fullReport.match(/## ৫\. উপসংহার[\s\S]*?(?=## ৬\.)/);
+  const conclusion = conclusionSectionMatch
+    ? conclusionSectionMatch[0]
+        .replace(/## ৫\. উপসংহার[\s\S]*?\n/, "")
+        .trim()
+    : "";
+
+  const referencesStart = fullReport.indexOf("## ৬. Reference Box");
+  const referencesSection = referencesStart !== -1 ? fullReport.slice(referencesStart).trim() : "";
+  const reportWithoutReferences = referencesStart !== -1 ? fullReport.slice(0, referencesStart).trim() : fullReport;
+
+  const referenceLines = referencesSection
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("["));
+
+  const structuredSources = referenceLines
+    .map((line, index) => {
+      const match = line.match(/^\[(\d+)\]\s*(.*?)\s*-\s*(https?:\/\/\S+)/i);
+      const id = match ? Number(match[1]) : index + 1;
+      const title = match ? match[2].trim() : line.replace(/^\[\d+\]\s*/, "").split(" - ")[0]?.trim();
+      const url = match ? match[3].trim() : line.split(" - ")[1]?.trim();
+
+      if (!url) {
+        return null;
+      }
+
+      const evidenceMatch = evidence.find(
+        (source) => normalizeUrl(source.url) === normalizeUrl(url)
+      );
+
+      return {
+        id,
+        title: title || evidenceMatch?.title || `Source ${id}`,
+        url,
+        snippet: evidenceMatch?.snippet || "",
+        language: "English",
+      };
+    })
+    .filter(Boolean) as Array<{
+    id: number;
+    title: string;
+    url: string;
+    snippet: string;
+    language: string;
+  }>;
+
+  const fallbackSources = evidence.map((source) => ({
+    id: source.id,
+    title: source.title,
+    url: source.url,
+    snippet: source.snippet || "",
+    language: "English",
+  }));
+
+  const sources = structuredSources.length ? structuredSources : fallbackSources;
+
+  return {
+    report: reportWithoutReferences,
+    verdict,
+    summary,
+    conclusion,
+    sources,
+  };
 }
 
 export async function GET() {
   try {
     const groqApiKey = process.env.GROQ_API_KEY;
-    const geminiApiKey =
-      process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY;
-
-    if (!groqApiKey && !geminiApiKey) {
-      return NextResponse.json({
-        status: "Mythbusting API is working",
-        message: "Use POST method with query parameter to analyze claims",
-        error: "No AI API keys configured",
-        details: "Need either GROQ_API_KEY or GEMINI_API_KEY",
-        availableKeys: Object.keys(process.env).filter(
-          (key) => key.includes("GROQ") || key.includes("GEMINI")
-        ),
-      });
-    }
+    const geminiApiKey = process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY;
 
     return NextResponse.json({
       status: "Mythbusting API is working",
       message: "Use POST method with query parameter to analyze claims",
-      apiKeyConfigured: true,
-      primaryModel: groqApiKey ? "Groq GPT-OSS-120B" : "Gemini 2.5 Flash",
-      fallbackModel: groqApiKey && geminiApiKey ? "Gemini 2.5 Flash" : "None",
       groqAvailable: !!groqApiKey,
       geminiAvailable: !!geminiApiKey,
     });
   } catch (error) {
     return NextResponse.json({
-      status: "Mythbusting API is working",
-      message: "Use POST method with query parameter to analyze claims",
-      error: "API key issue: " + error,
+      status: "Mythbusting API encountered an issue",
+      error: (error as Error).message,
     });
   }
 }
@@ -144,501 +487,64 @@ export async function POST(request: NextRequest) {
   try {
     const { query } = await request.json();
 
-    if (!query) {
+    if (!query || typeof query !== "string") {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
-    console.log("Mythbusting request received:", query);
+    const evidence = await buildEvidenceCorpus(query);
+    let usedKnowledgeFallback = false;
 
-    // Step 1: Search for evidence using RapidAPI with fallback
-    let searchResults = null;
-    let evidenceSources: Array<{
-      title: string;
-      url: string;
-      snippet: string;
-    }> = [];
+    let aiReport = "";
 
-    try {
-      console.log("Starting RapidAPI search...");
-      // Try primary RapidAPI search with fallback
-      searchResults = await searchWithRapidAPIFallback(query, 20);
-
-      // If primary fails, try alternative with fallback
-      if (!searchResults) {
-        console.log("Primary RapidAPI search failed, trying alternative...");
-        searchResults = await searchWithRapidAPIFallbackAlternative(query, 10);
+    if (evidence.length === 0) {
+      const knowledgeReport = await generateKnowledgeFallbackReport(query);
+      if (!knowledgeReport) {
+        throw new Error("Knowledge fallback generation failed");
       }
-
-      if (searchResults) {
-        console.log("RapidAPI search successful");
-      } else {
-        console.log(
-          "All RapidAPI searches failed, will use fallback references"
-        );
-      }
-    } catch (searchError) {
-      console.error("RapidAPI search error:", searchError);
-      console.log("Continuing with fallback references...");
-    }
-
-    // Extract sources from search results
-    if (searchResults && searchResults.results) {
-      const toCandidate = (result: any) => ({
-        title: result.title || result.name || "Unknown",
-        url: result.url || result.link || result.href || "",
-        snippet: result.snippet || result.description || result.excerpt || "",
-      });
-
-      const candidates = searchResults.results.map(toCandidate).filter((s: any) => s.url && s.title);
-
-      // Prefer international, English-language sources; filter out Bangla/local (.bd) content
-      const isLikelyBangla = (text: string) => /[\u0980-\u09FF]/.test(text);
-      const isLocalBd = (url: string) => /\.(bd)(\/|$)/i.test(url);
-
-      evidenceSources = candidates
-        .filter((s: any) => !isLocalBd(s.url) && !isLikelyBangla(s.title + " " + s.snippet))
-        .slice(0, 8);
-
-      // Fallback to any candidates if filtering removed all
-      if (evidenceSources.length === 0) {
-        evidenceSources = candidates.slice(0, 8);
-      }
-    }
-
-    // If no evidence sources found, create fallback references based on the query
-    if (evidenceSources.length === 0) {
-      console.log("No RapidAPI results found, creating fallback references...");
-      evidenceSources = generateFallbackReferences(query);
-    }
-
-    console.log(`📚 Found ${evidenceSources.length} evidence sources`);
-
-    // Initialize AI models - Groq first, then Gemini fallback
-    const groqApiKey = process.env.GROQ_API_KEY;
-    const geminiApiKey =
-      process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY;
-
-    if (!groqApiKey && !geminiApiKey) {
-      console.error("No AI API keys configured in environment");
-      return NextResponse.json(
-        {
-          error: "No AI API keys configured",
-          details:
-            "Please check your environment variables. Need either GROQ_API_KEY or GEMINI_API_KEY",
-          availableKeys: Object.keys(process.env).filter(
-            (key) => key.includes("GROQ") || key.includes("GEMINI")
-          ),
-        },
-        { status: 500 }
-      );
-    }
-
-    console.log("Environment check passed - AI API keys are configured");
-
-    let useGroq = false;
-    let groqClient = null;
-    let geminiModel = null;
-
-    // Try Groq first (primary)
-    if (groqApiKey) {
-      try {
-        console.log("Initializing Groq client with GPT-OSS-120B...");
-        groqClient = new Groq({ apiKey: groqApiKey });
-        useGroq = true;
-        console.log("Successfully initialized Groq client");
-      } catch (error) {
-        console.error("Groq initialization failed:", error);
-        useGroq = false;
-      }
+      aiReport = knowledgeReport;
+      usedKnowledgeFallback = true;
     } else {
-      console.log("GROQ_API_KEY not found, using Gemini fallback");
+      const generatedReport = await generateStructuredReport(query, evidence);
+      if (!generatedReport) {
+        throw new Error("AI generation failed");
+      }
+      aiReport = generatedReport;
     }
 
-    // Initialize Gemini as fallback
-    if (!useGroq && geminiApiKey) {
-      try {
-        console.log("Initializing Gemini AI as fallback...");
-        const genAI = new GoogleGenerativeAI(geminiApiKey);
-        geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-        console.log("Successfully initialized Gemini 2.5 Flash model");
-      } catch (error) {
-        console.error("Gemini initialization failed:", error);
-        return NextResponse.json(
-          {
-            error: "No AI model available",
-            details: "Both Groq and Gemini failed to initialize",
-            groqAvailable: !!groqApiKey,
-            geminiAvailable: !!geminiApiKey,
-            last_error:
-              error instanceof Error ? error.message : "Unknown error",
-          },
-          { status: 500 }
-        );
-      }
-    } else if (!useGroq && !geminiApiKey) {
-      return NextResponse.json(
-        {
-          error: "No AI API keys configured",
-          details: "Need either GROQ_API_KEY or GEMINI_API_KEY",
-          availableKeys: Object.keys(process.env).filter(
-            (key) => key.includes("GROQ") || key.includes("GEMINI")
-          ),
-        },
-        { status: 500 }
-      );
-    }
+    let parsed = parseStructuredReport(aiReport, evidence);
 
-    // Prepare evidence context for AI
-    let evidenceContext = "";
-    if (evidenceSources.length > 0) {
-      evidenceContext = `\n\n**EVIDENCE FROM WEB SEARCH (${evidenceSources.length} sources found):**\n`;
-      evidenceSources.forEach((source: any, index: number) => {
-        evidenceContext += `[${index + 1}] ${source.title}\nURL: ${source.url}\nSnippet: ${source.snippet}\n\n`;
-      });
-      evidenceContext += `\n**INSTRUCTIONS FOR ANALYSIS:**\n`;
-      evidenceContext += `- Use these web search results as primary evidence\n`;
-      evidenceContext += `- Supplement with your extensive knowledge base\n`;
-      evidenceContext += `- Cross-reference information between sources\n`;
-      evidenceContext += `- Provide scientific context and background\n`;
-      evidenceContext += `- Include counter-arguments if they exist\n`;
-      evidenceContext += `- Explain the broader implications\n`;
-      evidenceContext += `- When referencing sources, include the source name (e.g., "BBC Science [7] mentions...")\n`;
-      evidenceContext += `- ALWAYS include at least 8 references in your SOURCES section\n`;
-    } else {
-      evidenceContext =
-        "\n\n**Note: No web search results found. Rely on your extensive knowledge base to provide a comprehensive analysis.**";
-      evidenceContext += `\n\n**INSTRUCTIONS FOR ANALYSIS:**\n`;
-      evidenceContext += `- Use your comprehensive knowledge base\n`;
-      evidenceContext += `- Provide detailed scientific background\n`;
-      evidenceContext += `- Include relevant research and studies\n`;
-      evidenceContext += `- Explain underlying principles\n`;
-      evidenceContext += `- Address common misconceptions\n`;
-      evidenceContext += `- ALWAYS include at least 8 references in your SOURCES section\n`;
-    }
-
-    // Enhanced system prompt for conversational mythbusting
-    const systemPrompt = `You are a careful fact-checker writing a Bengali report. Do not use clichéd openings like "আপনি হয়তো ভাবছেন". Keep the tone natural and clear.
-
-**Your Communication Style:**
-- Use simple, everyday Bengali that anyone can understand
-- Flowing narrative; avoid bullet points and tables
-- Natural openings; DO NOT use the phrase "আপনি হয়তো ভাবছেন"
-
-**Your Analysis Approach:**
-- Start with the big picture - what's really going on here?
-- Explain the science/history/context in simple terms
-- Use analogies and examples people can relate to
-- Address common misconceptions naturally in the flow
-- Show why this matters to people's daily lives
-- Be honest about what we know vs. what we don't know
-
-**Response Format (Write as flowing narrative, not bullet points):**
-
-VERDICT: [true/false/misleading/unverified/partially_true/context_dependent]
-
-SUMMARY: [Write a BRIEF 2-3 sentence gist in Bengali (no heading text required in the body, just the summary sentences).]
-
-DETAILED_ANALYSIS: [Write a comprehensive, flowing analysis in Bengali that:
-- Starts and ends naturally
-- Explains complex topics in simple language
-- Uses real-life examples and analogies
-- Corrects common misconceptions
-- Explains why this topic is important
-- Incorporates evidence as part of the story
-- Provides detailed scientific/historical context
-- Analyzes from multiple perspectives
-- Encourages readers to think critically
-- Contains at least 5-7 detailed paragraphs
-- NO TABLES, NO BULLET POINTS - only flowing paragraphs]
-
-CONCLUSION: [Write "তাহলে যেটা দাঁড়ায়" - your own explanation and final opinion that includes:
-- Summary of all analysis
-- Your own assessment
-- Explanation of why you reached this conclusion
-- Importance for people
-- Advice for the future]
-
-KEY TAKEAWAYS: [Write 2-3 simple, memorable key messages in Bengali]
-
-
-**Critical Formatting Requirements:**
-- SUMMARY must be a BRIEF gist (2-3 sentences max), NOT a detailed analysis
-- NO TABLES anywhere in the response
-- NO bullet points or numbered lists in DETAILED_ANALYSIS
-- Write in flowing paragraphs that connect naturally
-- Use conversational tone in Bengali; do NOT use the phrase "আপনি হয়তো ভাবছেন"
-- Include interesting facts and surprising discoveries
-- Make it feel like a friendly conversation, not a formal report
-- Use Bengali expressions and cultural references when appropriate
-- Be comprehensive - don't just rely on search results, use your extensive knowledge
-- Prefer international, English-language sources in SOURCES. Avoid local/regional Bangla-only sources when strong international sources exist.
-- For scientific/medical/technical claims, prioritize peer‑reviewed journals (e.g., Nature, Science, The Lancet, PNAS), reputable organizations (WHO, CDC, NASA, IPCC), credible science magazines (Scientific American, National Geographic, MIT Technology Review), and trustworthy research blogs from institutions.
-- In the SOURCES section, output lines strictly as: Title - URL (http/https link). Include at least 8 items.
-- Provide deep analysis with historical context, scientific background, and cultural implications
-- Write at least 5-7 detailed paragraphs in DETAILED_ANALYSIS section
-- In CONCLUSION section, provide your own expert opinion and final assessment
-- Make the analysis educational but accessible to everyone
-- Write ALL content in Bengali except for technical terms that are better in English
-
-Analyze the claim: "`;
-
-    const prompt = `${systemPrompt}${query}"
-
-${evidenceContext}
-
-Please provide a comprehensive mythbusting analysis following the exact format above. Use the provided evidence sources when available and reference them properly. The report must be in Bengali.`;
-
-    console.log("Sending request to AI with evidence...");
-    let text: string;
-    let aiModelUsed: string;
-
-    try {
-      if (useGroq && groqClient) {
-        console.log("Using Groq GPT-OSS-120B for mythbusting analysis...");
-        const completion = await groqClient.chat.completions.create({
-          model: "openai/gpt-oss-120b",
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 1,
-          max_tokens: 8192,
-          top_p: 1,
-        });
-
-        text = completion.choices[0]?.message?.content || "";
-        aiModelUsed = "Groq GPT-OSS-120B";
-        console.log("Successfully received response from Groq GPT-OSS-120B");
-      } else if (geminiModel) {
-        console.log("Using Gemini 2.5 Flash for mythbusting analysis...");
-        const result = await geminiModel.generateContent(prompt);
-        const response = await result.response;
-        text = response.text();
-        aiModelUsed = "Gemini 2.5 Flash";
-        console.log("Successfully received response from Gemini 2.5 Flash");
-      } else {
-        throw new Error("No AI model available");
-      }
-
-      if (!text) {
-        console.error("Empty response from AI model");
-        return NextResponse.json(
-          { error: "Empty response from AI model" },
-          { status: 500 }
-        );
-      }
-    } catch (aiError) {
-      console.error("AI request failed:", aiError);
-
-      // Try fallback if Groq failed and Gemini is available
-      if (useGroq && geminiModel) {
-        console.log("Groq failed, trying Gemini fallback...");
-        try {
-          const result = await geminiModel.generateContent(prompt);
-          const response = await result.response;
-          text = response.text();
-          aiModelUsed = "Gemini 2.5 Flash (fallback)";
-          console.log("Successfully received response from Gemini fallback");
-        } catch (fallbackError) {
-          console.error("Both AI models failed:", fallbackError);
-          return NextResponse.json(
-            {
-              error: "Failed to generate content with AI models",
-              details: `Groq error: ${aiError instanceof Error ? aiError.message : "Unknown"}, Gemini error: ${fallbackError instanceof Error ? fallbackError.message : "Unknown"}`,
-              models_tried: ["Groq GPT-OSS-120B", "Gemini 2.5 Flash"],
-            },
-            { status: 500 }
-          );
-        }
-      } else {
-        return NextResponse.json(
-          {
-            error: "Failed to generate content with AI model",
-            details:
-              aiError instanceof Error ? aiError.message : "Unknown error",
-            model_used: useGroq ? "Groq GPT-OSS-120B" : "Gemini 2.5 Flash",
-          },
-          { status: 500 }
-        );
+    if (parsed.sources.length < MIN_REFERENCE_COUNT) {
+      const knowledgeReport = await generateKnowledgeFallbackReport(query);
+      if (knowledgeReport) {
+        parsed = parseStructuredReport(knowledgeReport, []);
+        aiReport = knowledgeReport;
+        usedKnowledgeFallback = true;
       }
     }
 
-    console.log(`Received response from ${aiModelUsed}, parsing...`);
-    // Parse the response to extract structured data
-    const parsedResult = parseMythbustingResponse(text, query, evidenceSources);
-
-    console.log("Mythbusting analysis completed:", parsedResult.verdict);
-    console.log("Returning evidenceSources:", evidenceSources);
-    return NextResponse.json({
-      ...parsedResult,
-      evidenceSources: evidenceSources,
-      aiModelUsed: aiModelUsed,
+    const responsePayload = {
+      report: parsed.report,
+      verdict: parsed.verdict,
+      summary: parsed.summary,
+      conclusion: parsed.conclusion,
+      sources: parsed.sources,
+      result: parsed.report,
+      response: parsed.report,
+      detailedAnalysis: parsed.report,
+      evidenceSources: parsed.sources,
+      aiModelUsed: usedKnowledgeFallback ? "AI-knowledge" : "AI",
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    return NextResponse.json(responsePayload);
   } catch (error) {
     console.error("Mythbusting error:", error);
     return NextResponse.json(
       {
-        error: "Failed to analyze claim",
+        error: "Failed to generate mythbusting report",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
   }
-}
-
-function parseMythbustingResponse(
-  response: string,
-  query: string,
-  evidenceSources: Array<{ title: string; url: string; snippet: string }>
-) {
-  // Enhanced structure with conclusion section
-  let verdict:
-    | "true"
-    | "false"
-    | "misleading"
-    | "unverified"
-    | "partially_true"
-    | "context_dependent" = "unverified";
-  let summary = "প্রশ্নের উত্তর বিশ্লেষণ করা হয়েছে।";
-  let detailedAnalysis = response;
-  let conclusion = "";
-  let keyTakeaways: string[] = [];
-  let sources: string[] = [];
-
-  try {
-    // Try to extract verdict
-    const verdictMatch = response.match(
-      /VERDICT:\s*(true|false|misleading|unverified|partially_true|context_dependent)/i
-    );
-    if (verdictMatch) {
-      verdict = verdictMatch[1].toLowerCase() as any;
-    }
-
-    // Try to extract summary - ensure it's brief (2-3 sentences max)
-    const summaryMatch = response.match(/SUMMARY:\s*(.+?)/is);
-    if (summaryMatch) {
-      summary = summaryMatch[1].trim();
-
-      // Ensure summary is brief - truncate if too long
-      if (summary.length > 200) {
-        const sentences = summary.split(/[.!?]+/);
-        summary = sentences.slice(0, 2).join(". ").trim() + ".";
-      }
-    }
-
-    // Try to extract detailed analysis
-    const analysisMatch = response.match(
-      /DETAILED_ANALYSIS:\s*(.+?)(?=\nCONCLUSION:|$)/is
-    );
-    if (analysisMatch) {
-      detailedAnalysis = analysisMatch[1].trim();
-    }
-
-    // Try to extract conclusion
-    const conclusionMatch = response.match(
-      /CONCLUSION:\s*(.+?)(?=\nKEY_TAKEAWAYS:|$)/is
-    );
-    if (conclusionMatch) {
-      conclusion = conclusionMatch[1].trim();
-    }
-
-    // Try to extract key takeaways
-    const takeawaysMatch = response.match(
-      /KEY_TAKEAWAYS:\s*(.+?)(?=\nSOURCES:|$)/is
-    );
-    if (takeawaysMatch) {
-      const takeawaysText = takeawaysMatch[1].trim();
-      keyTakeaways = takeawaysText
-        .split("\n")
-        .filter((takeaway) => takeaway.trim().length > 0);
-    }
-
-    // Try to extract sources and format them properly with hyperlinks
-    const sourcesMatch = response.match(/SOURCES:\s*(.+?)(?=\n|$)/is);
-    if (sourcesMatch) {
-      const sourcesText = sourcesMatch[1].trim();
-      const sourceLines = sourcesText.split("\n").filter((line) => line.trim());
-
-      // Format sources with proper hyperlinks
-      sources = sourceLines.map((line) => {
-        // Check if line already has URL format
-        if (line.includes(" - [") && line.includes("]")) {
-          return line; // Already formatted
-        } else if (line.includes(" - ")) {
-          // Format: "Title - URL" -> "Title - [URL]"
-          const parts = line.split(" - ");
-          if (parts.length === 2) {
-            return `${parts[0].trim()} - [${parts[1].trim()}]`;
-          }
-        } else if (line.startsWith("http")) {
-          // Just URL, create generic title
-          return `Source - [${line.trim()}]`;
-        }
-        return line;
-      });
-    }
-
-    // If no structured format found, try to extract URLs
-    if (sources.length === 0) {
-      const urlMatches = response.match(/https?:\/\/[^\s\n]+/g);
-      if (urlMatches) {
-        sources = urlMatches.slice(0, 8); // Limit to 8 sources
-      }
-    }
-
-    // If still no sources found, use evidence sources as fallback
-    if (sources.length === 0 && evidenceSources.length > 0) {
-      sources = evidenceSources.map(
-        (source) => `${source.title} - ${source.url}`
-      );
-    }
-
-    // Ensure we have at least 8 sources by adding fallback sources if needed
-    if (sources.length < 8) {
-      const fallbackSources = [
-        "Scientific American - https://www.scientificamerican.com",
-        "PubMed - https://pubmed.ncbi.nlm.nih.gov",
-        "Nature - https://www.nature.com",
-        "Science Magazine - https://www.science.org",
-        "World Health Organization - https://www.who.int",
-        "NASA - https://www.nasa.gov",
-        "National Geographic - https://www.nationalgeographic.com",
-        "BBC Science - https://www.bbc.com/news/science_and_environment",
-      ];
-
-      const additionalSources = fallbackSources.slice(0, 8 - sources.length);
-      sources = [...sources, ...additionalSources];
-    }
-
-    // If no key takeaways found, generate some based on the analysis
-    if (keyTakeaways.length === 0) {
-      keyTakeaways = [
-        "প্রমাণের উপর ভিত্তি করে সিদ্ধান্ত নিন",
-        "বিভিন্ন দৃষ্টিকোণ থেকে চিন্তা করুন",
-        "নতুন তথ্য পাওয়া গেলে মত পরিবর্তন করতে প্রস্তুত থাকুন",
-      ];
-    }
-
-    // If no conclusion found, create a simple one
-    if (!conclusion) {
-      conclusion =
-        "উপরের বিশ্লেষণ থেকে দেখা যায় যে এই দাবিটি মূলত সত্য/মিথ্যা/অর্ধসত্য। তবে এখানে গুরুত্বপূর্ণ বিষয় হলো প্রমাণের উপর ভিত্তি করে সিদ্ধান্ত নেওয়া।";
-    }
-  } catch (parseError) {
-    console.error("Error parsing mythbusting response:", parseError);
-    // Keep default values if parsing fails
-  }
-
-  return {
-    query,
-    verdict,
-    summary,
-    detailedAnalysis,
-    conclusion,
-    keyTakeaways,
-    sources,
-  };
 }

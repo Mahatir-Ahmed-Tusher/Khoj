@@ -18,8 +18,14 @@ import {
 } from "@/lib/visit-tracker";
 // import IntroImagePopup from "@/components/IntroImagePopup";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { detectInputType, classifyQuery } from "@/lib/utils";
+import {
+  detectInputType,
+  classifyQuery,
+  getVerdictLabel,
+  normalizeVerdict,
+} from "@/lib/utils";
 import ImageOptionsModal from "@/components/ImageOptionsModal";
+import FloatingBall from "@/components/FloatingBall";
 
 // Blog data
 interface BlogPost {
@@ -474,15 +480,31 @@ export default function HomePage() {
   );
 
   const getFilterText = useCallback((filterValue: string) => {
-    switch (filterValue) {
+    if (filterValue === "all") {
+      return "সব";
+    }
+    return getVerdictLabel(filterValue);
+  }, []);
+
+  const getVerdictBadgeColor = useCallback((verdict: string) => {
+    switch (normalizeVerdict(verdict)) {
       case "true":
-        return "সত্য";
+        return "bg-green-600";
       case "false":
-        return "মিথ্যা";
-      case "misleading":
-        return "ভ্রান্তিমূলক";
+        return "bg-red-600";
       default:
-        return "সব";
+        return "bg-yellow-600";
+    }
+  }, []);
+
+  const getVerdictBadgeLabelEn = useCallback((verdict: string) => {
+    switch (normalizeVerdict(verdict)) {
+      case "true":
+        return "TRUE";
+      case "false":
+        return "FALSE";
+      default:
+        return "UNVERIFIED";
     }
   }, []);
 
@@ -491,16 +513,11 @@ export default function HomePage() {
     () => [
       { value: "all", label: "সব", color: "bg-gray-100 text-gray-700" },
       { value: "true", label: "সত্য", color: "bg-green-100 text-green-700" },
-      { value: "false", label: "মিথ্যা", color: "bg-red-100 text-red-700" },
+      { value: "false", label: "অসত্য", color: "bg-red-100 text-red-700" },
       {
-        value: "misleading",
-        label: "ভ্রান্তিমূলক",
+        value: "unverified",
+        label: "বিভ্রান্তিকর",
         color: "bg-yellow-100 text-yellow-700",
-      },
-      {
-        value: "debunk",
-        label: "খন্ডন",
-        color: "bg-purple-100 text-purple-700",
       },
     ],
     [
@@ -1139,16 +1156,10 @@ export default function HomePage() {
 
                             {/* Verdict Badge - Top Right */}
                             <div className="absolute top-3 right-3">
-                              <div className="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                                {article.verdict === "true"
-                                  ? "TRUE"
-                                  : article.verdict === "false"
-                                    ? "FALSE"
-                                    : article.verdict === "misleading"
-                                      ? "MISLEADING"
-                                      : article.verdict === "debunk"
-                                        ? "DEBUNK"
-                                        : "UNVERIFIED"}
+                              <div
+                                className={`${getVerdictBadgeColor(article.verdict)} text-white px-2 py-1 rounded-full text-xs font-bold`}
+                              >
+                                {getVerdictBadgeLabelEn(article.verdict)}
                               </div>
                             </div>
 
@@ -1232,27 +1243,11 @@ export default function HomePage() {
                     {/* Verdict Badge - Top Right */}
                     <div className="absolute top-1 right-1">
                       <span
-                        className={`inline-block px-1 py-0.5 rounded text-xs font-bold text-white ${
-                          article.verdict === "true"
-                            ? "bg-green-600"
-                            : article.verdict === "false"
-                              ? "bg-red-600"
-                              : article.verdict === "misleading"
-                                ? "bg-yellow-600"
-                                : article.verdict === "debunk"
-                                  ? "bg-purple-600"
-                                  : "bg-gray-600"
-                        }`}
+                        className={`inline-block px-1 py-0.5 rounded text-xs font-bold text-white ${getVerdictBadgeColor(
+                          article.verdict
+                        )}`}
                       >
-                        {article.verdict === "true"
-                          ? "TRUE"
-                          : article.verdict === "false"
-                            ? "FALSE"
-                            : article.verdict === "misleading"
-                              ? "MISLEADING"
-                              : article.verdict === "debunk"
-                                ? "DEBUNK"
-                                : "UNVERIFIED"}
+                        {getVerdictBadgeLabelEn(article.verdict)}
                       </span>
                     </div>
                     {/* FACT CHECK Watermark */}
@@ -1587,6 +1582,7 @@ export default function HomePage() {
             <ChevronUp className="h-6 w-6" />
           )}
         </button>
+        <FloatingBall />
       </div>
 
       {/* Image options modal - shown after successful upload */}

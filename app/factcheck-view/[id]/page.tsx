@@ -9,7 +9,6 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  HelpCircle,
   Share2,
   Loader2,
 } from "lucide-react";
@@ -19,6 +18,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import GenkitAudioPlayer from "@/components/GenkitAudioPlayer";
+import { getVerdictLabel, normalizeVerdict } from "@/lib/utils";
 
 export default function FactCheckViewPage() {
   const params = useParams();
@@ -63,15 +63,13 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
   };
 
   const getVerdictIcon = (verdict: string) => {
-    switch (verdict) {
+    switch (normalizeVerdict(verdict)) {
       case "true":
         return <CheckCircle className="h-6 w-6 text-green-600" />;
       case "false":
         return <XCircle className="h-6 w-6 text-red-600" />;
-      case "misleading":
-        return <AlertCircle className="h-6 w-6 text-yellow-600" />;
       default:
-        return <HelpCircle className="h-6 w-6 text-gray-600" />;
+        return <AlertCircle className="h-6 w-6 text-yellow-600" />;
     }
   };
 
@@ -106,6 +104,8 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
     );
   }
 
+  const verdictValue = normalizeVerdict(factCheckData.verdict);
+
   return (
     <div className="min-h-screen text-justify bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -124,7 +124,7 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
           <div className="card bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-primary-600">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
-                {getVerdictIcon(factCheckData.verdict)}
+                {getVerdictIcon(verdictValue)}
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">
                     ফ্যাক্ট চেকিং রিপোর্ট
@@ -132,6 +132,9 @@ ${factCheckData.sources.map((source) => `${source.id}. ${source.title} - ${sourc
                   <p className="text-gray-600 font-tiro-bangla">
                     সংরক্ষিত AI চালিত বিশ্লেষণ
                   </p>
+                  <span className="inline-flex mt-2 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {getVerdictLabel(verdictValue)}
+                  </span>
                 </div>
               </div>
             </div>

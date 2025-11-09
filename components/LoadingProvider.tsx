@@ -5,7 +5,11 @@ import { createPortal } from "react-dom";
 
 interface LoadingContextValue {
   loading: boolean;
-  setLoading: (v: boolean) => void;
+  // setLoading accepts an optional tag (e.g. 'image') so callers can indicate what kind
+  // of operation is running. The provider will show the global modal only for certain
+  // tags (we'll use 'image' for image-related operations).
+  setLoading: (v: boolean, tag?: string) => void;
+  loadingTag?: string | null;
 }
 
 const LoadingContext = createContext<LoadingContextValue | null>(null);
@@ -16,7 +20,8 @@ export const useLoading = () => {
   if (!ctx) {
     return {
       loading: false,
-      setLoading: (_: boolean) => {},
+      setLoading: (_: boolean, __?: string) => {},
+      loadingTag: null,
     } as LoadingContextValue;
   }
   return ctx;
@@ -25,14 +30,29 @@ export const useLoading = () => {
 export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoadingState] = useState(false);
+  const [loadingTag, setLoadingTag] = useState<string | null>(null);
+
+  // Accept optional tag from callers. When v is false we clear the tag. When v is true
+  // and a tag is passed we set it; otherwise default to 'generic'.
+  const setLoading = (v: boolean, tag?: string) => {
+    if (v) {
+      setLoadingTag(tag || "generic");
+      setLoadingState(true);
+    } else {
+      setLoadingState(false);
+      setLoadingTag(null);
+    }
+  };
 
   return (
-    <LoadingContext.Provider value={{ loading, setLoading }}>
+    <LoadingContext.Provider value={{ loading, setLoading, loadingTag }}>
       {children}
       {typeof document !== "undefined" &&
         createPortal(
-          loading ? (
+          // Only show the global modal for image-tagged loading to avoid triggering it
+          // for every generic operation. This makes image flows opt-in by passing 'image'.
+          loading && loadingTag === "image" ? (
             <div className="fixed overflow-hidden inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center">
               <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-sm mx-4">
                 <div className="text-center">
@@ -46,21 +66,13 @@ export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({
                   <h3 className="text-lg font-semibold text-gray-900 mb-2 font-tiro-bangla">
                     পরবর্তী ধাপে যাওয়া হচ্ছে...
                   </h3>
-                  <p className="text-sm text-gray-600 font-tiro-bangla">
-                    একটু অপেক্ষা করুন...
-                  </p>
+                  <p className="text-sm text-gray-600 font-tiro-bangla">এটাতে একটু সময় লাগতে পারে...</p>
 
                   {/* Progress Dots */}
                   <div className="flex justify-center space-x-1 mt-4">
                     <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
-                    <div
-                      className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.1s" }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.2s" }}
-                    ></div>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                   </div>
                 </div>
               </div>

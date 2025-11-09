@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useLoading } from "@/components/LoadingProvider";
+// Loading provider removed; do not import useLoading
 import { useRouter } from "next/navigation";
 import Footer from "@/components/Footer";
 
@@ -67,7 +67,7 @@ export default function ImageSearchPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const router = useRouter();
-  const loadingCtx = useLoading();
+  // Loading provider removed; use local component state for UI feedback
 
   // Ensure client-side rendering to prevent hydration mismatch
   useEffect(() => {
@@ -147,9 +147,7 @@ export default function ImageSearchPage() {
     setResult(null);
     setUploadProgress("");
 
-    try {
-      loadingCtx.setLoading(true);
-    } catch (e) {}
+    // global loading removed; local UI state handles feedback
 
     try {
       // Update progress messages
@@ -182,9 +180,7 @@ export default function ImageSearchPage() {
       setUploadProgress("");
     } finally {
       setIsLoading(false);
-      try {
-        loadingCtx.setLoading(false);
-      } catch (e) {}
+      // global loading removed; local UI state handles feedback
     }
   };
 

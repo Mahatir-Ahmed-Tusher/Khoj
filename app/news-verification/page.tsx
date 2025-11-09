@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Footer from "@/components/Footer";
+import { getVerdictLabel, normalizeVerdict } from "@/lib/utils";
 
 function NewsVerificationContent() {
   const [isLoading, setIsLoading] = useState(true);
@@ -75,7 +76,10 @@ function NewsVerificationContent() {
       }
 
       const data = await response.json();
-      setResult(data);
+      setResult({
+        ...data,
+        verdict: normalizeVerdict(data.verdict),
+      });
       setIsLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -107,6 +111,7 @@ function NewsVerificationContent() {
   }
 
   if (result) {
+    const verdictValue = normalizeVerdict(result.verdict);
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 py-8">
@@ -123,9 +128,9 @@ function NewsVerificationContent() {
           {/* Verdict Card */}
           <div
             className={`rounded-xl p-6 mb-8 ${
-              result.verdict === "true"
+              verdictValue === "true"
                 ? "bg-green-50 border-green-200"
-                : result.verdict === "false"
+                : verdictValue === "false"
                   ? "bg-red-50 border-red-200"
                   : "bg-yellow-50 border-yellow-200"
             } border-2`}
@@ -133,11 +138,7 @@ function NewsVerificationContent() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold font-tiro-bangla">
-                  {result.verdict === "true"
-                    ? "সত্য"
-                    : result.verdict === "false"
-                      ? "মিথ্যা"
-                      : "ভ্রান্তিমূলক"}
+                  {getVerdictLabel(verdictValue)}
                 </h2>
                 <p className="text-sm text-gray-600 font-tiro-bangla">
                   আস্থার মাত্রা: {result.confidence}%
@@ -145,16 +146,16 @@ function NewsVerificationContent() {
               </div>
               <div
                 className={`text-4xl ${
-                  result.verdict === "true"
+                  verdictValue === "true"
                     ? "text-green-600"
-                    : result.verdict === "false"
+                    : verdictValue === "false"
                       ? "text-red-600"
                       : "text-yellow-600"
                 }`}
               >
-                {result.verdict === "true"
+                {verdictValue === "true"
                   ? "✅"
-                  : result.verdict === "false"
+                  : verdictValue === "false"
                     ? "❌"
                     : "⚠️"}
               </div>

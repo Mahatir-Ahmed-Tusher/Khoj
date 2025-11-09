@@ -9,10 +9,11 @@
 ## 📋 Feature Catalog
 
 ### 1. **Fact-Checking Articles System**
+
 - **Bengali Content**: All articles written in authentic Bengali
 - **Verdict Categories**:
   - ✅ সত্য (True) - Verified factual claims
-  - ❌ মিথ্যা (False) - Debunked false claims  
+  - ❌ অসত্য (False) - Debunked false claims
   - ⚠️ ভ্রান্তিমূলক (Misleading) - Partially true but misleading
   - 🔍 খন্ডন (Debunk) - Exposed misinformation
   - ❓ অযাচাইকৃত (Unverified) - Pending verification
@@ -22,6 +23,7 @@
 - **Responsive Design**: Mobile-optimized interface
 
 ### 2. **AI Text Analysis Tools**
+
 - **Winston AI Integration**: Professional-grade text analysis
 - **AI Detection**: Identifies AI-generated vs human-written content
 - **Plagiarism Checker**: Scans for duplicate content across the web
@@ -35,6 +37,7 @@
 - **Export Options**: Copy to clipboard and download functionality
 
 ### 3. **Reverse Media Search**
+
 - **Image Search**: Google Lens integration via SerpAPI
 - **File Upload**: Drag-and-drop interface for multiple formats
 - **Real Results**: Actual search results with similarity scores
@@ -43,6 +46,7 @@
 - **Future Expansion**: Audio and video search capabilities
 
 ### 4. **Khoj Chat - AI Assistant**
+
 - **Intelligent Q&A**: AI-powered question answering system
 - **Dual Mode Operation**:
   - **Fact-Check Mode**: Professional fact-checking with source citations
@@ -56,6 +60,7 @@
 - **Export Options**: Copy responses and download functionality
 
 ### 5. **Mukti Corner - Liberation War Engine**
+
 - **Specialized Knowledge**: Focused on Bangladesh Liberation War 1971
 - **Python Backend**: Advanced RAG (Retrieval-Augmented Generation)
 - **Knowledge Categories**:
@@ -74,6 +79,7 @@
 - **Export Features**: Copy and download responses
 
 ### 6. **User Interface & Experience**
+
 - **Bengali Typography**: Solaiman Lipi font for authentic experience
 - **Color Theme**: Red and green representing Bangladesh flag
 - **Responsive Layout**: Works on all devices and screen sizes
@@ -86,6 +92,7 @@
 ## 🛠️ Technical Specifications
 
 ### Frontend Architecture
+
 - **Framework**: Next.js 14 with App Router
 - **Language**: TypeScript for type safety
 - **Styling**: Tailwind CSS for rapid development
@@ -94,6 +101,7 @@
 - **File Handling**: Drag-and-drop upload functionality
 
 ### Backend Services
+
 - **Next.js API Routes**: Serverless API endpoints
 - **Python FastAPI**: Advanced backend for Mukti Corner
 - **External Integrations**:
@@ -103,6 +111,7 @@
   - Google Gemini for AI responses
 
 ### Data Management
+
 - **Static Content**: JSON-based article storage
 - **Markdown Processing**: Custom parser with HTML sanitization
 - **File Validation**: Server-side file processing
@@ -113,6 +122,7 @@
 ## 📱 Application Pages
 
 ### Core Pages
+
 1. **Homepage** (`/`) - Landing with featured fact-checks
 2. **About Us** (`/about`) - Team and platform information
 3. **Fact Checks** (`/factchecks`) - Complete article listing
@@ -122,6 +132,7 @@
 7. **Mukti Corner** (`/mukti-corner`) - Liberation War search engine
 
 ### Navigation Features
+
 - **Responsive Navbar**: Logo, navigation links, mobile menu
 - **Footer**: Quick links, social media, contact info
 - **Search Integration**: Global search functionality
@@ -132,12 +143,14 @@
 ## 🔒 Security & Performance
 
 ### Security Measures
+
 - **API Protection**: Environment variable security
 - **Input Validation**: Server-side validation for all inputs
 - **Error Handling**: Comprehensive error management
 - **Data Sanitization**: HTML sanitization for user content
 
 ### Performance Optimization
+
 - **Image Optimization**: Next.js image optimization
 - **Code Splitting**: Automatic code splitting
 - **Lazy Loading**: Component and image lazy loading
@@ -148,12 +161,14 @@
 ## 🌐 Multilingual & Accessibility
 
 ### Language Support
+
 - **Primary**: Bengali (বাংলা) throughout the platform
 - **Secondary**: English for technical terms
 - **Font Optimization**: Bengali-specific typography
 - **RTL Support**: Right-to-left text where needed
 
 ### Accessibility Features
+
 - **Alt Text**: All images have descriptive alt text
 - **Keyboard Navigation**: Full keyboard accessibility
 - **Screen Reader**: Compatible with screen readers
@@ -164,6 +179,7 @@
 ## 📊 Content Management
 
 ### Article Structure
+
 - **Categories**: Organized content classification
 - **Tags**: Flexible tagging system
 - **References**: Hyperlinked sources and citations
@@ -171,6 +187,7 @@
 - **Version Control**: Git-based content management
 
 ### Editorial Features
+
 - **Rich Text Editor**: Markdown-based content creation
 - **Media Upload**: Easy image and video upload
 - **Preview Mode**: Real-time content preview
@@ -181,12 +198,14 @@
 ## 🚀 Deployment & Hosting
 
 ### Production Ready
+
 - **Vercel Optimized**: Ready for Vercel deployment
 - **Environment Setup**: Easy configuration management
 - **Build Optimization**: Production-ready builds
 - **SEO Ready**: Meta tags and structured data
 
 ### Scalability
+
 - **CDN Integration**: Global content delivery
 - **Database Ready**: Prepared for database integration
 - **API Scaling**: Designed for high traffic
@@ -197,6 +216,7 @@
 ## 📈 Future Roadmap
 
 ### Planned Features
+
 - **Audio/Video Search**: Complete multimedia search
 - **User Authentication**: User accounts and profiles
 - **Community Features**: User submissions and voting
@@ -205,6 +225,7 @@
 - **Analytics Dashboard**: Content performance tracking
 
 ### Technical Enhancements
+
 - **Real-time Updates**: Live content updates
 - **Advanced AI**: More sophisticated AI models
 - **Machine Learning**: Predictive fact-checking
@@ -215,11 +236,13 @@
 ## 🛠️ Installation Guide
 
 ### Prerequisites
+
 - Node.js 18 or higher
 - Python 3.8 or higher
 - npm or yarn package manager
 
 ### Quick Start
+
 ```bash
 # Clone repository
 git clone [repository-url]
@@ -242,6 +265,7 @@ python server.py
 ```
 
 ### Environment Variables
+
 ```env
 # Required API Keys
 WINSTON_TOKEN=your_winston_api_key
@@ -258,6 +282,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ## 🤝 Contributing
 
 ### Development Guidelines
+
 - Follow TypeScript best practices
 - Use Bengali for user-facing content
 - Maintain responsive design principles
@@ -265,6 +290,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Document new features
 
 ### Community Standards
+
 - Respectful communication
 - Fact-based discussions
 - Constructive feedback
@@ -275,9 +301,11 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ## 📄 License & Legal
 
 ### License
+
 This project is licensed under the MIT License.
 
 ### Legal Compliance
+
 - GDPR compliant data handling
 - Copyright protection
 - Fair use guidelines
@@ -288,11 +316,13 @@ This project is licensed under the MIT License.
 ## 🏆 Acknowledgments
 
 ### Team Members
+
 - **Mahatir Ahmed Tusher** - Founder & Lead Developer
 - **Sagar Chandra Dey** - UI/UX Designer
 - **Tania Chaity** - Content Researcher
 
 ### Technology Partners
+
 - Winston AI for text analysis
 - Google Gemini for AI responses
 - SerpAPI for search functionality
@@ -302,4 +332,4 @@ This project is licensed under the MIT License.
 
 **খোঁজ** - Empowering truth through technology 🇧🇩
 
-*Building a more informed and fact-checked digital Bangladesh*
+_Building a more informed and fact-checked digital Bangladesh_

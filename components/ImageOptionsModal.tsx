@@ -1,17 +1,22 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { useLoading } from "./LoadingProvider";
+// LoadingProvider removed — do not import useLoading
 import { createPortal } from "react-dom";
 import { XCircle, Crop, Check, X } from "lucide-react";
 import Image from "next/image";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
+import Loading from "./Loading";
 
 interface ImageOptionsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectOption: (option: string, croppedImage?: string, userMessage?: string) => void;
+  onSelectOption: (
+    option: string,
+    croppedImage?: string,
+    userMessage?: string
+  ) => void;
   previewUrl?: string;
 }
 
@@ -27,9 +32,9 @@ const ImageOptionsModal: React.FC<ImageOptionsModalProps> = ({
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
   const [userMessage, setUserMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  // useLoading provides a safe fallback when provider is missing, so we can call it directly
-  const loadingCtx = useLoading();
+  // Loading provider removed; no global loading context here
 
   // Create image from blob and crop
   const createImage = (url: string): Promise<HTMLImageElement> =>
@@ -89,7 +94,7 @@ const ImageOptionsModal: React.FC<ImageOptionsModalProps> = ({
 
   const handleCrop = async () => {
     if (!previewUrl || !croppedAreaPixels) return;
-    
+
     try {
       const croppedImage = await getCroppedImg(previewUrl, croppedAreaPixels);
       setCroppedImageUrl(croppedImage);
@@ -189,7 +194,9 @@ const ImageOptionsModal: React.FC<ImageOptionsModalProps> = ({
                   {/* Zoom Control */}
                   <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg w-64">
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-gray-600 font-medium whitespace-nowrap">জুম:</span>
+                      <span className="text-xs text-gray-600 font-medium whitespace-nowrap">
+                        জুম:
+                      </span>
                       <input
                         type="range"
                         min={0.5}
@@ -270,7 +277,8 @@ const ImageOptionsModal: React.FC<ImageOptionsModalProps> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm font-tiro-bangla resize-none"
               />
               <p className="text-xs text-gray-500 mt-1 font-tiro-bangla">
-                এই বক্সটি শুধুমাত্র "ফটোকার্ড থেকে খবর যাচাই" এর জন্য ব্যবহার হবে
+                এই বক্সটি শুধুমাত্র "ফটোকার্ড থেকে খবর যাচাই" এর জন্য ব্যবহার
+                হবে
               </p>
             </div>
           )}
@@ -282,26 +290,30 @@ const ImageOptionsModal: React.FC<ImageOptionsModalProps> = ({
                 <button
                   key={option.name}
                   onClick={() => {
-                    // trigger global loading and then call handlers
-                    try {
-                      loadingCtx?.setLoading(true);
-                      // console log for visibility
-                      // eslint-disable-next-line no-console
-                      console.log(
-                        `[ImageOptionsModal] option clicked: ${option.name}`
-                      );
-                    } catch (e) {
-                      // noop
-                    }
+                    // show loading overlay and then call handler
+                    // eslint-disable-next-line no-console
+                    console.log(
+                      `[ImageOptionsModal] option clicked: ${option.name}`
+                    );
+                    setIsLoading(true);
+
                     // Pass cropped image and user message if available
                     // Only pass user message for Photocard news verification
-                    const messageToPass = option.name === "Photocard news verification" 
-                      ? (userMessage.trim() || undefined)
-                      : undefined;
-                    onSelectOption(option.name, croppedImageUrl || undefined, messageToPass);
-                    onClose();
+                    const messageToPass =
+                      option.name === "Photocard news verification"
+                        ? userMessage.trim() || undefined
+                        : undefined;
+
+                    // Call the parent handler; we intentionally do NOT call onClose here
+                    // so the loading overlay remains visible until navigation occurs.
+                    onSelectOption(
+                      option.name,
+                      croppedImageUrl || undefined,
+                      messageToPass
+                    );
                   }}
-                  className={`flex items-center space-x-2 px-4 py-3 rounded-lg text-white transition-all duration-200 transform hover:scale-105 active:scale-95 ${option.color} ${option.hoverColor} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                  disabled={isLoading}
+                  className={`flex items-center space-x-2 px-4 py-3 rounded-lg text-white transition-all duration-200 transform ${isLoading ? "opacity-60 cursor-not-allowed scale-100" : "hover:scale-105 active:scale-95"} ${option.color} ${option.hoverColor} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
                 >
                   <span className="text-sm font-medium">{option.label}</span>
                 </button>
@@ -313,9 +325,23 @@ const ImageOptionsModal: React.FC<ImageOptionsModalProps> = ({
     </div>
   );
 
-  // Render via portal so modal reliably appears above all layout content
+  // If loading, render a full-screen overlay with Loading via portal so it sits above everything.
+  // We keep the modal portal as well; when isLoading is true the overlay will cover the viewport.
   if (typeof document !== "undefined") {
-    return createPortal(modal, document.body);
+    return (
+      <>
+        {createPortal(modal, document.body)}
+        {isLoading &&
+          createPortal(
+            <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-white bg-opacity-95">
+              <div className="w-full max-w-xl mx-auto p-6">
+                <Loading />
+              </div>
+            </div>,
+            document.body
+          )}
+      </>
+    );
   }
 
   return null;

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { chromium, firefox, webkit } from 'playwright'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { tavily } from '@tavily/core'
+import { normalizeVerdict } from '@/lib/utils'
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
@@ -440,7 +441,7 @@ ${searchResults.map((result, index) => `
             
             // Create reconstructed object
             parsedReport = {
-              verdict: verdictMatch ? verdictMatch[1] : "misleading",
+              verdict: verdictMatch ? verdictMatch[1] : "unverified",
               confidence: confidenceMatch ? parseInt(confidenceMatch[1]) : 50,
               claim: claimMatch ? claimMatch[1] : scrapedContent.title,
               report: reportMatch ? reportMatch[1] : "এই নিউজটি যাচাই করা হয়েছে।",
@@ -479,6 +480,7 @@ ${searchResults.map((result, index) => `
       
       return {
         ...parsedReport,
+        verdict: normalizeVerdict(parsedReport.verdict),
         sources: sourcesWithIds,
         generatedAt: new Date().toISOString()
       }

@@ -5,10 +5,9 @@ import ImageOptionsModal from "@/components/ImageOptionsModal";
 import { useRouter } from "next/navigation";
 import { Search, Mic, MicOff, X, ImageUpIcon, XCircle } from "lucide-react";
 import Image from "next/image";
-import { useLoading } from "./LoadingProvider";
+// LoadingProvider removed — do not import useLoading
 import { useVoiceSearch } from "@/lib/hooks/useVoiceSearch";
 import { isUrl } from "@/lib/utils";
-import { createPortal } from "react-dom";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -32,11 +31,12 @@ const SearchBar = memo(function SearchBar({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showTextModal, setShowTextModal] = useState(false);
+  const [isPhotocardLoading, setIsPhotocardLoading] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const loadingCtx = useLoading();
+  // Loading provider removed; no global loading context here
   const [previewUrl, setPreviewUrl] = useState<string | undefined>(undefined);
 
   const {
@@ -206,31 +206,40 @@ const SearchBar = memo(function SearchBar({
     }
   };
 
-  const handleImageOptionSelect = async (option: string, croppedImageUrl?: string, userMessage?: string) => {
+  const handleImageOptionSelect = async (
+    option: string,
+    croppedImageUrl?: string,
+    userMessage?: string
+  ) => {
     if (!selectedFile) return;
 
     // For Photocard news verification
     if (option === "Photocard news verification") {
       console.log("[SearchBar] Starting Photocard news verification");
 
+      setShowImageModal(false);
+      setIsPhotocardLoading(true);
+
       // ensure loading is on (ImageOptionsModal already sets it, but ensure here too)
-      try {
-        loadingCtx.setLoading(true);
-      } catch (e) {}
 
       const formData = new FormData();
-      
+
       // Use cropped image if available, otherwise use original file
       if (croppedImageUrl) {
         // Convert cropped image URL to File
         try {
           const response = await fetch(croppedImageUrl);
           const blob = await response.blob();
-          const croppedFile = new File([blob], selectedFile.name, { type: selectedFile.type || "image/jpeg" });
+          const croppedFile = new File([blob], selectedFile.name, {
+            type: selectedFile.type || "image/jpeg",
+          });
           formData.append("image", croppedFile);
           console.log("[SearchBar] Using cropped image for text extraction");
         } catch (error) {
-          console.error("[SearchBar] Error converting cropped image to file:", error);
+          console.error(
+            "[SearchBar] Error converting cropped image to file:",
+            error
+          );
           // Fallback to original file
           formData.append("image", selectedFile);
         }
@@ -249,10 +258,9 @@ const SearchBar = memo(function SearchBar({
         if (!extractResponse.ok) {
           const body = await extractResponse.text();
           console.error("[SearchBar] Text extraction failed:", body);
-          try {
-            loadingCtx.setLoading(false);
-          } catch (e) {}
+          // global loading removed; handled by local UI states
           alert("Failed to extract text from image");
+          setIsPhotocardLoading(false);
           resetFileInput(); // SOLUTION: Reset on error
           return;
         }
@@ -262,10 +270,8 @@ const SearchBar = memo(function SearchBar({
 
         if (!text) {
           console.warn("[SearchBar] No text extracted from image");
-          try {
-            loadingCtx.setLoading(false);
-          } catch (e) {}
           alert("No text could be extracted from the image");
+          setIsPhotocardLoading(false);
           resetFileInput(); // SOLUTION: Reset on error
           return;
         }
@@ -273,17 +279,17 @@ const SearchBar = memo(function SearchBar({
         // Step 2: Parse the extracted text using GPT-OSS-120B for optimized fact-checking
         console.log("[SearchBar] Parsing extracted text using GPT-OSS-120B...");
         let optimizedClaim = text; // Default to original text
-        
+
         try {
           const parseResponse = await fetch("/api/parse-query", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
               text: text,
               source: "photocard-verification",
-              userMessage: userMessage?.trim() || undefined // Pass user message if provided
+              userMessage: userMessage?.trim() || undefined, // Pass user message if provided
             }),
           });
 
@@ -293,10 +299,14 @@ const SearchBar = memo(function SearchBar({
               optimizedClaim = parseData.claim;
               console.log("[SearchBar] ✅ Optimized claim:", optimizedClaim);
             } else {
-              console.warn("[SearchBar] ⚠️ Parsed claim validation failed, using original text");
+              console.warn(
+                "[SearchBar] ⚠️ Parsed claim validation failed, using original text"
+              );
             }
           } else {
-            console.warn("[SearchBar] ⚠️ Query parsing failed, using original extracted text");
+            console.warn(
+              "[SearchBar] ⚠️ Query parsing failed, using original extracted text"
+            );
           }
         } catch (parseError) {
           console.error("[SearchBar] ❌ Query parsing error:", parseError);
@@ -314,81 +324,87 @@ const SearchBar = memo(function SearchBar({
         return;
       } catch (error) {
         console.error("[SearchBar] Error processing image:", error);
-        try {
-          loadingCtx.setLoading(false);
-        } catch (e: any) {
-          console.log(e.message);
-        }
+        // global loading removed; handled by local UI states
         alert("Error processing image");
+        setIsPhotocardLoading(false);
         resetFileInput(); // SOLUTION: Reset on error
         return;
       }
     }
 
     // For other options, maintain existing behavior
-    // Use cropped image if available, otherwise use original file
-    const fileToUse = croppedImageUrl 
+    setShowImageModal(false);
+    setIsPhotocardLoading(false);
+
+    const fileToUse = croppedImageUrl
       ? (async () => {
           try {
             const response = await fetch(croppedImageUrl);
             const blob = await response.blob();
-            return new File([blob], selectedFile.name, { type: selectedFile.type || "image/jpeg" });
+            return new File([blob], selectedFile.name, {
+              type: selectedFile.type || "image/jpeg",
+            });
           } catch (error) {
-            console.error("[SearchBar] Error converting cropped image to file:", error);
+            console.error(
+              "[SearchBar] Error converting cropped image to file:",
+              error
+            );
             return selectedFile;
           }
         })()
       : Promise.resolve(selectedFile);
 
-    fileToUse.then((file) => {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const fileData = {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          lastModified: file.lastModified,
-          content: e.target?.result as string, // Base64 content
-        };
-        sessionStorage.setItem("selectedImageFile", JSON.stringify(fileData));
+    fileToUse
+      .then((file) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const fileData = {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            lastModified: file.lastModified,
+            content: e.target?.result as string, // Base64 content
+          };
+          sessionStorage.setItem("selectedImageFile", JSON.stringify(fileData));
 
-        // SOLUTION: Reset before navigation
-        resetFileInput();
+          // SOLUTION: Reset before navigation
+          resetFileInput();
 
-        // Redirect based on selection
-        if (option === "AI image detection") {
-          router.push("/image-check");
-        } else if (option === "Image search") {
-          router.push("/image-search");
-        } else {
-          router.push("/image-search");
-        }
-      };
-      reader.readAsDataURL(file);
-    }).catch((error) => {
-      console.error("[SearchBar] Error processing file:", error);
-      // Fallback to original file
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const fileData = {
-          name: selectedFile.name,
-          size: selectedFile.size,
-          type: selectedFile.type,
-          lastModified: selectedFile.lastModified,
-          content: e.target?.result as string,
+          // Redirect based on selection
+          if (option === "AI image detection") {
+            router.push("/image-check");
+          } else if (option === "Image search") {
+            router.push("/image-search");
+          } else {
+            router.push("/image-search");
+          }
         };
-        sessionStorage.setItem("selectedImageFile", JSON.stringify(fileData));
-        resetFileInput();
-        if (option === "AI image detection") {
-          router.push("/image-check");
-        } else if (option === "Image search") {
-          router.push("/image-search");
-        } else {
-          router.push("/image-search");
-        }
-      };
-      reader.readAsDataURL(selectedFile);
-    });
+        reader.readAsDataURL(file);
+      })
+      .catch((error) => {
+        console.error("[SearchBar] Error processing file:", error);
+        // Fallback to original file
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const fileData = {
+            name: selectedFile.name,
+            size: selectedFile.size,
+            type: selectedFile.type,
+            lastModified: selectedFile.lastModified,
+            content: e.target?.result as string,
+          };
+          sessionStorage.setItem("selectedImageFile", JSON.stringify(fileData));
+          resetFileInput();
+          if (option === "AI image detection") {
+            router.push("/image-check");
+          } else if (option === "Image search") {
+            router.push("/image-search");
+          } else {
+            router.push("/image-search");
+          }
+        };
+        reader.readAsDataURL(selectedFile);
+      });
   };
 
   const handleInputChange = useCallback(
@@ -441,6 +457,7 @@ const SearchBar = memo(function SearchBar({
   // SOLUTION: Modal close handler with file input reset
   const handleModalClose = useCallback(() => {
     setShowImageModal(false);
+    setIsPhotocardLoading(false);
     resetFileInput(); // SOLUTION: Reset when modal closes
   }, [resetFileInput]);
 
@@ -454,6 +471,23 @@ const SearchBar = memo(function SearchBar({
 
   return (
     <>
+      {isPhotocardLoading && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/40 backdrop-blur-md">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-[90%] text-center border border-gray-100">
+            <div className="relative w-full overflow-hidden rounded-xl bg-gray-50">
+              <Image
+                src="/Loading%20Screens/photocard-verification-loadingscreen.gif"
+                alt="Photocard verification loading"
+                width={640}
+                height={360}
+                className="w-full h-auto"
+                unoptimized
+              />
+            </div>
+          
+          </div>
+        </div>
+      )}
       <form
         onSubmit={handleSubmit}
         className={`relative ${className}`}
