@@ -14,7 +14,11 @@ export interface SearchResult {
   source: string;
 }
 
-export type VerdictValue = "true" | "false" | "unverified";
+export type VerdictValue =
+  | "true"
+  | "false"
+  | "unverified"
+  | "context_dependent";
 
 export const normalizeVerdict = (value?: string | null): VerdictValue => {
   switch ((value || "").toLowerCase()) {
