@@ -13,7 +13,7 @@ module.exports = {
       keyframes: {
         "bounce-custom": {
           "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-25px)" },
+          "50%": { transform: "translateY(-20px)" },
         },
       },
       animation: {

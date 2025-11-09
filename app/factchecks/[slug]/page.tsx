@@ -1,29 +1,32 @@
-import Footer from '@/components/Footer'
-import RecommendationWidget from '@/components/RecommendationWidget'
-import ShareButtons from '@/components/ShareButtons'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { factCheckArticles } from '@/lib/data'
-import { parseMarkdown, sanitizeHtml } from '@/lib/markdown'
+import Footer from "@/components/Footer";
+import RecommendationWidget from "@/components/RecommendationWidget";
+import ShareButtons from "@/components/ShareButtons";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { factCheckArticles } from "@/lib/data";
+import { parseMarkdown, sanitizeHtml } from "@/lib/markdown";
 
 // Create a map of articles by slug for easy lookup
-const articlesBySlug = factCheckArticles.reduce((acc, article) => {
-  acc[article.slug] = article
-  return acc
-}, {} as Record<string, typeof factCheckArticles[0]>)
+const articlesBySlug = factCheckArticles.reduce(
+  (acc, article) => {
+    acc[article.slug] = article;
+    return acc;
+  },
+  {} as Record<string, (typeof factCheckArticles)[0]>
+);
 
 interface ArticlePageProps {
   params: Promise<{
-    slug: string
-  }>
+    slug: string;
+  }>;
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
-  const { slug } = await params
-  const article = articlesBySlug[slug]
+  const { slug } = await params;
+  const article = articlesBySlug[slug];
 
   if (!article) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -57,8 +60,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               {/* Thumbnail */}
               {article.thumbnail && (
                 <div className="relative mb-6 rounded-t-lg overflow-hidden">
-                  <img 
-                    src={article.thumbnail} 
+                  <img
+                    src={article.thumbnail}
                     alt={article.title}
                     className="w-full h-auto object-contain"
                   />
@@ -71,43 +74,58 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   </div>
                 </div>
               )}
-              
+
               <div className="p-6">
                 <div className="mb-6">
-                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                    article.verdict === 'true' ? 'bg-green-100 text-green-800' :
-                    article.verdict === 'false' ? 'bg-red-100 text-red-800' :
-                    article.verdict === 'misleading' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {article.verdict === 'true' ? 'সত্য' :
-                     article.verdict === 'false' ? 'মিথ্যা' :
-                     article.verdict === 'misleading' ? 'ভ্রান্তিমূলক' : 'অযাচাইকৃত'}
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                      article.verdict === "true"
+                        ? "bg-green-100 text-green-800"
+                        : article.verdict === "false"
+                          ? "bg-red-100 text-red-800"
+                          : article.verdict === "unverified"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {article.verdict === "true"
+                      ? "সত্য"
+                      : article.verdict === "false"
+                        ? "মিথ্যা"
+                        : article.verdict === "unverified"
+                          ? "ভ্রান্তিমূলক"
+                          : "অযাচাইকৃত"}
                   </span>
                 </div>
-                
+
                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
                   {article.title}
                 </h1>
-                
+
                 <div className="mb-6">
                   <p className="text-lg text-gray-700 bg-gray-50 p-4 rounded-lg">
                     <strong>দাবি:</strong> {article.claim}
                   </p>
                 </div>
-                
+
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-6">
                   <div className="flex items-center space-x-4">
                     <span>লেখক: {article.author}</span>
                     <span>•</span>
-                    <span>{new Date(article.publishedAt).toLocaleDateString('bn-BD')}</span>
+                    <span>
+                      {new Date(article.publishedAt).toLocaleDateString(
+                        "bn-BD"
+                      )}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="prose prose-lg max-w-none">
-                  <div 
+                  <div
                     className="whitespace-pre-wrap text-gray-700 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(parseMarkdown(article.content)) }}
+                    dangerouslySetInnerHTML={{
+                      __html: sanitizeHtml(parseMarkdown(article.content)),
+                    }}
                   />
                 </div>
               </div>
@@ -121,7 +139,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </h2>
                 <div className="space-y-3">
                   {article.references.map((reference) => (
-                    <div key={reference.id} className="border-l-4 border-primary-500 pl-4">
+                    <div
+                      key={reference.id}
+                      className="border-l-4 border-primary-500 pl-4"
+                    >
                       <h3 className="font-medium text-gray-900 mb-1">
                         {reference.title}
                       </h3>
@@ -160,9 +181,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </div>
 
             {/* Share Section */}
-            <ShareButtons 
+            <ShareButtons
               title={article.title}
-              url={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://khoj-bd.com'}/factchecks/${article.slug}`}
+              url={`${process.env.NEXT_PUBLIC_BASE_URL || "https://khoj-bd.com"}/factchecks/${article.slug}`}
               description={article.summary}
             />
           </div>
@@ -176,5 +197,5 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       <Footer />
     </div>
-  )
+  );
 }

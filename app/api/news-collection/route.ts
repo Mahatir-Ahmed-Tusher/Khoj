@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const NEWS_API_KEY = process.env.NEWS_API_KEY;
+console.log(NEWS_API_KEY);
 
 export async function GET(request: NextRequest) {
   try {

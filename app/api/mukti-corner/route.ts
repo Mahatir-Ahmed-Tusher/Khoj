@@ -382,7 +382,7 @@ function parseMuktiCornerResponse(
   try {
     // Try to extract verdict
     const verdictMatch = response.match(
-      /VERDICT:\s*(true|false|unverified|misleading|untrue|partially_true|context_dependent)/i
+      /VERDICT:\s*(true|false|unverified|unverified|untrue|partially_true|context_dependent)/i
     );
     if (verdictMatch) {
       verdict = normalizeVerdict(verdictMatch[1]);

@@ -1,9 +1,8 @@
 <img width="1892" height="448" alt="image" src="https://github.com/user-attachments/assets/74c854f5-a5ca-4a7b-af71-fa1c71c871be" /> 
 # 🔍 Khoj — The World's First AI-Powered Bengali Fact-Checking Platform
 
-
-
 ## 🚀 **Live Demo**
+
 [https://khoj-bd.com/](https://khoj-bd.com/) – Experience the future of Bengali fact-checking right now!
 
 ---
@@ -25,25 +24,29 @@
 ## 🎯 **Core Features**
 
 ### 🤖 **Advanced AI Fact-Checking Engine**
-- **Structured Bengali Reports**: Clear verdicts (True/False/Misleading) with up to 10 credible sources
+
+- **Structured Bengali Reports**: Clear verdicts (True/False/unverified) with up to 10 credible sources
 - **Domain-First Search Strategy**: Prioritizes trusted Bangladeshi news and fact-check sites
 - **Intelligent Fallback System**: Seamlessly integrates English sources when local coverage is insufficient
 - **Native Language Processing**: Always delivers results in Bengali, regardless of source language
 - **Multi-Model AI Chain**: DeepSeek → Gemini → GROQ fallback for maximum reliability
 
 ### 🖼️ **Cutting-Edge Multimedia Verification**
+
 - **AI Image Authenticity Detection**: Advanced Sightengine integration to detect AI-generated images
 - **Reverse Image Search**: Google Lens powered visual matching and provenance analysis
 - **Text Analysis Suite**: Winston AI powered AI-detection and plagiarism analysis
 - **Deepfake Detection**: State-of-the-art technology to identify manipulated content
 
 ### 🛠️ **Specialized AI Tools**
+
 - **Mukti Corner**: Revolutionary AI chat for 1971 Liberation War history and fact verification
 - **Mythbusting Engine**: AI-powered rumor debunking and myth analysis
 - **E-Library Integration**: Digital book and resource collection for comprehensive research
 - **Historical Context AI**: Specialized knowledge base for Bangladeshi historical events
 
 ### 🎨 **Premium User Experience**
+
 - **Responsive Design**: Flawless experience across all devices and screen sizes
 - **Bengali Typography**: Beautiful Solaiman Lipi font integration for authentic Bengali text
 - **Cultural Design Language**: Red-green theme reflecting Bangladeshi identity
@@ -56,6 +59,7 @@
 ## 🏗️ **Advanced Technology Stack**
 
 ### **Frontend Architecture**
+
 - **Framework**: Next.js 14 (App Router) + React 18 + TypeScript
 - **Styling**: Tailwind CSS with `tailwind-merge` and `clsx` for optimal performance
 - **Icons**: Lucide React for consistent, beautiful iconography
@@ -63,6 +67,7 @@
 - **Performance**: Optimized with React.memo, useMemo, and useCallback
 
 ### **AI and Search Infrastructure**
+
 - **AI Models**: Google Gemini (Pro/Flash), DeepSeek via OpenRouter, GROQ (GPT-OSS-20B)
 - **Search Engine**: Tavily API with 16 API keys supporting 1,600 searches/month
 - **Media Analysis**: Sightengine (AI image detection), SerpAPI (Google Lens)
@@ -70,6 +75,7 @@
 - **Fallback System**: Intelligent API key rotation for maximum uptime
 
 ### **Data Management and Storage**
+
 - **Local Storage**: Browser-based user data persistence
 - **Markdown Processing**: Custom parser with HTML sanitization
 - **API Architecture**: Scalable JSON endpoints with comprehensive error handling
@@ -89,6 +95,7 @@
 6. **Recommendation Engine**: Related articles from our library are suggested for deeper understanding
 
 ### **Advanced Features**
+
 - **Real-time Processing**: Instant fact-checking with live progress indicators
 - **Source Verification**: Automatic credibility scoring of information sources
 - **Context Awareness**: AI understands cultural nuances and historical context
@@ -99,19 +106,23 @@
 ## 📡 **এপিআই এন্ডপয়েন্টস**
 
 ### **মূল ফ্যাক্টচেকিং**
+
 - **POST** `/api/factcheck` - বাংলায় মিশ্র-সোর্স রিপোর্ট
 - **POST** `/api/factcheck-domain-first` - ডোমেইন-ফার্স্ট গ্যাদারার + অটো-ফলব্যাক
 
 ### **মিডিয়া যাচাই**
+
 - **POST** `/api/image-check` - এআই ইমেজ অথেনটিসিটি চেক
 - **POST** `/api/source-search` - রিভার্স ইমেজ সার্চ (Google Lens)
 - **POST** `/api/text-check` - এআই-ডিটেকশন এবং প্লেজিয়ারিজম
 
 ### **বিশেষায়িত চ্যাট**
+
 - **POST** `/api/mukti-corner` - মুক্তিযুদ্ধ বিষয়ক এআই চ্যাট
 - **POST** `/api/mythbusting` - মিথ ডিবাঙ্কিং এআই চ্যাট
 
 ### **ইউটিলিটি**
+
 - **POST** `/api/search` - স্মার্ট সার্চ বাংলাদেশী এবং প্রায়োরিটি সাইটে
 - **GET** `/api/tavily-status` - সব Tavily API কী-এর স্ট্যাটাস মনিটর
 
@@ -120,28 +131,33 @@
 ## 📱 **Complete Application Pages**
 
 ### **Core Pages**
+
 - `/` - **Homepage**: Hero search interface, latest fact-checks, AI widget, and interactive tour
 - `/factcheck-detail` - **AI Fact-Checking Interface**: Main fact-checking tool with advanced search
 - `/factchecks` - **Fact-Check Library**: Comprehensive listing with advanced filters
 - `/factchecks/[slug]` - **Individual Fact-Check Pages**: Detailed reports with recommendations
 
 ### **Multimedia Tools**
+
 - `/image-check` - **Image Authenticity Checker**: AI-powered image verification tool
 - `/text-check` - **Text Analysis Suite**: AI detection and plagiarism analysis
 - `/source-search` - **Reverse Image Search**: Visual source discovery tool
 
 ### **Specialized Features**
+
 - `/mukti-corner` - **Liberation War Chat**: Historical fact-checking and education
 - `/mythbusting` - **Myth Debunking Chat**: Rumor analysis and myth busting
 - `/e-library` - **Digital Library**: Educational resources and digital books
 - `/domain-first-factcheck` - **Advanced Fact-Checking**: Experimental domain-first flow
 
 ### **User Management**
+
 - `/factcheck-view` - **AI Fact-Check History**: All user-generated reports
 - `/factcheck-view/[id]` - **Individual Report Viewer**: Detailed report analysis
 - `/fact-checking-verification` - **Our Claim Verification**: Proof of being first
 
 ### **Information Pages**
+
 - `/about` - **Project Overview**: Comprehensive project information
 - `/faq` - **Frequently Asked Questions**: User support and guidance
 - `/privacy-policy` - **Privacy Policy**: Data protection and privacy information
@@ -152,17 +168,20 @@
 ## 🔧 **Complete Installation and Setup Guide**
 
 ### **Prerequisites**
+
 - Node.js 18+ installed
 - npm or yarn package manager
 - Git for version control
 
 ### **Step 1: Clone the Repository**
+
 ```bash
 git clone https://github.com/Mahatir-Ahmed-Tusher/Khoj.git
 cd Khoj
 ```
 
 ### **Step 2: Install Dependencies**
+
 ```bash
 npm install
 # or
@@ -170,11 +189,13 @@ yarn install
 ```
 
 ### **Step 3: Environment Configuration**
+
 ```bash
 cp env.example .env.local
 ```
 
 ### **Step 4: Configure API Keys**
+
 Edit `.env.local` and add your API keys:
 
 ```env
@@ -212,6 +233,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ### **Step 5: Run Development Server**
+
 ```bash
 npm run dev
 # or
@@ -219,9 +241,11 @@ yarn dev
 ```
 
 ### **Step 6: Access the Application**
+
 Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ### **Step 7: Production Build**
+
 ```bash
 npm run build
 npm run start
@@ -389,11 +413,13 @@ yarn lint            # Run linting
 ## 🏆 **For Hackathon Judges and Evaluators**
 
 ### **Quick Demo Setup**
+
 1. Add API keys to `.env.local`
 2. Run `npm run dev`
 3. Open the homepage and experience the interactive tour
 
 ### **Key Features to Test**
+
 - **Bengali Fact-Checking**: Submit claims in Bengali and see AI-generated reports
 - **Multimedia Tools**:
   - Image authenticity: `/image-check`
@@ -407,6 +433,7 @@ yarn lint            # Run linting
 - **Advanced Flow**: `/domain-first-factcheck` for experimental features
 
 ### **Technical Highlights**
+
 - **Performance**: Optimized with React.memo, useMemo, useCallback
 - **Responsive Design**: Flawless mobile and desktop experience
 - **AI Integration**: Multiple AI models with intelligent fallback
@@ -431,12 +458,14 @@ We welcome contributions from developers, researchers, and fact-checking enthusi
 ### **How to Contribute**
 
 1. **Fork the Repository**
+
    ```bash
    git clone https://github.com/your-username/Khoj.git
    cd Khoj
    ```
 
 2. **Create a Feature Branch**
+
    ```bash
    git checkout -b feature/amazing-feature
    ```
@@ -447,11 +476,13 @@ We welcome contributions from developers, researchers, and fact-checking enthusi
    - Update documentation
 
 4. **Commit Your Changes**
+
    ```bash
    git commit -m "feat: add amazing feature"
    ```
 
 5. **Push to Your Branch**
+
    ```bash
    git push origin feature/amazing-feature
    ```
@@ -462,6 +493,7 @@ We welcome contributions from developers, researchers, and fact-checking enthusi
    - Reference any related issues
 
 ### **Contribution Areas**
+
 - **AI Model Integration**: New AI models and fallback strategies
 - **Language Support**: Additional Bengali dialects and regional variations
 - **UI/UX Improvements**: Enhanced user experience and accessibility
@@ -481,22 +513,26 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 **Acknowledgments**
 
 ### **Technology Partners**
+
 - **Next.js & React**: Modern web development framework
 - **Tailwind CSS**: Utility-first CSS framework
 - **TypeScript**: Type-safe JavaScript development
 
 ### **AI and Search Partners**
+
 - **Tavily**: Advanced search API for reliable information
 - **Google Gemini**: Cutting-edge AI model for natural language processing
 - **OpenRouter DeepSeek**: High-performance AI model integration
 - **GROQ**: Fast inference for AI models
 
 ### **Media Analysis Partners**
+
 - **Sightengine**: AI-powered image authenticity detection
 - **SerpAPI**: Google Lens integration for reverse image search
 - **Winston AI**: Advanced AI detection and plagiarism analysis
 
 ### **Typography and Design**
+
 - **Solaiman Lipi**: Beautiful Bengali typography
 - **Times Now**: Professional heading font
 - **Lucide React**: Consistent iconography
@@ -508,7 +544,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Khoj isn't just a fact-checking platform—it's a testament to the power of AI in preserving truth and combating misinformation in the Bengali language. We believe that accurate information should be accessible to everyone, especially in languages that have been historically underserved by technology.
 
 Our mission is to:
-- **Combat Misinformation**: Fight against fake news and misleading information
+
+- **Combat Misinformation**: Fight against fake news and unverified information
 - **Promote Digital Literacy**: Educate users about fact-checking and critical thinking
 - **Preserve Cultural Heritage**: Protect Bengali language and cultural context
 - **Empower Communities**: Give people tools to verify information independently
@@ -526,4 +563,4 @@ Our mission is to:
 
 ---
 
-*Built with ❤️ for the Bengali-speaking community and the global fight against misinformation.*
+_Built with ❤️ for the Bengali-speaking community and the global fight against misinformation._

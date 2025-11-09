@@ -14,7 +14,7 @@
 - **Verdict Categories**:
   - ✅ সত্য (True) - Verified factual claims
   - ❌ অসত্য (False) - Debunked false claims
-  - ⚠️ ভ্রান্তিমূলক (Misleading) - Partially true but misleading
+  - ⚠️ ভ্রান্তিমূলক (unverified) - Partially true but unverified
   - 🔍 খন্ডন (Debunk) - Exposed misinformation
   - ❓ অযাচাইকৃত (Unverified) - Pending verification
 - **Rich Media**: Images, videos, and interactive elements

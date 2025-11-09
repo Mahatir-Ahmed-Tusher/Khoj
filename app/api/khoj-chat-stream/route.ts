@@ -1,60 +1,69 @@
-import { NextRequest } from 'next/server'
-import { tavilyManager } from '@/lib/tavily-manager'
-import { Groq } from 'groq-sdk'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { NextRequest } from "next/server";
+import { tavilyManager } from "@/lib/tavily-manager";
+import { Groq } from "groq-sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(request: NextRequest) {
   try {
-    const { query, type, citizenServiceData, mode } = await request.json()
+    const { query, type, citizenServiceData, mode } = await request.json();
 
     if (!query || !type) {
-      return new Response('Query and type are required', { status: 400 })
+      return new Response("Query and type are required", { status: 400 });
     }
 
     // Create a ReadableStream for streaming response
     const stream = new ReadableStream({
       async start(controller) {
-        const encoder = new TextEncoder()
-        
+        const encoder = new TextEncoder();
+
         try {
-          if (type === 'fact-check') {
+          if (type === "fact-check") {
             // Use Tavily search for fact checking
             try {
               const searchResults = await tavilyManager.search(query, {
                 max_results: 5,
                 include_domains: [
-                  'bbc.com',
-                  'reuters.com',
-                  'ap.org',
-                  'prothomalo.com',
-                  'bdnews24.com',
-                  'jugantor.com',
-                  'kalerkantho.com',
-                  'ittefaq.com.bd',
-                  'samakal.com',
-                  'banglatribune.com'
-                ]
-              })
+                  "bbc.com",
+                  "reuters.com",
+                  "ap.org",
+                  "prothomalo.com",
+                  "bdnews24.com",
+                  "jugantor.com",
+                  "kalerkantho.com",
+                  "ittefaq.com.bd",
+                  "samakal.com",
+                  "banglatribune.com",
+                ],
+              });
 
               // Format the response with sources
-              const sources = searchResults.results?.map((result: any) => ({
-                title: result.title || 'No title',
-                url: result.url || '',
-                snippet: result.content || result.snippet || ''
-              })) || []
+              const sources =
+                searchResults.results?.map((result: any) => ({
+                  title: result.title || "No title",
+                  url: result.url || "",
+                  snippet: result.content || result.snippet || "",
+                })) || [];
 
               // Send sources first
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'sources', data: sources })}\n\n`))
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ type: "sources", data: sources })}\n\n`
+                )
+              );
 
               // Try Gemini first, fallback to Groq
-              const apiKey = process.env.GEMINI_API_KEY_2
-              let geminiSuccess = false
-              
+              const apiKey = process.env.GEMINI_API_KEY_2;
+              let geminiSuccess = false;
+
               if (apiKey) {
                 try {
-                  console.log('🤖 Trying Gemini (gemini-2.5-flash) for fact-check streaming...')
-                  const genAI = new GoogleGenerativeAI(apiKey)
-                  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+                  console.log(
+                    "🤖 Trying Gemini (gemini-2.5-flash) for fact-check streaming..."
+                  );
+                  const genAI = new GoogleGenerativeAI(apiKey);
+                  const model = genAI.getGenerativeModel({
+                    model: "gemini-2.5-flash",
+                  });
 
                   const systemPrompt = `You are খোঁজ এআই, a professional fact-checker, friendly bengali chatbot and journalist created by the Khoj team. When asked about your identity, always introduce yourself as "খোঁজ এআই". Your task is to analyze search results and provide a comprehensive, detailed fact-check report in Bengali.
 
@@ -70,7 +79,7 @@ Structure your response as:
 1. **Title**: Clear, descriptive title for the fact-check
 2. **Claim Analysis**: Thorough analysis of the claim/question in paragraph form
 3. **Evidence Review**: Systematic review of all sources in analytical paragraphs
-4. **Verdict**: Clear verdict (True/False/Misleading/Unverified) with reasoning
+4. **Verdict**: Clear verdict (True/False/unverified/Unverified) with reasoning
 5. **Detailed Analysis**: Comprehensive explanation connecting all evidence
 6. **Source Citations**: Reference sources with numbered citations [1], [2], etc.
 
@@ -92,39 +101,56 @@ Question/Claim: ${query}
 Sources found: ${searchResults.results?.length || 0}
 
 Source details:
-${searchResults.results?.map((result: any, index: number) => `
+${
+  searchResults.results
+    ?.map(
+      (result: any, index: number) => `
 [${index + 1}] ${result.title}
 URL: ${result.url}
-Content: ${result.content || result.snippet || 'No detailed content available'}
-`).join('\n') || 'No sources found'}
+Content: ${result.content || result.snippet || "No detailed content available"}
+`
+    )
+    .join("\n") || "No sources found"
+}
 
-Provide a comprehensive fact-check report in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats.`
+Provide a comprehensive fact-check report in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats.`;
 
-                  const result = await model.generateContent(systemPrompt)
-                  const response = result.response.text()
-                  
+                  const result = await model.generateContent(systemPrompt);
+                  const response = result.response.text();
+
                   // Stream the response character by character to simulate streaming
                   for (let i = 0; i < response.length; i++) {
-                    const char = response[i]
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: char })}\n\n`))
-                    await new Promise(resolve => setTimeout(resolve, 7)) // 3x faster
+                    const char = response[i];
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({ type: "content", data: char })}\n\n`
+                      )
+                    );
+                    await new Promise((resolve) => setTimeout(resolve, 7)); // 3x faster
                   }
-                  
-                  geminiSuccess = true
-                  console.log('✅ Gemini fact-check streaming successful')
+
+                  geminiSuccess = true;
+                  console.log("✅ Gemini fact-check streaming successful");
                 } catch (geminiError) {
-                  console.error('❌ Gemini fact-check streaming failed:', geminiError)
-                  console.log('🔄 Falling back to Groq for fact-check streaming...')
+                  console.error(
+                    "❌ Gemini fact-check streaming failed:",
+                    geminiError
+                  );
+                  console.log(
+                    "🔄 Falling back to Groq for fact-check streaming..."
+                  );
                 }
               } else {
-                console.log('⚠️ GEMINI_API_KEY_2 not configured, using Groq for fact-check streaming...')
+                console.log(
+                  "⚠️ GEMINI_API_KEY_2 not configured, using Groq for fact-check streaming..."
+                );
               }
-              
+
               // Fallback to Groq if Gemini fails or is not configured
               if (!geminiSuccess) {
                 const groq = new Groq({
-                  apiKey: process.env.GROQ_API_KEY
-                })
+                  apiKey: process.env.GROQ_API_KEY,
+                });
 
                 const systemPrompt = `You are খোঁজ এআই, a professional fact-checker and journalist created by the Khoj team. When asked about your identity, always introduce yourself as "খোঁজ এআই". Your task is to analyze search results and provide a comprehensive, detailed fact-check report in Bengali.
 
@@ -140,7 +166,7 @@ Structure your response as:
 1. **Title**: Clear, descriptive title for the fact-check
 2. **Claim Analysis**: Thorough analysis of the claim/question in paragraph form
 3. **Evidence Review**: Systematic review of all sources in analytical paragraphs
-4. **Verdict**: Clear verdict (True/False/Misleading/Unverified) with reasoning
+4. **Verdict**: Clear verdict (True/False/unverified/Unverified) with reasoning
 5. **Detailed Analysis**: Comprehensive explanation connecting all evidence
 6. **Source Citations**: Reference sources with numbered citations [1], [2], etc.
 
@@ -162,105 +188,137 @@ Question/Claim: ${query}
 Sources found: ${searchResults.results?.length || 0}
 
 Source details:
-${searchResults.results?.map((result: any, index: number) => `
+${
+  searchResults.results
+    ?.map(
+      (result: any, index: number) => `
 [${index + 1}] ${result.title}
 URL: ${result.url}
-Content: ${result.content || result.snippet || 'No detailed content available'}
-`).join('\n') || 'No sources found'}
+Content: ${result.content || result.snippet || "No detailed content available"}
+`
+    )
+    .join("\n") || "No sources found"
+}
 
-Provide a comprehensive fact-check report in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats.`
+Provide a comprehensive fact-check report in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats.`;
 
                 const chatCompletion = await groq.chat.completions.create({
                   messages: [
                     {
                       role: "user",
-                      content: systemPrompt
-                    }
+                      content: systemPrompt,
+                    },
                   ],
                   model: "openai/gpt-oss-20b",
                   temperature: 1,
                   max_tokens: 8192,
                   top_p: 1,
                   stream: true,
-                  stop: null
-                })
+                  stop: null,
+                });
 
                 // Stream the response from Groq
                 for await (const chunk of chatCompletion) {
-                  const content = chunk.choices[0]?.delta?.content || ''
+                  const content = chunk.choices[0]?.delta?.content || "";
                   if (content) {
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: content })}\n\n`))
-                    await new Promise(resolve => setTimeout(resolve, 7)) // 3x faster
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({ type: "content", data: content })}\n\n`
+                      )
+                    );
+                    await new Promise((resolve) => setTimeout(resolve, 7)); // 3x faster
                   }
                 }
               }
 
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`))
-
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`)
+              );
             } catch (error) {
-              console.error('Tavily search error:', error)
-              const errorResponse = `দুঃখিত, "${query}" বিষয়ে তথ্য খুঁজে পাওয়া যায়নি। অনুগ্রহ করে ভিন্নভাবে প্রশ্ন করুন অথবা অন্য কোনো বিষয়ে জানতে চান।`
-              
-              for (let i = 0; i < errorResponse.length; i++) {
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: errorResponse[i] })}\n\n`))
-                await new Promise(resolve => setTimeout(resolve, 7))
-              }
-              
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`))
-            }
+              console.error("Tavily search error:", error);
+              const errorResponse = `দুঃখিত, "${query}" বিষয়ে তথ্য খুঁজে পাওয়া যায়নি। অনুগ্রহ করে ভিন্নভাবে প্রশ্ন করুন অথবা অন্য কোনো বিষয়ে জানতে চান।`;
 
-          } else if (type === 'citizen-service' && mode === 'citizen-service' && citizenServiceData) {
+              for (let i = 0; i < errorResponse.length; i++) {
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ type: "content", data: errorResponse[i] })}\n\n`
+                  )
+                );
+                await new Promise((resolve) => setTimeout(resolve, 7));
+              }
+
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`)
+              );
+            }
+          } else if (
+            type === "citizen-service" &&
+            mode === "citizen-service" &&
+            citizenServiceData
+          ) {
             // Handle citizen service queries with Tavily crawling
             try {
               // Find relevant service URLs based on query
-              const relevantUrls: string[] = []
-              
+              const relevantUrls: string[] = [];
+
               // Search through citizen service data to find relevant URLs
-              Object.entries(citizenServiceData).forEach(([serviceName, urls]) => {
-                if (Array.isArray(urls) && (query.toLowerCase().includes(serviceName.toLowerCase()) || 
-                    serviceName.toLowerCase().includes(query.toLowerCase()))) {
-                  relevantUrls.push(...urls)
+              Object.entries(citizenServiceData).forEach(
+                ([serviceName, urls]) => {
+                  if (
+                    Array.isArray(urls) &&
+                    (query.toLowerCase().includes(serviceName.toLowerCase()) ||
+                      serviceName.toLowerCase().includes(query.toLowerCase()))
+                  ) {
+                    relevantUrls.push(...urls);
+                  }
                 }
-              })
+              );
 
               // If no specific service found, search in all URLs
               if (relevantUrls.length === 0) {
-                Object.values(citizenServiceData).forEach(urls => {
+                Object.values(citizenServiceData).forEach((urls) => {
                   if (Array.isArray(urls)) {
-                    relevantUrls.push(...urls)
+                    relevantUrls.push(...urls);
                   }
-                })
+                });
               }
 
               // Limit to first 10 URLs to avoid overwhelming the search
-              const searchUrls = relevantUrls.slice(0, 10)
+              const searchUrls = relevantUrls.slice(0, 10);
 
               // Use Tavily to search with specific domains
               const searchResults = await tavilyManager.search(query, {
                 max_results: 8,
-                include_domains: searchUrls.map(url => {
-                  try {
-                    return new URL(url).hostname
-                  } catch {
-                    return url
-                  }
-                }).filter(Boolean)
-              })
+                include_domains: searchUrls
+                  .map((url) => {
+                    try {
+                      return new URL(url).hostname;
+                    } catch {
+                      return url;
+                    }
+                  })
+                  .filter(Boolean),
+              });
 
               // Format the response with sources
-              const sources = searchResults.results?.map((result: any) => ({
-                title: result.title || 'No title',
-                url: result.url || '',
-                snippet: result.content || result.snippet || ''
-              })) || []
+              const sources =
+                searchResults.results?.map((result: any) => ({
+                  title: result.title || "No title",
+                  url: result.url || "",
+                  snippet: result.content || result.snippet || "",
+                })) || [];
 
               // Send sources first
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'sources', data: sources })}\n\n`))
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ type: "sources", data: sources })}\n\n`
+                )
+              );
 
               // Use Groq to create a comprehensive citizen service response
               const groq = new Groq({
-                apiKey: process.env.GROQ_API_KEY
-              })
+                apiKey: process.env.GROQ_API_KEY,
+              });
 
               const systemPrompt = `You are খোঁজ এআই, a helpful government service assistant created by the Khoj team. When asked about your identity, always introduce yourself as "খোঁজ এআই". Your task is to provide comprehensive information about Bangladeshi government services based on search results.
 
@@ -292,96 +350,121 @@ Question: ${query}
 Sources found: ${searchResults.results?.length || 0}
 
 Source details:
-${searchResults.results?.map((result: any, index: number) => `
+${
+  searchResults.results
+    ?.map(
+      (result: any, index: number) => `
 [${index + 1}] ${result.title}
 URL: ${result.url}
-Content: ${result.content || result.snippet || 'No detailed content available'}
-`).join('\n') || 'No sources found'}
+Content: ${result.content || result.snippet || "No detailed content available"}
+`
+    )
+    .join("\n") || "No sources found"
+}
 
-Provide a comprehensive answer about the government service in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats. Include relevant procedures, requirements, and contact information. Make sure to format all URLs as clickable markdown links [text](url) so users can click and visit the websites directly.`
+Provide a comprehensive answer about the government service in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats. Include relevant procedures, requirements, and contact information. Make sure to format all URLs as clickable markdown links [text](url) so users can click and visit the websites directly.`;
 
               const chatCompletion = await groq.chat.completions.create({
                 messages: [
                   {
                     role: "user",
-                    content: systemPrompt
-                  }
+                    content: systemPrompt,
+                  },
                 ],
                 model: "openai/gpt-oss-20b",
                 temperature: 1,
                 max_tokens: 8192,
                 top_p: 1,
                 stream: true,
-                stop: null
-              })
+                stop: null,
+              });
 
               // Stream the response from Groq
               for await (const chunk of chatCompletion) {
-                const content = chunk.choices[0]?.delta?.content || ''
+                const content = chunk.choices[0]?.delta?.content || "";
                 if (content) {
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: content })}\n\n`))
-                  await new Promise(resolve => setTimeout(resolve, 7))
+                  controller.enqueue(
+                    encoder.encode(
+                      `data: ${JSON.stringify({ type: "content", data: content })}\n\n`
+                    )
+                  );
+                  await new Promise((resolve) => setTimeout(resolve, 7));
                 }
               }
 
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`))
-
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`)
+              );
             } catch (error) {
-              console.error('Citizen service search error:', error)
-              const errorResponse = `দুঃখিত, "${query}" বিষয়ে সরকারি সেবা সম্পর্কে তথ্য খুঁজে পাওয়া যায়নি। অনুগ্রহ করে ভিন্নভাবে প্রশ্ন করুন অথবা অন্য কোনো সরকারি সেবা সম্পর্কে জানতে চান।`
-              
-              for (let i = 0; i < errorResponse.length; i++) {
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: errorResponse[i] })}\n\n`))
-                await new Promise(resolve => setTimeout(resolve, 7))
-              }
-              
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`))
-            }
+              console.error("Citizen service search error:", error);
+              const errorResponse = `দুঃখিত, "${query}" বিষয়ে সরকারি সেবা সম্পর্কে তথ্য খুঁজে পাওয়া যায়নি। অনুগ্রহ করে ভিন্নভাবে প্রশ্ন করুন অথবা অন্য কোনো সরকারি সেবা সম্পর্কে জানতে চান।`;
 
-          } else if (type === 'general') {
+              for (let i = 0; i < errorResponse.length; i++) {
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ type: "content", data: errorResponse[i] })}\n\n`
+                  )
+                );
+                await new Promise((resolve) => setTimeout(resolve, 7));
+              }
+
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`)
+              );
+            }
+          } else if (type === "general") {
             // Use Tavily search for general questions to prevent hallucination
             try {
               // First, try to get web search results for factual information
               const searchResults = await tavilyManager.search(query, {
                 max_results: 5,
                 include_domains: [
-                  'bbc.com',
-                  'reuters.com',
-                  'ap.org',
-                  'prothomalo.com',
-                  'bdnews24.com',
-                  'jugantor.com',
-                  'kalerkantho.com',
-                  'ittefaq.com.bd',
-                  'samakal.com',
-                  'banglatribune.com',
-                  'wikipedia.org',
-                  'britannica.com',
-                  'who.int',
-                  'un.org',
-                  'worldbank.org'
-                ]
-              })
+                  "bbc.com",
+                  "reuters.com",
+                  "ap.org",
+                  "prothomalo.com",
+                  "bdnews24.com",
+                  "jugantor.com",
+                  "kalerkantho.com",
+                  "ittefaq.com.bd",
+                  "samakal.com",
+                  "banglatribune.com",
+                  "wikipedia.org",
+                  "britannica.com",
+                  "who.int",
+                  "un.org",
+                  "worldbank.org",
+                ],
+              });
 
               // Format the response with sources
-              const sources = searchResults.results?.map((result: any) => ({
-                title: result.title || 'No title',
-                url: result.url || '',
-                snippet: result.content || result.snippet || ''
-              })) || []
+              const sources =
+                searchResults.results?.map((result: any) => ({
+                  title: result.title || "No title",
+                  url: result.url || "",
+                  snippet: result.content || result.snippet || "",
+                })) || [];
 
               // Send sources first
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'sources', data: sources })}\n\n`))
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ type: "sources", data: sources })}\n\n`
+                )
+              );
 
               // Try Gemini first, fallback to Groq
-              const apiKey = process.env.GEMINI_API_KEY_2
-              let geminiSuccess = false
-              
+              const apiKey = process.env.GEMINI_API_KEY_2;
+              let geminiSuccess = false;
+
               if (apiKey) {
                 try {
-                  console.log('🤖 Trying Gemini (gemini-2.5-flash) for general chat streaming...')
-                  const genAI = new GoogleGenerativeAI(apiKey)
-                  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+                  console.log(
+                    "🤖 Trying Gemini (gemini-2.5-flash) for general chat streaming..."
+                  );
+                  const genAI = new GoogleGenerativeAI(apiKey);
+                  const model = genAI.getGenerativeModel({
+                    model: "gemini-2.5-flash",
+                  });
 
                   const prompt = `You are খোঁজ এআই, a helpful AI assistant created by the Khoj team. When asked about your identity, always introduce yourself as "খোঁজ এআই".
 
@@ -412,39 +495,56 @@ Question: ${query}
 Search results found: ${searchResults.results?.length || 0}
 
 Source details:
-${searchResults.results?.map((result: any, index: number) => `
+${
+  searchResults.results
+    ?.map(
+      (result: any, index: number) => `
 [${index + 1}] ${result.title}
 URL: ${result.url}
-Content: ${result.content || result.snippet || 'No detailed content available'}
-`).join('\n') || 'No sources found'}
+Content: ${result.content || result.snippet || "No detailed content available"}
+`
+    )
+    .join("\n") || "No sources found"
+}
 
-Provide a detailed and well-formatted answer in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats. Make sure to cite sources with numbered references and format all URLs as clickable markdown links [text](url) so users can click and visit the websites directly.`
+Provide a detailed and well-formatted answer in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats. Make sure to cite sources with numbered references and format all URLs as clickable markdown links [text](url) so users can click and visit the websites directly.`;
 
-                  const result = await model.generateContent(prompt)
-                  const response = result.response.text()
-                  
+                  const result = await model.generateContent(prompt);
+                  const response = result.response.text();
+
                   // Stream the response character by character to simulate streaming
                   for (let i = 0; i < response.length; i++) {
-                    const char = response[i]
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: char })}\n\n`))
-                    await new Promise(resolve => setTimeout(resolve, 7)) // 3x faster
+                    const char = response[i];
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({ type: "content", data: char })}\n\n`
+                      )
+                    );
+                    await new Promise((resolve) => setTimeout(resolve, 7)); // 3x faster
                   }
-                  
-                  geminiSuccess = true
-                  console.log('✅ Gemini general chat streaming successful')
+
+                  geminiSuccess = true;
+                  console.log("✅ Gemini general chat streaming successful");
                 } catch (geminiError) {
-                  console.error('❌ Gemini general chat streaming failed:', geminiError)
-                  console.log('🔄 Falling back to Groq for general chat streaming...')
+                  console.error(
+                    "❌ Gemini general chat streaming failed:",
+                    geminiError
+                  );
+                  console.log(
+                    "🔄 Falling back to Groq for general chat streaming..."
+                  );
                 }
               } else {
-                console.log('⚠️ GEMINI_API_KEY_2 not configured, using Groq for general chat streaming...')
+                console.log(
+                  "⚠️ GEMINI_API_KEY_2 not configured, using Groq for general chat streaming..."
+                );
               }
-              
+
               // Fallback to Groq if Gemini fails or is not configured
               if (!geminiSuccess) {
                 const groq = new Groq({
-                  apiKey: process.env.GROQ_API_KEY
-                })
+                  apiKey: process.env.GROQ_API_KEY,
+                });
 
                 const prompt = `You are খোঁজ এআই, a helpful AI assistant created by the Khoj team. When asked about your identity, always introduce yourself as "খোঁজ এআই".
 
@@ -475,76 +575,98 @@ Question: ${query}
 Search results found: ${searchResults.results?.length || 0}
 
 Source details:
-${searchResults.results?.map((result: any, index: number) => `
+${
+  searchResults.results
+    ?.map(
+      (result: any, index: number) => `
 [${index + 1}] ${result.title}
 URL: ${result.url}
-Content: ${result.content || result.snippet || 'No detailed content available'}
-`).join('\n') || 'No sources found'}
+Content: ${result.content || result.snippet || "No detailed content available"}
+`
+    )
+    .join("\n") || "No sources found"
+}
 
-Provide a detailed and well-formatted answer in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats. Make sure to cite sources with numbered references and format all URLs as clickable markdown links [text](url) so users can click and visit the websites directly.`
+Provide a detailed and well-formatted answer in Bengali using analytical paragraphs. Connect all dots from the search results and provide thorough analysis. Do NOT create tables or structured formats. Make sure to cite sources with numbered references and format all URLs as clickable markdown links [text](url) so users can click and visit the websites directly.`;
 
                 const chatCompletion = await groq.chat.completions.create({
                   messages: [
                     {
                       role: "user",
-                      content: prompt
-                    }
+                      content: prompt,
+                    },
                   ],
                   model: "openai/gpt-oss-20b",
                   temperature: 1,
                   max_tokens: 8192,
                   top_p: 1,
                   stream: true,
-                  stop: null
-                })
+                  stop: null,
+                });
 
                 // Stream the response from Groq
                 for await (const chunk of chatCompletion) {
-                  const content = chunk.choices[0]?.delta?.content || ''
+                  const content = chunk.choices[0]?.delta?.content || "";
                   if (content) {
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: content })}\n\n`))
-                    await new Promise(resolve => setTimeout(resolve, 7)) // 3x faster
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({ type: "content", data: content })}\n\n`
+                      )
+                    );
+                    await new Promise((resolve) => setTimeout(resolve, 7)); // 3x faster
                   }
                 }
               }
 
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`))
-
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`)
+              );
             } catch (error) {
-              console.error('General search error:', error)
-              const errorResponse = `দুঃখিত, "${query}" বিষয়ে তথ্য খুঁজে পাওয়া যায়নি। অনুগ্রহ করে ভিন্নভাবে প্রশ্ন করুন অথবা অন্য কোনো বিষয়ে জানতে চান।`
-              
+              console.error("General search error:", error);
+              const errorResponse = `দুঃখিত, "${query}" বিষয়ে তথ্য খুঁজে পাওয়া যায়নি। অনুগ্রহ করে ভিন্নভাবে প্রশ্ন করুন অথবা অন্য কোনো বিষয়ে জানতে চান।`;
+
               for (let i = 0; i < errorResponse.length; i++) {
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'content', data: errorResponse[i] })}\n\n`))
-                await new Promise(resolve => setTimeout(resolve, 7))
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ type: "content", data: errorResponse[i] })}\n\n`
+                  )
+                );
+                await new Promise((resolve) => setTimeout(resolve, 7));
               }
-              
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`))
+
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`)
+              );
             }
-
           } else {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', data: 'Invalid type. Use "fact-check", "citizen-service", or "general"' })}\n\n`))
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ type: "error", data: 'Invalid type. Use "fact-check", "citizen-service", or "general"' })}\n\n`
+              )
+            );
           }
-
         } catch (error) {
-          console.error('Streaming error:', error)
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', data: 'Internal server error' })}\n\n`))
+          console.error("Streaming error:", error);
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({ type: "error", data: "Internal server error" })}\n\n`
+            )
+          );
         } finally {
-          controller.close()
+          controller.close();
         }
-      }
-    })
+      },
+    });
 
     return new Response(stream, {
       headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
       },
-    })
-
+    });
   } catch (error) {
-    console.error('Khoj chat stream API error:', error)
-    return new Response('Internal server error', { status: 500 })
+    console.error("Khoj chat stream API error:", error);
+    return new Response("Internal server error", { status: 500 });
   }
 }

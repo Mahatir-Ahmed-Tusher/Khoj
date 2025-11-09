@@ -7,7 +7,11 @@ export default defineSchema({
     query: v.string(),
     result: v.string(),
     timestamp: v.number(),
-    verdict: v.union(v.literal("true"), v.literal("false"), v.literal("unverified")),
+    verdict: v.union(
+      v.literal("true"),
+      v.literal("false"),
+      v.literal("unverified")
+    ),
     sources: v.array(
       v.object({
         id: v.number(),

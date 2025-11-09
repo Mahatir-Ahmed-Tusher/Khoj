@@ -26,6 +26,7 @@ import {
 } from "@/lib/utils";
 import ImageOptionsModal from "@/components/ImageOptionsModal";
 import FloatingBall from "@/components/FloatingBall";
+import Toaster from "@/components/Toaster";
 
 // Blog data
 interface BlogPost {
@@ -777,6 +778,7 @@ export default function HomePage() {
         reader.onerror = () => {
           setIsUploadingImage(false);
           setUploadProgress(0);
+
           alert("আপলোডে সমস্যা হয়েছে — অনুগ্রহ করে আবার চেষ্টা করুন।");
         };
         reader.readAsDataURL(file);

@@ -25,7 +25,7 @@ export const normalizeVerdict = (value?: string | null): VerdictValue => {
     case "untrue":
     case "debunk":
       return "false";
-    case "misleading":
+    case "unverified":
     case "context_dependent":
     case "unverified":
     default:

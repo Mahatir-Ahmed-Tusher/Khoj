@@ -1,56 +1,63 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Footer from '@/components/Footer'
-import SearchBar from '@/components/SearchBar'
-import { Loader2, Download, CheckCircle, XCircle, AlertTriangle, HelpCircle } from 'lucide-react'
-import { addAIFactCheck } from '@/lib/ai-factcheck-utils'
-import { useMutation } from 'convex/react'
-import { api } from '@/convex/_generated/api'
+import { useState } from "react";
+import Footer from "@/components/Footer";
+import SearchBar from "@/components/SearchBar";
+import {
+  Loader2,
+  Download,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  HelpCircle,
+} from "lucide-react";
+import { addAIFactCheck } from "@/lib/ai-factcheck-utils";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 interface FactCheckResult {
-  claim: string
-  report: string
+  claim: string;
+  report: string;
   sources: Array<{
-    id: number
-    title: string
-    url: string
-    snippet: string
-  }>
-  generatedAt: string
+    id: number;
+    title: string;
+    url: string;
+    snippet: string;
+  }>;
+  generatedAt: string;
 }
 
 export default function AIFactCheckPage() {
-  const [query, setQuery] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [result, setResult] = useState<FactCheckResult | null>(null)
-  const [error, setError] = useState('')
-  
+  const [query, setQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<FactCheckResult | null>(null);
+  const [error, setError] = useState("");
+
   // Convex mutation for saving to database
-  const createFactCheck = useMutation(api.factChecks.create)
+  const createFactCheck = useMutation(api.factChecks.create);
 
   const handleSearch = async (searchQuery: string) => {
-    setQuery(searchQuery)
-    setIsLoading(true)
-    setError('')
-    setResult(null)
+    setQuery(searchQuery);
+    setIsLoading(true);
+    setError("");
+    setResult(null);
 
     try {
-      const response = await fetch('/api/factcheck', {
-        method: 'POST',
+      const response = await fetch("/api/factcheck", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ query: searchQuery }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error('ফ্যাক্টচেক রিপোর্ট তৈরি করতে সমস্যা হয়েছে')
+        throw new Error("ফ্যাক্টচেক রিপোর্ট তৈরি করতে সমস্যা হয়েছে");
       }
 
-      const data = await response.json()
-      setResult(data)
-      
+      const data = await response.json();
+      setResult(data);
+
       // Save to database
       if (data.verdict) {
         await addAIFactCheck(
@@ -60,57 +67,60 @@ export default function AIFactCheckPage() {
           data.sources,
           data.sourceInfo,
           createFactCheck
-        )
+        );
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'একটি ত্রুটি ঘটেছে')
+      setError(err instanceof Error ? err.message : "একটি ত্রুটি ঘটেছে");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const downloadReport = () => {
-    if (!result) return
+    if (!result) return;
 
     const content = `
 খোঁজ - AI ফ্যাক্টচেক রিপোর্ট
 
 দাবি: ${result.claim}
-তৈরির তারিখ: ${new Date(result.generatedAt).toLocaleDateString('bn-BD')}
+তৈরির তারিখ: ${new Date(result.generatedAt).toLocaleDateString("bn-BD")}
 
 ${result.report}
 
 ---
 উৎসসমূহ:
-${result.sources.map(source => `${source.id}. ${source.title} - ${source.url}`).join('\n')}
+${result.sources.map((source) => `${source.id}. ${source.title} - ${source.url}`).join("\n")}
 
 ---
 খোঁজ - AI-চালিত বাংলা ফ্যাক্টচেকিং প্ল্যাটফর্ম
 https://khoj.com
-    `.trim()
+    `.trim();
 
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `khoj-factcheck-${Date.now()}.txt`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `khoj-factcheck-${Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   const getVerdictIcon = (report: string) => {
-    if (report.includes('সত্য') || report.includes('true')) {
-      return <CheckCircle className="h-6 w-6 text-green-600" />
-    } else if (report.includes('মিথ্যা') || report.includes('false')) {
-      return <XCircle className="h-6 w-6 text-red-600" />
-    } else if (report.includes('ভ্রান্তিমূলক') || report.includes('misleading')) {
-      return <AlertTriangle className="h-6 w-6 text-yellow-600" />
+    if (report.includes("সত্য") || report.includes("true")) {
+      return <CheckCircle className="h-6 w-6 text-green-600" />;
+    } else if (report.includes("মিথ্যা") || report.includes("false")) {
+      return <XCircle className="h-6 w-6 text-red-600" />;
+    } else if (
+      report.includes("ভ্রান্তিমূলক") ||
+      report.includes("unverified")
+    ) {
+      return <AlertTriangle className="h-6 w-6 text-yellow-600" />;
     } else {
-      return <HelpCircle className="h-6 w-6 text-gray-600" />
+      return <HelpCircle className="h-6 w-6 text-gray-600" />;
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -122,9 +132,9 @@ https://khoj.com
           <p className="text-lg text-gray-600 mb-8 font-tiro-bangla">
             যেকোনো দাবি বা তথ্যের সত্যতা যাচাই করুন AI-এর সাহায্যে
           </p>
-          
+
           <div className="max-w-2xl mx-auto">
-            <SearchBar 
+            <SearchBar
               placeholder="কি নিয়ে যাচাই করতে চান তা লিখে ফেলুন..."
               onSearch={handleSearch}
             />
@@ -139,7 +149,9 @@ https://khoj.com
               আপনার জন্য ফ্যাক্টচেক রিপোর্ট তৈরি হচ্ছে...
             </p>
             <p className="text-sm text-gray-500 mt-2 font-tiro-bangla">
-              আপনার প্রশ্ন বা দাবি কতোটা জটিল, তার উপর ভিত্তি করে তা কয়েক সেকেন্ড থেকে অন্তত এক মিনিট সময় নিতে পারে, অনুগ্রহ পূর্বক অপেক্ষা করুন...
+              আপনার প্রশ্ন বা দাবি কতোটা জটিল, তার উপর ভিত্তি করে তা কয়েক
+              সেকেন্ড থেকে অন্তত এক মিনিট সময় নিতে পারে, অনুগ্রহ পূর্বক অপেক্ষা
+              করুন...
             </p>
           </div>
         )}
@@ -168,7 +180,7 @@ https://khoj.com
                       ফ্যাক্টচেক রিপোর্ট
                     </h2>
                     <p className="text-gray-600 font-tiro-bangla">
-                      {new Date(result.generatedAt).toLocaleDateString('bn-BD')}
+                      {new Date(result.generatedAt).toLocaleDateString("bn-BD")}
                     </p>
                   </div>
                 </div>
@@ -208,7 +220,10 @@ https://khoj.com
                 </h3>
                 <div className="space-y-4">
                   {result.sources.map((source) => (
-                    <div key={source.id} className="border border-gray-200 rounded-lg p-4">
+                    <div
+                      key={source.id}
+                      className="border border-gray-200 rounded-lg p-4"
+                    >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h4 className="font-medium text-gray-900 mb-2">
@@ -250,7 +265,9 @@ https://khoj.com
                   <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                     <span className="text-primary-600 font-bold">১</span>
                   </div>
-                  <h4 className="font-medium text-gray-900 mb-2 font-tiro-bangla">দাবি লিখুন</h4>
+                  <h4 className="font-medium text-gray-900 mb-2 font-tiro-bangla">
+                    দাবি লিখুন
+                  </h4>
                   <p className="text-sm text-gray-600 font-tiro-bangla">
                     যেকোনো দাবি বা তথ্য উপরে দেওয়া বাক্সে লিখুন
                   </p>
@@ -259,7 +276,9 @@ https://khoj.com
                   <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                     <span className="text-primary-600 font-bold">২</span>
                   </div>
-                  <h4 className="font-medium text-gray-900 mb-2 font-tiro-bangla">AI যাচাই করে</h4>
+                  <h4 className="font-medium text-gray-900 mb-2 font-tiro-bangla">
+                    AI যাচাই করে
+                  </h4>
                   <p className="text-sm text-gray-600 font-tiro-bangla">
                     AI বিশ্বাসযোগ্য উৎস থেকে তথ্য সংগ্রহ করে যাচাই করে
                   </p>
@@ -268,7 +287,9 @@ https://khoj.com
                   <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-3">
                     <span className="text-primary-600 font-bold">৩</span>
                   </div>
-                  <h4 className="font-medium text-gray-900 mb-2 font-tiro-bangla">রিপোর্ট পান</h4>
+                  <h4 className="font-medium text-gray-900 mb-2 font-tiro-bangla">
+                    রিপোর্ট পান
+                  </h4>
                   <p className="text-sm text-gray-600 font-tiro-bangla">
                     বিস্তারিত বিশ্লেষণ এবং উৎস সহ রিপোর্ট পান
                   </p>
@@ -281,5 +302,5 @@ https://khoj.com
 
       <Footer />
     </div>
-  )
+  );
 }
