@@ -96,7 +96,7 @@ function MythbustingContent() {
         generatedAt: report.timestamp.toISOString(),
         pageUrl: typeof window !== "undefined" ? window.location.href : "",
       };
-      await convex.mutation(api.factChecks.create, payload);
+      await convex.mutation(api.factChecks.create, payload as any);
       console.log("[Convex] Saved successfully");
     } catch (error) {
       console.error("[Convex] Error saving:", error);
@@ -508,7 +508,7 @@ ${messageText}
                 url: source.url,
               }) as Source
           ),
-          verdict: latest.verdict,
+          verdict: normalizeVerdict(latest.verdict),
           summary: (latest as any).summary,
           conclusion: (latest as any).conclusion,
           keyTakeaways: (latest as any).keyTakeaways,

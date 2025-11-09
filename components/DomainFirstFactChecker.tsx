@@ -3,6 +3,7 @@
 import { useState } from "react";
 import SearchBar from "./SearchBar";
 import { parseMarkdown, sanitizeHtml } from "@/lib/markdown";
+import { VerdictValue } from "@/lib/utils";
 
 interface SearchResult {
   url: string;
@@ -35,7 +36,7 @@ interface FactCheckResponse {
     title: string;
     slug: string;
     summary: string;
-    verdict: "true" | "false" | "unverified" | "unverified" | "debunk";
+    verdict: VerdictValue | "debunk";
     publishedAt: string;
     author: string;
     tags: string[];
