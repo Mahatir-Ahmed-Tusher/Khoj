@@ -8,7 +8,7 @@ import {
   normalizeUrl,
   extractDomain,
   isAllowedSite,
-  VerdictValue,
+  ArticleVerdict,
 } from "@/lib/utils";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -39,7 +39,7 @@ interface FactCheckResponse {
     title: string;
     slug: string;
     summary: string;
-    verdict: VerdictValue | "debunk";
+    verdict: ArticleVerdict;
     publishedAt: string;
     author: string;
     tags: string[];

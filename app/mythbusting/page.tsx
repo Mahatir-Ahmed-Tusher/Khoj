@@ -96,7 +96,7 @@ function MythbustingContent() {
         generatedAt: report.timestamp.toISOString(),
         pageUrl: typeof window !== "undefined" ? window.location.href : "",
       };
-      await convex.mutation(api.factChecks.create, payload as any);
+      await convex.mutation(api.factChecks.create, payload);
       console.log("[Convex] Saved successfully");
     } catch (error) {
       console.error("[Convex] Error saving:", error);

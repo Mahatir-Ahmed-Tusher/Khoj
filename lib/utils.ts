@@ -20,6 +20,67 @@ export type VerdictValue =
   | "unverified"
   | "context_dependent";
 
+export type ArticleVerdict = VerdictValue | "debunk";
+
+export type ArticleVerdictMeta = {
+  heroLabel: string;
+  heroClass: string;
+  chipLabelBn: string;
+  chipClass: string;
+  filterLabelBn: string;
+  filterColor: string;
+};
+
+const ARTICLE_VERDICT_META: Record<ArticleVerdict, ArticleVerdictMeta> = {
+  true: {
+    heroLabel: "TRUE",
+    heroClass: "bg-green-600 text-white",
+    chipLabelBn: "সত্য",
+    chipClass: "bg-green-100 text-green-800",
+    filterLabelBn: "সত্য",
+    filterColor: "bg-green-100 text-green-700",
+  },
+  false: {
+    heroLabel: "FALSE",
+    heroClass: "bg-red-600 text-white",
+    chipLabelBn: "মিথ্যা",
+    chipClass: "bg-red-100 text-red-800",
+    filterLabelBn: "মিথ্যা",
+    filterColor: "bg-red-100 text-red-700",
+  },
+  debunk: {
+    heroLabel: "DEBUNK",
+    heroClass: "bg-purple-600 text-white",
+    chipLabelBn: "খন্ডন",
+    chipClass: "bg-purple-100 text-purple-800",
+    filterLabelBn: "খন্ডন",
+    filterColor: "bg-purple-100 text-purple-700",
+  },
+  context_dependent: {
+    heroLabel: "CONTEXT",
+    heroClass: "bg-blue-600 text-white",
+    chipLabelBn: "প্রেক্ষাপট নির্ভর",
+    chipClass: "bg-blue-100 text-blue-800",
+    filterLabelBn: "প্রেক্ষাপট নির্ভর",
+    filterColor: "bg-blue-100 text-blue-700",
+  },
+  unverified: {
+    heroLabel: "UNVERIFIED",
+    heroClass: "bg-yellow-500 text-white",
+    chipLabelBn: "অযাচাইকৃত",
+    chipClass: "bg-yellow-100 text-yellow-800",
+    filterLabelBn: "অযাচাইকৃত",
+    filterColor: "bg-yellow-100 text-yellow-700",
+  },
+};
+
+export const getArticleVerdictMeta = (
+  verdict?: string | null
+): ArticleVerdictMeta => {
+  const key = (verdict ?? "unverified") as ArticleVerdict;
+  return ARTICLE_VERDICT_META[key] ?? ARTICLE_VERDICT_META.unverified;
+};
+
 export const normalizeVerdict = (value?: string | null): VerdictValue => {
   switch ((value || "").toLowerCase()) {
     case "true":
@@ -30,8 +91,9 @@ export const normalizeVerdict = (value?: string | null): VerdictValue => {
     case "debunk":
       return "false";
     case "unverified":
+      return "unverified";
     case "context_dependent":
-    case "unverified":
+      return "context_dependent";
     default:
       return "unverified";
   }
@@ -48,6 +110,8 @@ export const getVerdictLabel = (
         return "True";
       case "false":
         return "False";
+      case "context_dependent":
+        return "Context-dependent";
       default:
         return "Unverified";
     }
@@ -58,6 +122,8 @@ export const getVerdictLabel = (
       return "সত্য";
     case "false":
       return "অসত্য";
+    case "context_dependent":
+      return "প্রেক্ষাপট নির্ভর";
     default:
       return "বিভ্রান্তিকর";
   }
@@ -84,7 +150,7 @@ export interface FactCheckArticle {
   slug: string;
   title: string;
   claim: string;
-  verdict: VerdictValue;
+  verdict: ArticleVerdict;
   summary: string;
   content: string;
   publishedAt: string;

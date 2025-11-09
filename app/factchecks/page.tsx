@@ -4,6 +4,33 @@ import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import { factCheckArticles } from "@/lib/data";
+import { ArticleVerdict, getArticleVerdictMeta } from "@/lib/utils";
+
+type VerdictFilter = ArticleVerdict | "all";
+
+const VERDICT_ORDER: ArticleVerdict[] = [
+  "true",
+  "false",
+  "debunk",
+  "context_dependent",
+  "unverified",
+];
+
+const FILTER_OPTIONS: Array<{
+  value: VerdictFilter;
+  label: string;
+  color: string;
+}> = [
+  { value: "all", label: "সব", color: "bg-gray-100 text-gray-700" },
+  ...VERDICT_ORDER.map((value) => {
+    const meta = getArticleVerdictMeta(value);
+    return {
+      value,
+      label: meta.filterLabelBn,
+      color: meta.filterColor,
+    };
+  }),
+];
 
 export default function FactChecksPage() {
   // Sort articles by date (newest first)
@@ -13,7 +40,7 @@ export default function FactChecksPage() {
   );
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState<VerdictFilter>("all");
   const [filteredArticles, setFilteredArticles] = useState(sortedArticles);
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -34,12 +61,12 @@ export default function FactChecksPage() {
     filterArticles(query, filter);
   };
 
-  const handleFilterChange = (newFilter: string) => {
+  const handleFilterChange = (newFilter: VerdictFilter) => {
     setFilter(newFilter);
     filterArticles(searchQuery, newFilter);
   };
 
-  const filterArticles = (query: string, verdictFilter: string) => {
+  const filterArticles = (query: string, verdictFilter: VerdictFilter) => {
     let filtered = sortedArticles;
 
     // Filter by search query
@@ -66,21 +93,6 @@ export default function FactChecksPage() {
     );
 
     setFilteredArticles(uniqueArticles);
-  };
-
-  const getFilterText = (filterValue: string) => {
-    switch (filterValue) {
-      case "true":
-        return "সত্য";
-      case "false":
-        return "মিথ্যা";
-      case "unverified":
-        return "ভ্রান্তিমূলক";
-      case "unverified":
-        return "অযাচাইকৃত";
-      default:
-        return "সব";
-    }
   };
 
   return (
@@ -128,34 +140,7 @@ export default function FactChecksPage() {
         {/* Filter Section */}
         <div className="mb-6">
           <div className="flex flex-wrap gap-2 justify-center">
-            {[
-              { value: "all", label: "সব", color: "bg-gray-100 text-gray-700" },
-              {
-                value: "true",
-                label: "সত্য",
-                color: "bg-green-100 text-green-700",
-              },
-              {
-                value: "false",
-                label: "মিথ্যা",
-                color: "bg-red-100 text-red-700",
-              },
-              {
-                value: "unverified",
-                label: "ভ্রান্তিমূলক",
-                color: "bg-yellow-100 text-yellow-700",
-              },
-              {
-                value: "unverified",
-                label: "অযাচাইকৃত",
-                color: "bg-blue-100 text-blue-700",
-              },
-              {
-                value: "debunk",
-                label: "খন্ডন",
-                color: "bg-purple-100 text-purple-700",
-              },
-            ].map((filterOption) => (
+            {FILTER_OPTIONS.map((filterOption) => (
               <button
                 key={filterOption.value}
                 onClick={() => handleFilterChange(filterOption.value)}
@@ -184,7 +169,9 @@ export default function FactChecksPage() {
             {/* Main Carousel Container */}
             <div className="relative h-96 overflow-hidden">
               <div className="flex items-center justify-center h-full">
-                {latestArticles.map((article, index) => (
+                {latestArticles.map((article, index) => {
+                  const meta = getArticleVerdictMeta(article.verdict);
+                  return (
                   <div
                     key={`carousel-${article.id}-${index}`}
                     className={`absolute transition-all duration-1000 ease-in-out ${
@@ -222,16 +209,10 @@ export default function FactChecksPage() {
 
                         {/* Verdict Badge - Top Right */}
                         <div className="absolute top-3 right-3">
-                          <div className="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                            {article.verdict === "true"
-                              ? "TRUE"
-                              : article.verdict === "false"
-                                ? "FALSE"
-                                : article.verdict === "unverified"
-                                  ? "unverified"
-                                  : article.verdict === "debunk"
-                                    ? "DEBUNK"
-                                    : "UNVERIFIED"}
+                          <div
+                            className={`${meta.heroClass} px-2 py-1 rounded-full text-xs font-bold`}
+                          >
+                            {meta.heroLabel}
                           </div>
                         </div>
 
@@ -276,7 +257,8 @@ export default function FactChecksPage() {
                       </div>
                     </article>
                   </div>
-                ))}
+                );
+                })}
               </div>
             </div>
 
@@ -320,29 +302,16 @@ export default function FactChecksPage() {
                     </h3>
                   </div>
                   <div className="absolute top-3 left-3">
-                    <span
-                      className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                        article.verdict === "true"
-                          ? "bg-green-100 text-green-800"
-                          : article.verdict === "false"
-                            ? "bg-red-100 text-red-800"
-                            : article.verdict === "unverified"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : article.verdict === "debunk"
-                                ? "bg-purple-100 text-purple-800"
-                                : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {article.verdict === "true"
-                        ? "সত্য"
-                        : article.verdict === "false"
-                          ? "মিথ্যা"
-                          : article.verdict === "unverified"
-                            ? "ভ্রান্তিমূলক"
-                            : article.verdict === "debunk"
-                              ? "খন্ডন"
-                              : "অযাচাইকৃত"}
-                    </span>
+                    {(() => {
+                      const meta = getArticleVerdictMeta(article.verdict);
+                      return (
+                        <span
+                          className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${meta.chipClass}`}
+                        >
+                          {meta.chipLabelBn}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { tavilyManager } from "@/lib/tavily-manager";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Groq } from "groq-sdk";
-import { PRIORITY_SITES } from "@/lib/utils";
+import { PRIORITY_SITES, type VerdictValue } from "@/lib/utils";
 import { findRelatedArticles } from "@/lib/data";
 import {
   getSourceTiers,
@@ -931,11 +931,17 @@ ${processedSocialMediaSources.map((item: any, index: number) => `- [${index + 1}
         : report;
 
     // Determine verdict from report content
-    const getVerdictFromReport = (
-      reportText: string
-    ): "true" | "false" | "unverified" | "unverified" => {
+    const getVerdictFromReport = (reportText: string): VerdictValue => {
       const lowerText = reportText.toLowerCase();
-      if (lowerText.includes("সত্য") || lowerText.includes("true")) {
+      if (
+        lowerText.includes("context dependent") ||
+        lowerText.includes("context-dependent") ||
+        lowerText.includes("context specific") ||
+        lowerText.includes("contextual") ||
+        lowerText.includes("প্রেক্ষাপট")
+      ) {
+        return "context_dependent";
+      } else if (lowerText.includes("সত্য") || lowerText.includes("true")) {
         return "true";
       } else if (lowerText.includes("মিথ্যা") || lowerText.includes("false")) {
         return "false";

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import SearchBar from "./SearchBar";
 import { parseMarkdown, sanitizeHtml } from "@/lib/markdown";
-import { VerdictValue } from "@/lib/utils";
+import { ArticleVerdict, getArticleVerdictMeta } from "@/lib/utils";
 
 interface SearchResult {
   url: string;
@@ -36,7 +36,7 @@ interface FactCheckResponse {
     title: string;
     slug: string;
     summary: string;
-    verdict: VerdictValue | "debunk";
+    verdict: ArticleVerdict;
     publishedAt: string;
     author: string;
     tags: string[];
@@ -278,7 +278,9 @@ export default function DomainFirstFactChecker() {
                 📚 সম্পর্কিত নিবন্ধসমূহ
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {result.relatedArticles.map((article) => (
+                {result.relatedArticles.map((article) => {
+                  const meta = getArticleVerdictMeta(article.verdict);
+                  return (
                   <div
                     key={article.id}
                     className="bg-white border border-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow"
@@ -299,27 +301,9 @@ export default function DomainFirstFactChecker() {
                       </div>
                       <div className="absolute top-2 left-2">
                         <span
-                          className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                            article.verdict === "true"
-                              ? "bg-green-100 text-green-800"
-                              : article.verdict === "false"
-                                ? "bg-red-100 text-red-800"
-                                : article.verdict === "unverified"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : article.verdict === "debunk"
-                                    ? "bg-purple-100 text-purple-800"
-                                    : "bg-gray-100 text-gray-800"
-                          }`}
+                          className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${meta.chipClass}`}
                         >
-                          {article.verdict === "true"
-                            ? "সত্য"
-                            : article.verdict === "false"
-                              ? "মিথ্যা"
-                              : article.verdict === "unverified"
-                                ? "ভ্রান্তিমূলক"
-                                : article.verdict === "debunk"
-                                  ? "খন্ডন"
-                                  : "অযাচাইকৃত"}
+                          {meta.chipLabelBn}
                         </span>
                       </div>
                     </div>
@@ -357,7 +341,8 @@ export default function DomainFirstFactChecker() {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
