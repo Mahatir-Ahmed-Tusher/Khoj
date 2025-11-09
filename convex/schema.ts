@@ -10,7 +10,8 @@ export default defineSchema({
     verdict: v.union(
       v.literal("true"),
       v.literal("false"),
-      v.literal("unverified")
+      v.literal("unverified"),
+      v.literal("context_dependent")
     ),
     sources: v.array(
       v.object({
