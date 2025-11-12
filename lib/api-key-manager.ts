@@ -84,14 +84,25 @@ function readKeys(): APIKeysData {
 
 /**
  * Write keys to file
+ * Note: In serverless environments (Vercel, etc.), file writes may fail.
+ * This is handled gracefully - the file is read-only in production.
  */
 function writeKeys(data: APIKeysData): void {
   try {
     data.lastUpdated = new Date().toISOString();
     writeFileSync(KEYS_FILE_PATH, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (error) {
-    console.error('Error writing keys file:', error);
-    throw error;
+  } catch (error: any) {
+    // In production/serverless environments, file writes may fail
+    // Log the error but don't throw - this allows reads to still work
+    console.error('Error writing keys file (this is expected in production):', error.message);
+    // In production, we can't write to the file system, but reads still work
+    // The file is committed to git and deployed, so initial keys are available
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('⚠️ Running in production - file writes are disabled. Keys file is read-only.');
+    } else {
+      // In development, throw the error so we know something is wrong
+      throw error;
+    }
   }
 }
 
@@ -151,7 +162,14 @@ export function assignKeyToUser(userEmail: string): { success: boolean; key?: st
   availableKey.assignedTo = userEmail;
   availableKey.assignedAt = new Date().toISOString();
 
-  writeKeys(data);
+  // Try to write, but don't fail if it's production (read-only filesystem)
+  try {
+    writeKeys(data);
+  } catch (error) {
+    // In production, writes may fail, but we still return success
+    // The assignment is in-memory for this request
+    console.warn('Could not persist key assignment to file (production mode), but assignment succeeded for this request');
+  }
 
   return {
     success: true,

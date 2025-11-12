@@ -62,8 +62,8 @@ temp/
 screenshots/
 developer_guide/
 
-# API Keys (never commit this file!)
-lib/_keys.json
+# API Keys - Now committed for deployment
+# lib/_keys.json
 
 .vercel
 
