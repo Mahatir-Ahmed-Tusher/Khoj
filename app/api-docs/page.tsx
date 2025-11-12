@@ -532,6 +532,18 @@ export default function APIDocsPage() {
                         code={`X-API-Key: <your-api-key>`}
                       />
                     </div>
+                    <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">✅ API Key Format & Handling</h3>
+                      <p className="text-gray-700 mb-2">
+                        <strong>API Key Format:</strong> API keys are 11-character alphanumeric strings (e.g., <code className="bg-green-100 px-2 py-1 rounded text-sm">K7D9PX4LQTA</code>).
+                      </p>
+                      <p className="text-gray-700 mb-2">
+                        <strong>Whitespace Handling:</strong> The API automatically trims whitespace from API keys, so you don't need to worry about extra spaces when copying keys.
+                      </p>
+                      <p className="text-gray-700">
+                        <strong>Getting Your API Key:</strong> Log in with Google and visit <Link href="/get-api-key" className="text-primary-600 hover:underline">https://khoj-bd.com/get-api-key</Link> to get your unique API key.
+                      </p>
+                    </div>
                     <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">💡 Testing Without API Key (Development Only)</h3>
                       <p className="text-gray-700 mb-3">
@@ -568,6 +580,18 @@ export default function APIDocsPage() {
                         language="text"
                         code={`X-API-Key: <your-api-key>`}
                       />
+                    </div>
+                    <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">✅ API কী ফরম্যাট ও পরিচালনা</h3>
+                      <p className="text-gray-700 mb-2">
+                        <strong>API কী ফরম্যাট:</strong> API কীগুলি 11-অক্ষরের alphanumeric স্ট্রিং (উদাহরণ: <code className="bg-green-100 px-2 py-1 rounded text-sm">K7D9PX4LQTA</code>)।
+                      </p>
+                      <p className="text-gray-700 mb-2">
+                        <strong>হোয়াইটস্পেস পরিচালনা:</strong> API স্বয়ংক্রিয়ভাবে API কী থেকে whitespace ট্রিম করে, তাই কী কপি করার সময় অতিরিক্ত স্পেস নিয়ে চিন্তা করার দরকার নেই।
+                      </p>
+                      <p className="text-gray-700">
+                        <strong>আপনার API কী পাওয়া:</strong> Google দিয়ে লগইন করুন এবং <Link href="/get-api-key" className="text-primary-600 hover:underline">https://khoj-bd.com/get-api-key</Link> এ যান আপনার অনন্য API কী পেতে।
+                      </p>
                     </div>
                     <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">💡 API কী ছাড়া পরীক্ষা (শুধুমাত্র উন্নয়ন)</h3>
