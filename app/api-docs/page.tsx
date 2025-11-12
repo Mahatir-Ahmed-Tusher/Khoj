@@ -439,12 +439,21 @@ export default function APIDocsPage() {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">2. Make Your First Request</h3>
+                      <p className="text-gray-700 mb-2">With API Key (Production):</p>
                       <CodeBlock
                         id="quick-start-curl"
                         language="bash"
                         code={`curl -X POST https://khoj-bd.com/api/v1/factcheck \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
+  -d '{"query": "বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে"}'`}
+                      />
+                      <p className="text-gray-700 mt-3 mb-2">Without API Key (Development - requires API_AUTH_REQUIRED=false):</p>
+                      <CodeBlock
+                        id="quick-start-curl-no-key"
+                        language="bash"
+                        code={`curl -X POST https://khoj-bd.com/api/v1/factcheck \\
+  -H "Content-Type: application/json" \\
   -d '{"query": "বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে"}'`}
                       />
                     </div>
@@ -461,12 +470,21 @@ export default function APIDocsPage() {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">২. আপনার প্রথম অনুরোধ করুন</h3>
+                      <p className="text-gray-700 mb-2">API কী সহ (প্রোডাকশন):</p>
                       <CodeBlock
                         id="quick-start-curl-bn"
                         language="bash"
                         code={`curl -X POST https://khoj-bd.com/api/v1/factcheck \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
+  -d '{"query": "বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে"}'`}
+                      />
+                      <p className="text-gray-700 mt-3 mb-2">API কী ছাড়া (উন্নয়ন - API_AUTH_REQUIRED=false প্রয়োজন):</p>
+                      <CodeBlock
+                        id="quick-start-curl-no-key-bn"
+                        language="bash"
+                        code={`curl -X POST https://khoj-bd.com/api/v1/factcheck \\
+  -H "Content-Type: application/json" \\
   -d '{"query": "বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে"}'`}
                       />
                     </div>
@@ -507,6 +525,18 @@ export default function APIDocsPage() {
                         code={`X-API-Key: <your-api-key>`}
                       />
                     </div>
+                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">💡 Testing Without API Key (Development Only)</h3>
+                      <p className="text-gray-700 mb-3">
+                        For development and testing, you can disable authentication by setting <code className="bg-blue-100 px-2 py-1 rounded text-sm">API_AUTH_REQUIRED=false</code> in your server's <code className="bg-blue-100 px-2 py-1 rounded text-sm">.env</code> file.
+                      </p>
+                      <p className="text-gray-700 mb-3">
+                        <strong>⚠️ WARNING:</strong> Only use this in development/testing environments, never in production!
+                      </p>
+                      <p className="text-gray-700">
+                        When authentication is disabled, you can make API calls without providing an API key. This is useful for local development and testing.
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -531,6 +561,18 @@ export default function APIDocsPage() {
                         language="text"
                         code={`X-API-Key: <your-api-key>`}
                       />
+                    </div>
+                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">💡 API কী ছাড়া পরীক্ষা (শুধুমাত্র উন্নয়ন)</h3>
+                      <p className="text-gray-700 mb-3">
+                        উন্নয়ন এবং পরীক্ষার জন্য, আপনি আপনার সার্ভারের <code className="bg-blue-100 px-2 py-1 rounded text-sm">.env</code> ফাইলে <code className="bg-blue-100 px-2 py-1 rounded text-sm">API_AUTH_REQUIRED=false</code> সেট করে প্রমাণীকরণ নিষ্ক্রিয় করতে পারেন।
+                      </p>
+                      <p className="text-gray-700 mb-3">
+                        <strong>⚠️ সতর্কতা:</strong> এটি কেবল উন্নয়ন/পরীক্ষার পরিবেশে ব্যবহার করুন, কখনই প্রোডাকশনে নয়!
+                      </p>
+                      <p className="text-gray-700">
+                        প্রমাণীকরণ নিষ্ক্রিয় হলে, আপনি API কী প্রদান না করেই API কল করতে পারেন। এটি স্থানীয় উন্নয়ন এবং পরীক্ষার জন্য উপযোগী।
+                      </p>
                     </div>
                   </div>
                 )}
@@ -810,7 +852,7 @@ export default function APIDocsPage() {
                         <strong>400 Bad Request:</strong> Invalid or missing query parameter
                       </li>
                       <li>
-                        <strong>401 Unauthorized:</strong> Invalid or missing API key
+                        <strong>401 Unauthorized:</strong> Invalid or missing API key. For development, set <code className="bg-gray-100 px-2 py-1 rounded text-sm">API_AUTH_REQUIRED=false</code> in your server's .env file to test without an API key.
                       </li>
                       <li>
                         <strong>429 Too Many Requests:</strong> Rate limit exceeded
@@ -828,7 +870,7 @@ export default function APIDocsPage() {
                         <strong>400 Bad Request:</strong> অবৈধ বা অনুপস্থিত ক্যোয়ারী প্যারামিটার
                       </li>
                       <li>
-                        <strong>401 Unauthorized:</strong> অবৈধ বা অনুপস্থিত API কী
+                        <strong>401 Unauthorized:</strong> অবৈধ বা অনুপস্থিত API কী। উন্নয়নের জন্য, API কী ছাড়া পরীক্ষা করতে আপনার সার্ভারের .env ফাইলে <code className="bg-gray-100 px-2 py-1 rounded text-sm">API_AUTH_REQUIRED=false</code> সেট করুন।
                       </li>
                       <li>
                         <strong>429 Too Many Requests:</strong> হার সীমা অতিক্রম করেছে
@@ -853,13 +895,26 @@ export default function APIDocsPage() {
                 {language === "en" ? (
                   <div className="space-y-4">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Test with API Key</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Test with API Key (Production)</h3>
                       <CodeBlock
                         id="test-with-key"
                         language="bash"
                         code={`curl -X POST https://khoj-bd.com/api/v1/factcheck \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer your-api-key" \\
+  -d '{"query": "বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে"}'`}
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Test Without API Key (Development)</h3>
+                      <p className="text-gray-700 mb-2 text-sm">
+                        ⚠️ Requires <code className="bg-gray-100 px-2 py-1 rounded text-sm">API_AUTH_REQUIRED=false</code> in server's .env file
+                      </p>
+                      <CodeBlock
+                        id="test-without-key"
+                        language="bash"
+                        code={`curl -X POST https://khoj-bd.com/api/v1/factcheck \\
+  -H "Content-Type: application/json" \\
   -d '{"query": "বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে"}'`}
                       />
                     </div>
@@ -875,13 +930,26 @@ export default function APIDocsPage() {
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">API কী দিয়ে পরীক্ষা করুন</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">API কী দিয়ে পরীক্ষা করুন (প্রোডাকশন)</h3>
                       <CodeBlock
                         id="test-with-key-bn"
                         language="bash"
                         code={`curl -X POST https://khoj-bd.com/api/v1/factcheck \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer your-api-key" \\
+  -d '{"query": "বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে"}'`}
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">API কী ছাড়া পরীক্ষা করুন (উন্নয়ন)</h3>
+                      <p className="text-gray-700 mb-2 text-sm">
+                        ⚠️ সার্ভারের .env ফাইলে <code className="bg-gray-100 px-2 py-1 rounded text-sm">API_AUTH_REQUIRED=false</code> প্রয়োজন
+                      </p>
+                      <CodeBlock
+                        id="test-without-key-bn"
+                        language="bash"
+                        code={`curl -X POST https://khoj-bd.com/api/v1/factcheck \\
+  -H "Content-Type: application/json" \\
   -d '{"query": "বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে"}'`}
                       />
                     </div>
@@ -1089,13 +1157,19 @@ function CodeExamples({ language }: { language: Language }) {
   const examples: { [key: string]: { code: string; id: string } } = {
     javascript: {
       id: "js-example",
-      code: `async function factCheck(query, apiKey) {
+      code: `async function factCheck(query, apiKey = null) {
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  
+  // Only add API key if provided (optional for development)
+  if (apiKey) {
+    headers['Authorization'] = \`Bearer \${apiKey.trim()}\`;
+  }
+  
   const response = await fetch('https://khoj-bd.com/api/v1/factcheck', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': \`Bearer \${apiKey}\`
-    },
+    headers: headers,
     body: JSON.stringify({ query })
   });
 
@@ -1108,12 +1182,19 @@ function CodeExamples({ language }: { language: Language }) {
   return data;
 }
 
-// Usage
+// Usage with API key (production)
 factCheck('বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে', 'your-api-key')
   .then(result => {
     console.log('Verdict:', result.data.verdict);
     console.log('Report:', result.data.report);
     console.log('Sources:', result.data.sources.length);
+  })
+  .catch(error => console.error('Error:', error));
+
+// Usage without API key (development - requires API_AUTH_REQUIRED=false)
+factCheck('বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে')
+  .then(result => {
+    console.log('Verdict:', result.data.verdict);
   })
   .catch(error => console.error('Error:', error));`
     },
@@ -1121,12 +1202,16 @@ factCheck('বাংলাদেশে করোনা ভ্যাকসিন�
       id: "python-example",
       code: `import requests
 
-def fact_check(query, api_key):
+def fact_check(query, api_key=None):
     url = 'https://khoj-bd.com/api/v1/factcheck'
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {api_key}'
     }
+    
+    # Only add API key if provided (optional for development)
+    if api_key:
+        headers['Authorization'] = f'Bearer {api_key.strip()}'
+    
     data = {'query': query}
     
     response = requests.post(url, json=data, headers=headers)
@@ -1134,11 +1219,15 @@ def fact_check(query, api_key):
     
     return response.json()
 
-# Usage
+# Usage with API key (production)
 result = fact_check('বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে', 'your-api-key')
 print(f"Verdict: {result['data']['verdict']}")
 print(f"Report: {result['data']['report']}")
-print(f"Sources: {len(result['data']['sources'])}")`
+print(f"Sources: {len(result['data']['sources'])}")
+
+# Usage without API key (development - requires API_AUTH_REQUIRED=false)
+result = fact_check('বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে')
+print(f"Verdict: {result['data']['verdict']}")`
     },
     powershell: {
       id: "powershell-example",

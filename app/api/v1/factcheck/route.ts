@@ -744,20 +744,88 @@ async function searchTieredSources(
  * Rate limiting: Configurable per API key
  */
 export async function POST(request: NextRequest) {
+  // Handle CORS preflight requests
+  if (request.method === 'OPTIONS') {
+    return new NextResponse(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
+        'Access-Control-Max-Age': '86400',
+      },
+    });
+  }
+
   try {
     // 1. Authenticate request (optional if API_AUTH_REQUIRED is false)
     const apiKey = getAPIKeyFromRequest(request.headers);
+    
+    // Debug logging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔑 API Key received:', apiKey ? `${apiKey.substring(0, 4)}...` : 'none');
+    }
+    
     const keyConfig = validateAPIKey(apiKey);
     const authRequired = process.env.API_AUTH_REQUIRED !== "false"; // Default: true (required)
 
     if (authRequired && !keyConfig) {
+      // Get detailed validation info for better error messages
+      let errorMessage = "Invalid or missing API key.";
+      let helpMessage = "";
+      
+      if (apiKey) {
+        const { validateAPIKeyForUser } = await import('@/lib/api-key-manager');
+        const validation = validateAPIKeyForUser(apiKey);
+        
+        // Debug logging (only in development)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('❌ API Key validation failed:', {
+            keyExists: !!validation.key,
+            status: validation.key?.status,
+            assigned: validation.assigned,
+            error: validation.error,
+          });
+        }
+        
+        // Provide specific error messages
+        if (!validation.key) {
+          errorMessage = "API key not found. Please check your API key and try again.";
+          helpMessage = "💡 For development/testing, you can disable authentication by setting API_AUTH_REQUIRED=false in your .env file.";
+        } else if (validation.key.status === 'revoked') {
+          errorMessage = "This API key has been revoked. Please contact support or get a new API key.";
+        } else if (validation.key.status === 'available') {
+          errorMessage = "This API key is not assigned to any user. Please log in with Google and visit /get-api-key to assign it to your account.";
+          helpMessage = "💡 For development/testing, you can disable authentication by setting API_AUTH_REQUIRED=false in your .env file.";
+        } else if (!validation.assigned) {
+          errorMessage = "This API key is not assigned. Please log in with Google and visit /get-api-key to assign it to your account.";
+          helpMessage = "💡 For development/testing, you can disable authentication by setting API_AUTH_REQUIRED=false in your .env file.";
+        }
+      } else {
+        errorMessage = "No API key provided. Please provide a valid API key in the 'Authorization: Bearer <key>' header or 'X-API-Key' header.";
+        helpMessage = "💡 For development/testing, you can disable authentication by setting API_AUTH_REQUIRED=false in your .env file. This allows you to test without an API key.";
+      }
+      
+      const fullMessage = helpMessage 
+        ? `${errorMessage}\n\n${helpMessage}\n\nTo get an API key for production, log in with Google and visit https://khoj-bd.com/get-api-key`
+        : `${errorMessage} To get an API key, log in with Google and visit https://khoj-bd.com/get-api-key`;
+      
       return NextResponse.json(
         {
           error: "Unauthorized",
-          message:
-            "Invalid or missing API key. Please provide a valid API key in the 'Authorization: Bearer <key>' header or 'X-API-Key' header. To get an API key, log in with Google and visit /get-api-key",
+          message: fullMessage,
+          developmentTip: process.env.NODE_ENV === 'development' 
+            ? "Set API_AUTH_REQUIRED=false in your .env file to disable authentication for testing"
+            : undefined,
         },
-        { status: 401 }
+        { 
+          status: 401,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
+          },
+        }
       );
     }
 
@@ -964,6 +1032,10 @@ ${processedSocialMediaSources.map((item: any, index: number) => `- [${index + 1}
     const resetDate = new Date(rateLimit.resetAt);
     const responseHeaders: Record<string, string> = {
       "Content-Type": "application/json",
+      // CORS headers for cross-origin requests
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, X-API-Key",
     };
     
     if (keyConfig) {
@@ -1038,7 +1110,14 @@ ${processedSocialMediaSources.map((item: any, index: number) => `- [${index + 1}
             ? error.message
             : "Failed to generate fact-checking report",
       },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
+        },
+      }
     );
   }
 }
@@ -1119,6 +1198,12 @@ export async function GET() {
     },
     documentation: "https://khoj-bd.com/api-docs",
     support: "For technical support, contact info@khoj-bd.com. To get an API key, log in with Google and visit /get-api-key",
+  }, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
+    },
   });
 }
 
