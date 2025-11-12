@@ -40,8 +40,11 @@ export function validateAPIKey(apiKey: string | null): APIKeyConfig | null {
     return null;
   }
 
+  // Trim the API key to handle any whitespace
+  const trimmedApiKey = apiKey.trim();
+  
   // Check if key exists in the key management system
-  const validation = validateAPIKeyForUser(apiKey);
+  const validation = validateAPIKeyForUser(trimmedApiKey);
   
   if (!validation.valid || !validation.assigned) {
     return null;

@@ -87,6 +87,10 @@ const translations: Translations = {
     en: "Code Examples",
     bn: "কোড উদাহরণ"
   },
+  cors: {
+    en: "Cross-Origin Resource Sharing (CORS)",
+    bn: "ক্রস-অরিজিন রিসোর্স শেয়ারিং (CORS)"
+  },
   configuration: {
     en: "Configuration",
     bn: "কনফিগারেশন"
@@ -137,6 +141,7 @@ export default function APIDocsPage() {
     { id: "authentication", label: t("authentication", language) },
     { id: "endpoints", label: t("endpoints", language) },
     { id: "request-response", label: t("requestResponse", language) },
+    { id: "cors", label: t("cors", language) },
     { id: "code-examples", label: t("codeExamples", language) },
     { id: "configuration", label: t("configuration", language) },
     { id: "rate-limiting", label: t("rateLimiting", language) },
@@ -396,6 +401,7 @@ export default function APIDocsPage() {
                       <li>Tiered source verification system</li>
                       <li>Geography-aware fact-checking (Bangladesh vs International)</li>
                       <li>Related articles from Khoj database</li>
+                      <li>Full CORS support for cross-origin requests</li>
                       <li>Rate limiting and API key authentication</li>
                       <li>Comprehensive error handling</li>
                     </ul>
@@ -412,6 +418,7 @@ export default function APIDocsPage() {
                       <li>স্তরযুক্ত সূত্র যাচাইকরণ সিস্টেম</li>
                       <li>ভূগোল-সচেতন ফ্যাক্ট-চেকিং (বাংলাদেশ বনাম আন্তর্জাতিক)</li>
                       <li>Khoj ডাটাবেস থেকে সম্পর্কিত নিবন্ধ</li>
+                      <li>ক্রস-অরিজিন অনুরোধের জন্য সম্পূর্ণ CORS সমর্থন</li>
                       <li>হার সীমাবদ্ধতা এবং API কী প্রমাণীকরণ</li>
                       <li>ব্যাপক ত্রুটি পরিচালনা</li>
                     </ul>
@@ -753,6 +760,156 @@ export default function APIDocsPage() {
                 )}
               </section>
 
+              {/* CORS Section */}
+              <section
+                ref={(el) => { sectionRefs.current["cors"] = el; }}
+                id="cors"
+                className="scroll-mt-8"
+              >
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+                  {t("cors", language)}
+                </h2>
+                {language === "en" ? (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-gray-700 mb-3">
+                        <strong>✅ Full CORS Support:</strong> The API fully supports Cross-Origin Resource Sharing (CORS), allowing you to make requests from any web application, including browser-based JavaScript applications.
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">CORS Headers</h3>
+                      <p className="text-gray-700 mb-2">
+                        All API responses include the following CORS headers:
+                      </p>
+                      <ul className="list-disc ml-6 space-y-1 text-gray-700 mb-4">
+                        <li><code className="bg-gray-100 px-2 py-1 rounded text-sm">Access-Control-Allow-Origin: *</code> - Allows requests from any origin</li>
+                        <li><code className="bg-gray-100 px-2 py-1 rounded text-sm">Access-Control-Allow-Methods: GET, POST, OPTIONS</code> - Allowed HTTP methods</li>
+                        <li><code className="bg-gray-100 px-2 py-1 rounded text-sm">Access-Control-Allow-Headers: Content-Type, Authorization, X-API-Key</code> - Allowed request headers</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Preflight Requests</h3>
+                      <p className="text-gray-700 mb-2">
+                        The API automatically handles CORS preflight (OPTIONS) requests. Browsers will send these automatically before making cross-origin POST requests.
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Responses</h3>
+                      <p className="text-gray-700 mb-2">
+                        All error responses (400, 401, 429, 500) include proper CORS headers, ensuring that error messages are accessible from cross-origin requests.
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Example: Using from Browser</h3>
+                      <p className="text-gray-700 mb-2">
+                        You can call the API directly from any web page using JavaScript:
+                      </p>
+                      <CodeBlock
+                        id="cors-example"
+                        language="javascript"
+                        code={`// This works from any web page, no CORS issues
+async function factCheck(query, apiKey = null) {
+  const headers = { 
+    'Content-Type': 'application/json' 
+  };
+  
+  if (apiKey) {
+    headers['Authorization'] = \`Bearer \${apiKey.trim()}\`;
+  }
+  
+  const response = await fetch('https://khoj-bd.com/api/v1/factcheck', {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify({ query })
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Fact-check failed');
+  }
+  
+  return await response.json();
+}
+
+// Usage
+factCheck('বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে')
+  .then(result => console.log('Verdict:', result.data.verdict))
+  .catch(error => console.error('Error:', error));`}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-gray-700 mb-3">
+                        <strong>✅ সম্পূর্ণ CORS সমর্থন:</strong> API সম্পূর্ণরূপে Cross-Origin Resource Sharing (CORS) সমর্থন করে, যা আপনাকে যেকোনো ওয়েব অ্যাপ্লিকেশন থেকে, ব্রাউজার-ভিত্তিক JavaScript অ্যাপ্লিকেশন সহ, অনুরোধ করতে দেয়।
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">CORS হেডার</h3>
+                      <p className="text-gray-700 mb-2">
+                        সমস্ত API প্রতিক্রিয়ায় নিম্নলিখিত CORS হেডার অন্তর্ভুক্ত থাকে:
+                      </p>
+                      <ul className="list-disc ml-6 space-y-1 text-gray-700 mb-4">
+                        <li><code className="bg-gray-100 px-2 py-1 rounded text-sm">Access-Control-Allow-Origin: *</code> - যেকোনো উৎস থেকে অনুরোধের অনুমতি দেয়</li>
+                        <li><code className="bg-gray-100 px-2 py-1 rounded text-sm">Access-Control-Allow-Methods: GET, POST, OPTIONS</code> - অনুমোদিত HTTP পদ্ধতি</li>
+                        <li><code className="bg-gray-100 px-2 py-1 rounded text-sm">Access-Control-Allow-Headers: Content-Type, Authorization, X-API-Key</code> - অনুমোদিত অনুরোধ হেডার</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">প্রিফ্লাইট অনুরোধ</h3>
+                      <p className="text-gray-700 mb-2">
+                        API স্বয়ংক্রিয়ভাবে CORS প্রিফ্লাইট (OPTIONS) অনুরোধ পরিচালনা করে। ব্রাউজারগুলি ক্রস-অরিজিন POST অনুরোধ করার আগে স্বয়ংক্রিয়ভাবে এগুলি পাঠাবে।
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">ত্রুটি প্রতিক্রিয়া</h3>
+                      <p className="text-gray-700 mb-2">
+                        সমস্ত ত্রুটি প্রতিক্রিয়া (400, 401, 429, 500) সঠিক CORS হেডার অন্তর্ভুক্ত করে, নিশ্চিত করে যে ক্রস-অরিজিন অনুরোধ থেকে ত্রুটি বার্তাগুলি অ্যাক্সেসযোগ্য।
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">উদাহরণ: ব্রাউজার থেকে ব্যবহার</h3>
+                      <p className="text-gray-700 mb-2">
+                        আপনি JavaScript ব্যবহার করে যেকোনো ওয়েব পৃষ্ঠা থেকে সরাসরি API কল করতে পারেন:
+                      </p>
+                      <CodeBlock
+                        id="cors-example-bn"
+                        language="javascript"
+                        code={`// এটি যেকোনো ওয়েব পৃষ্ঠা থেকে কাজ করে, CORS সমস্যা নেই
+async function factCheck(query, apiKey = null) {
+  const headers = { 
+    'Content-Type': 'application/json' 
+  };
+  
+  if (apiKey) {
+    headers['Authorization'] = \`Bearer \${apiKey.trim()}\`;
+  }
+  
+  const response = await fetch('https://khoj-bd.com/api/v1/factcheck', {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify({ query })
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Fact-check failed');
+  }
+  
+  return await response.json();
+}
+
+// ব্যবহার
+factCheck('বাংলাদেশে করোনা ভ্যাকসিনের পার্শ্বপ্রতিক্রিয়া আছে')
+  .then(result => console.log('Verdict:', result.data.verdict))
+  .catch(error => console.error('Error:', error));`}
+                      />
+                    </div>
+                  </div>
+                )}
+              </section>
+
               {/* Code Examples Section */}
               <section
                 ref={(el) => { sectionRefs.current["code-examples"] = el; }}
@@ -845,40 +1002,154 @@ export default function APIDocsPage() {
                   {t("errorHandling", language)}
                 </h2>
                 {language === "en" ? (
-                  <div className="space-y-4">
-                    <p className="text-gray-700"><strong>Common Error Codes:</strong></p>
-                    <ul className="space-y-3 text-gray-700">
-                      <li>
-                        <strong>400 Bad Request:</strong> Invalid or missing query parameter
-                      </li>
-                      <li>
-                        <strong>401 Unauthorized:</strong> Invalid or missing API key. For development, set <code className="bg-gray-100 px-2 py-1 rounded text-sm">API_AUTH_REQUIRED=false</code> in your server's .env file to test without an API key.
-                      </li>
-                      <li>
-                        <strong>429 Too Many Requests:</strong> Rate limit exceeded
-                      </li>
-                      <li>
-                        <strong>500 Internal Server Error:</strong> Server-side error occurred
-                      </li>
-                    </ul>
+                  <div className="space-y-6">
+                    <div>
+                      <p className="text-gray-700 mb-4"><strong>Common Error Codes:</strong></p>
+                      <ul className="space-y-3 text-gray-700 mb-6">
+                        <li>
+                          <strong>400 Bad Request:</strong> Invalid or missing query parameter, or invalid JSON in request body
+                        </li>
+                        <li>
+                          <strong>401 Unauthorized:</strong> Invalid or missing API key. For development, set <code className="bg-gray-100 px-2 py-1 rounded text-sm">API_AUTH_REQUIRED=false</code> in your server's .env file to test without an API key.
+                        </li>
+                        <li>
+                          <strong>429 Too Many Requests:</strong> Rate limit exceeded
+                        </li>
+                        <li>
+                          <strong>500 Internal Server Error:</strong> Server-side error occurred
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Error Response Examples</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-gray-700 mb-2"><strong>400 Bad Request:</strong></p>
+                          <CodeBlock
+                            id="error-400"
+                            language="json"
+                            code={`{
+  "error": "Bad Request",
+  "message": "Query is required and must be a non-empty string"
+}`}
+                          />
+                        </div>
+                        <div>
+                          <p className="text-gray-700 mb-2"><strong>401 Unauthorized:</strong></p>
+                          <CodeBlock
+                            id="error-401"
+                            language="json"
+                            code={`{
+  "error": "Unauthorized",
+  "message": "No API key provided. Please provide a valid API key...",
+  "developmentTip": "Set API_AUTH_REQUIRED=false in your .env file..."
+}`}
+                          />
+                        </div>
+                        <div>
+                          <p className="text-gray-700 mb-2"><strong>429 Too Many Requests:</strong></p>
+                          <CodeBlock
+                            id="error-429"
+                            language="json"
+                            code={`{
+  "error": "Rate limit exceeded",
+  "message": "You have exceeded your rate limit. Please try again after 2024-01-01T13:00:00.000Z.",
+  "resetAt": "2024-01-01T13:00:00.000Z"
+}`}
+                          />
+                          <p className="text-gray-600 text-sm mt-2">
+                            Response headers also include: <code className="bg-gray-100 px-2 py-1 rounded text-sm">X-RateLimit-Limit</code>, <code className="bg-gray-100 px-2 py-1 rounded text-sm">X-RateLimit-Remaining</code>, <code className="bg-gray-100 px-2 py-1 rounded text-sm">X-RateLimit-Reset</code>
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-700 mb-2"><strong>500 Internal Server Error:</strong></p>
+                          <CodeBlock
+                            id="error-500"
+                            language="json"
+                            code={`{
+  "success": false,
+  "error": "Internal Server Error",
+  "message": "Failed to generate fact-checking report"
+}`}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    <p className="text-gray-700"><strong>সাধারণ ত্রুটি কোড:</strong></p>
-                    <ul className="space-y-3 text-gray-700">
-                      <li>
-                        <strong>400 Bad Request:</strong> অবৈধ বা অনুপস্থিত ক্যোয়ারী প্যারামিটার
-                      </li>
-                      <li>
-                        <strong>401 Unauthorized:</strong> অবৈধ বা অনুপস্থিত API কী। উন্নয়নের জন্য, API কী ছাড়া পরীক্ষা করতে আপনার সার্ভারের .env ফাইলে <code className="bg-gray-100 px-2 py-1 rounded text-sm">API_AUTH_REQUIRED=false</code> সেট করুন।
-                      </li>
-                      <li>
-                        <strong>429 Too Many Requests:</strong> হার সীমা অতিক্রম করেছে
-                      </li>
-                      <li>
-                        <strong>500 Internal Server Error:</strong> সার্ভার-সাইড ত্রুটি ঘটেছে
-                      </li>
-                    </ul>
+                  <div className="space-y-6">
+                    <div>
+                      <p className="text-gray-700 mb-4"><strong>সাধারণ ত্রুটি কোড:</strong></p>
+                      <ul className="space-y-3 text-gray-700 mb-6">
+                        <li>
+                          <strong>400 Bad Request:</strong> অবৈধ বা অনুপস্থিত ক্যোয়ারী প্যারামিটার, বা অনুরোধ বডিতে অবৈধ JSON
+                        </li>
+                        <li>
+                          <strong>401 Unauthorized:</strong> অবৈধ বা অনুপস্থিত API কী। উন্নয়নের জন্য, API কী ছাড়া পরীক্ষা করতে আপনার সার্ভারের .env ফাইলে <code className="bg-gray-100 px-2 py-1 rounded text-sm">API_AUTH_REQUIRED=false</code> সেট করুন।
+                        </li>
+                        <li>
+                          <strong>429 Too Many Requests:</strong> হার সীমা অতিক্রম করেছে
+                        </li>
+                        <li>
+                          <strong>500 Internal Server Error:</strong> সার্ভার-সাইড ত্রুটি ঘটেছে
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">ত্রুটি প্রতিক্রিয়া উদাহরণ</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-gray-700 mb-2"><strong>400 Bad Request:</strong></p>
+                          <CodeBlock
+                            id="error-400-bn"
+                            language="json"
+                            code={`{
+  "error": "Bad Request",
+  "message": "Query is required and must be a non-empty string"
+}`}
+                          />
+                        </div>
+                        <div>
+                          <p className="text-gray-700 mb-2"><strong>401 Unauthorized:</strong></p>
+                          <CodeBlock
+                            id="error-401-bn"
+                            language="json"
+                            code={`{
+  "error": "Unauthorized",
+  "message": "No API key provided. Please provide a valid API key...",
+  "developmentTip": "Set API_AUTH_REQUIRED=false in your .env file..."
+}`}
+                          />
+                        </div>
+                        <div>
+                          <p className="text-gray-700 mb-2"><strong>429 Too Many Requests:</strong></p>
+                          <CodeBlock
+                            id="error-429-bn"
+                            language="json"
+                            code={`{
+  "error": "Rate limit exceeded",
+  "message": "You have exceeded your rate limit. Please try again after 2024-01-01T13:00:00.000Z.",
+  "resetAt": "2024-01-01T13:00:00.000Z"
+}`}
+                          />
+                          <p className="text-gray-600 text-sm mt-2">
+                            প্রতিক্রিয়া হেডারেও অন্তর্ভুক্ত: <code className="bg-gray-100 px-2 py-1 rounded text-sm">X-RateLimit-Limit</code>, <code className="bg-gray-100 px-2 py-1 rounded text-sm">X-RateLimit-Remaining</code>, <code className="bg-gray-100 px-2 py-1 rounded text-sm">X-RateLimit-Reset</code>
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-700 mb-2"><strong>500 Internal Server Error:</strong></p>
+                          <CodeBlock
+                            id="error-500-bn"
+                            language="json"
+                            code={`{
+  "success": false,
+  "error": "Internal Server Error",
+  "message": "Failed to generate fact-checking report"
+}`}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </section>

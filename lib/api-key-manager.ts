@@ -108,7 +108,9 @@ export function getAllKeys(): APIKey[] {
  */
 export function getKeyByValue(keyValue: string): APIKey | null {
   const data = readKeys();
-  return data.keys.find(k => k.key === keyValue) || null;
+  // Trim the key value to handle any whitespace issues
+  const trimmedKey = keyValue.trim();
+  return data.keys.find(k => k.key === trimmedKey) || null;
 }
 
 /**
@@ -199,7 +201,9 @@ export function validateAPIKeyForUser(apiKey: string, userEmail?: string): {
   key?: APIKey;
   error?: string;
 } {
-  const key = getKeyByValue(apiKey);
+  // Trim the API key to handle any whitespace
+  const trimmedApiKey = apiKey.trim();
+  const key = getKeyByValue(trimmedApiKey);
   
   if (!key) {
     return {

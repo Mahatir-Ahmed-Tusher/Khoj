@@ -22,6 +22,15 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 
+// CORS headers helper function to ensure all responses have proper CORS headers
+function getCorsHeaders(): Record<string, string> {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
+  };
+}
+
 // Import helper functions from the internal factcheck route
 // These are the same functions used in /api/factcheck/route.ts
 
@@ -749,9 +758,7 @@ export async function POST(request: NextRequest) {
     return new NextResponse(null, {
       status: 200,
       headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
+        ...getCorsHeaders(),
         'Access-Control-Max-Age': '86400',
       },
     });
@@ -776,11 +783,14 @@ export async function POST(request: NextRequest) {
       
       if (apiKey) {
         const { validateAPIKeyForUser } = await import('@/lib/api-key-manager');
-        const validation = validateAPIKeyForUser(apiKey);
+        const trimmedApiKey = apiKey.trim();
+        const validation = validateAPIKeyForUser(trimmedApiKey);
         
         // Debug logging (only in development)
         if (process.env.NODE_ENV === 'development') {
           console.log('❌ API Key validation failed:', {
+            keyReceived: trimmedApiKey.substring(0, 4) + '...',
+            keyLength: trimmedApiKey.length,
             keyExists: !!validation.key,
             status: validation.key?.status,
             assigned: validation.assigned,
@@ -790,15 +800,15 @@ export async function POST(request: NextRequest) {
         
         // Provide specific error messages
         if (!validation.key) {
-          errorMessage = "API key not found. Please check your API key and try again.";
+          errorMessage = `API key not found. Please check your API key and try again. Make sure you copied the key correctly from https://khoj-bd.com/get-api-key`;
           helpMessage = "💡 For development/testing, you can disable authentication by setting API_AUTH_REQUIRED=false in your .env file.";
         } else if (validation.key.status === 'revoked') {
-          errorMessage = "This API key has been revoked. Please contact support or get a new API key.";
+          errorMessage = "This API key has been revoked. Please contact support or get a new API key from https://khoj-bd.com/get-api-key";
         } else if (validation.key.status === 'available') {
-          errorMessage = "This API key is not assigned to any user. Please log in with Google and visit /get-api-key to assign it to your account.";
+          errorMessage = "This API key is not assigned to any user. Please log in with Google and visit https://khoj-bd.com/get-api-key to assign it to your account.";
           helpMessage = "💡 For development/testing, you can disable authentication by setting API_AUTH_REQUIRED=false in your .env file.";
         } else if (!validation.assigned) {
-          errorMessage = "This API key is not assigned. Please log in with Google and visit /get-api-key to assign it to your account.";
+          errorMessage = "This API key is not assigned. Please log in with Google and visit https://khoj-bd.com/get-api-key to assign it to your account.";
           helpMessage = "💡 For development/testing, you can disable authentication by setting API_AUTH_REQUIRED=false in your .env file.";
         }
       } else {
@@ -820,11 +830,7 @@ export async function POST(request: NextRequest) {
         },
         { 
           status: 401,
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
-          },
+          headers: getCorsHeaders(),
         }
       );
     }
@@ -844,6 +850,7 @@ export async function POST(request: NextRequest) {
           {
             status: 429,
             headers: {
+              ...getCorsHeaders(),
               "X-RateLimit-Limit": keyConfig.rateLimit.requests.toString(),
               "X-RateLimit-Remaining": "0",
               "X-RateLimit-Reset": resetDate.toISOString(),
@@ -854,7 +861,22 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Parse request body
-    const body = await request.json();
+    let body: any;
+    try {
+      body = await request.json();
+    } catch (jsonError) {
+      return NextResponse.json(
+        {
+          error: "Bad Request",
+          message: "Invalid JSON in request body. Please ensure your request body is valid JSON.",
+        },
+        { 
+          status: 400,
+          headers: getCorsHeaders(),
+        }
+      );
+    }
+    
     const { query } = body;
 
     if (!query || typeof query !== "string" || query.trim().length === 0) {
@@ -863,7 +885,10 @@ export async function POST(request: NextRequest) {
           error: "Bad Request",
           message: "Query is required and must be a non-empty string",
         },
-        { status: 400 }
+        { 
+          status: 400,
+          headers: getCorsHeaders(),
+        }
       );
     }
 
@@ -1032,10 +1057,7 @@ ${processedSocialMediaSources.map((item: any, index: number) => `- [${index + 1}
     const resetDate = new Date(rateLimit.resetAt);
     const responseHeaders: Record<string, string> = {
       "Content-Type": "application/json",
-      // CORS headers for cross-origin requests
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization, X-API-Key",
+      ...getCorsHeaders(),
     };
     
     if (keyConfig) {
@@ -1112,11 +1134,7 @@ ${processedSocialMediaSources.map((item: any, index: number) => `- [${index + 1}
       },
       { 
         status: 500,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
-        },
+        headers: getCorsHeaders(),
       }
     );
   }
@@ -1199,11 +1217,7 @@ export async function GET() {
     documentation: "https://khoj-bd.com/api-docs",
     support: "For technical support, contact info@khoj-bd.com. To get an API key, log in with Google and visit /get-api-key",
   }, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
-    },
+    headers: getCorsHeaders(),
   });
 }
 
