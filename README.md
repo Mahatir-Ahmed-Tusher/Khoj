@@ -103,28 +103,68 @@
 
 ---
 
-## 📡 **এপিআই এন্ডপয়েন্টস**
+## 📡 **API Endpoints**
 
-### **মূল ফ্যাক্টচেকিং**
+### **Core Fact-Checking**
 
-- **POST** `/api/factcheck` - বাংলায় মিশ্র-সোর্স রিপোর্ট
-- **POST** `/api/factcheck-domain-first` - ডোমেইন-ফার্স্ট গ্যাদারার + অটো-ফলব্যাক
+- **POST** `/api/factcheck` - Internal fact-checking endpoint with mixed-source Bengali reports
+- **POST** `/api/factcheck-domain-first` - Domain-first search strategy with automatic fallback to general search
+- **POST** `/api/v1/factcheck` - Public API endpoint for third-party integration (requires API key authentication)
+- **GET** `/api/v1/factcheck` - API information and documentation
 
-### **মিডিয়া যাচাই**
+### **Media Verification**
 
-- **POST** `/api/image-check` - এআই ইমেজ অথেনটিসিটি চেক
-- **POST** `/api/source-search` - রিভার্স ইমেজ সার্চ (Google Lens)
-- **POST** `/api/text-check` - এআই-ডিটেকশন এবং প্লেজিয়ারিজম
+- **POST** `/api/image-check` - AI-powered image authenticity detection using Sightengine
+- **POST** `/api/source-search` - Reverse image search using Google Lens via SerpAPI
+- **POST** `/api/image-to-text` - Extract text from images using OCR
+- **POST** `/api/text-check` - AI content detection and plagiarism analysis using Winston AI
 
-### **বিশেষায়িত চ্যাট**
+### **Specialized AI Chat**
 
-- **POST** `/api/mukti-corner` - মুক্তিযুদ্ধ বিষয়ক এআই চ্যাট
-- **POST** `/api/mythbusting` - মিথ ডিবাঙ্কিং এআই চ্যাট
+- **POST** `/api/mukti-corner` - Liberation War (1971) historical fact-checking and Q&A chat
+- **GET** `/api/mukti-corner` - Get Mukti Corner categories and information
+- **POST** `/api/mukti-corner-chat` - Alternative Mukti Corner chat endpoint
+- **POST** `/api/mythbusting` - Myth debunking and rumor analysis AI chat
+- **GET** `/api/mythbusting` - Get mythbusting API information
+- **POST** `/api/mythbusting-test` - Testing endpoint for mythbusting features
 
-### **ইউটিলিটি**
+### **General AI Chat**
 
-- **POST** `/api/search` - স্মার্ট সার্চ বাংলাদেশী এবং প্রায়োরিটি সাইটে
-- **GET** `/api/tavily-status` - সব Tavily API কী-এর স্ট্যাটাস মনিটর
+- **POST** `/api/khoj-chat` - General purpose AI chat interface
+- **POST** `/api/khoj-chat-stream` - Streaming version of Khoj chat
+- **POST** `/api/gemini-chat` - Direct Gemini AI chat integration
+
+### **News & Content Verification**
+
+- **POST** `/api/news-verification` - News article verification endpoint
+- **POST** `/api/news-verification-v2` - Enhanced news verification with improved features
+- **POST** `/api/news-collection` - Collect and process news articles
+
+### **Search & Classification**
+
+- **POST** `/api/search` - Smart search across Bangladeshi and priority sites
+- **POST** `/api/classify-query` - Intelligent query classification (mythbusting/factcheck/url)
+- **POST** `/api/classify-geography` - Classify queries as Bangladesh or international
+- **POST** `/api/parse-query` - Parse and extract information from queries
+
+### **API Management**
+
+- **POST** `/api/api-keys/assign` - Assign API key to authenticated user (requires Google OAuth)
+- **GET** `/api/api-keys/assign` - Get user's assigned API key (requires authentication)
+- **GET** `/api/api-docs-content` - Get API documentation markdown content
+
+### **Status & Monitoring**
+
+- **GET** `/api/tavily-status` - Monitor status and usage of all Tavily API keys
+- **GET** `/api/rapidapi-status` - Monitor status and usage of RapidAPI keys
+- **POST** `/api/rapidapi-status` - Update RapidAPI key status
+
+### **Utility Endpoints**
+
+- **GET** `/api/categories` - Get categories for Mukti Corner
+- **POST** `/api/gen-audio` - Generate audio from text
+- **POST** `/api/text-to-speech` - Text-to-speech conversion
+- **GET** `/api/auth/[...nextauth]` - NextAuth.js authentication endpoints
 
 ---
 
@@ -190,47 +230,17 @@ yarn install
 
 ### **Step 3: Environment Configuration**
 
+Create your environment file by copying the example:
+
 ```bash
 cp env.example .env.local
 ```
 
-### **Step 4: Configure API Keys**
+**Important:** The `.env.local` file is not tracked by Git and contains your sensitive API keys. Never commit this file to version control.
 
-Edit `.env.local` and add your API keys:
+### **Step 4: Configure Environment Variables**
 
-```env
-# Tavily API Keys (16 keys for maximum capacity)
-TAVILY_API_KEY=your_primary_tavily_api_key_here
-TAVILY_API_KEY_2=your_second_tavily_api_key_here
-TAVILY_API_KEY_3=your_third_tavily_api_key_here
-TAVILY_API_KEY_4=your_fourth_tavily_api_key_here
-TAVILY_API_KEY_5=your_fifth_tavily_api_key_here
-TAVILY_API_KEY_6=your_sixth_tavily_api_key_here
-TAVILY_API_KEY_7=your_seventh_tavily_api_key_here
-TAVILY_API_KEY_8=your_eighth_tavily_api_key_here
-TAVILY_API_KEY_9=your_ninth_tavily_api_key_here
-TAVILY_API_KEY_10=your_tenth_tavily_api_key_here
-TAVILY_API_KEY_11=your_eleventh_tavily_api_key_here
-TAVILY_API_KEY_12=your_twelfth_tavily_api_key_here
-TAVILY_API_KEY_13=your_thirteenth_tavily_api_key_here
-TAVILY_API_KEY_14=your_fourteenth_tavily_api_key_here
-TAVILY_API_KEY_15=your_fifteenth_tavily_api_key_here
-TAVILY_API_KEY_16=your_sixteenth_tavily_api_key_here
-
-# AI Model APIs
-OPENROUTER_API_KEY=your_openrouter_api_key_here
-GEMINI_API_KEY=your_gemini_api_key_here
-GROQ_API_KEY=your_groq_api_key_here
-
-# Media Analysis APIs
-SIGHTENGINE_API_USER=your_sightengine_api_user_here
-SIGHTENGINE_API_SECRET=your_sightengine_api_secret_here
-SERPAPI_KEY=your_serpapi_key_here
-WINSTON_TOKEN=your_winston_token_here
-
-# Application Configuration
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+Edit `.env.local` and add your API keys. See the [Environment Variables](#-environment-variables) section below for detailed information about each variable.
 
 ### **Step 5: Run Development Server**
 
@@ -256,33 +266,141 @@ yarn start
 
 ---
 
-## 🔑 **এনভায়রনমেন্ট ভেরিয়েবল**
+## 🔑 **Environment Variables**
 
-`.env.example` কপি করে `.env.local` তৈরি করুন এবং আপনার কীগুলো পূরণ করুন।
+The application requires several environment variables to function properly. Copy `env.example` to `.env.local` and fill in your API keys.
+
+### **Required Environment Variables**
+
+#### **Search API Keys (Tavily)**
+
+Tavily API keys are used for web search and content crawling. The system automatically falls back to the next available key when a key's monthly limit (100 searches) is reached. With 19 API keys, you can perform up to 1,900 searches per month.
 
 ```env
-# Tavily API Keys (মাসিক লিমিট পূরণ হলে অটোমেটিক ফলব্যাকের জন্য)
+# Primary Tavily API Key (Required)
 TAVILY_API_KEY=your_primary_tavily_api_key_here
+
+# Additional Tavily API Keys (Optional, for fallback)
 TAVILY_API_KEY_2=your_second_tavily_api_key_here
-# ... (মোট ১৬টি API কী)
-TAVILY_API_KEY_16=your_sixteenth_tavily_api_key_here
-
-# AI Models
-OPENROUTER_API_KEY=your_openrouter_api_key_here
-GEMINI_API_KEY=your_gemini_api_key_here
-GROQ_API_KEY=your_groq_api_key_here
-
-# Media Analysis
-SIGHTENGINE_API_USER=your_sightengine_api_user_here
-SIGHTENGINE_API_SECRET=your_sightengine_api_secret_here
-SERPAPI_KEY=your_serpapi_key_here
-WINSTON_TOKEN=your_winston_token_here
-
-# App Configuration
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+TAVILY_API_KEY_3=your_third_tavily_api_key_here
+# ... up to TAVILY_API_KEY_19
 ```
 
-**নোট:** সিস্টেমটি অটোমেটিকভাবে একাধিক Tavily API কী ফলব্যাক হিসেবে ব্যবহার করে। একটি কী-এর মাসিক লিমিট (১০০ সার্চ) পূরণ হলে, এটি স্বয়ংক্রিয়ভাবে পরবর্তী উপলব্ধ কী-এ স্যুইচ করে। ১৬টি API কী দিয়ে আপনি মাসে ১,৬০০ সার্চ পেতে পারেন।
+**Note:** You can start with just one Tavily API key, but adding more keys increases your monthly search capacity and provides automatic fallback when limits are reached.
+
+#### **AI Model API Keys**
+
+```env
+# OpenRouter API Key (Required for DeepSeek AI - primary model)
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+
+# Google Gemini API Key (Required for fact-checking reports - secondary model)
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Secondary Gemini API Key (Optional, for Mukti Corner and Mythbusting)
+GEMINI_API_KEY_2=your_second_gemini_api_key_here
+
+# GROQ API Key (Required for GPT-OSS-20B - tertiary fallback)
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+#### **Media Analysis API Keys**
+
+```env
+# Sightengine API (Required for AI image detection)
+SIGHTENGINE_API_USER=your_sightengine_api_user_here
+SIGHTENGINE_API_SECRET=your_sightengine_api_secret_here
+
+# SerpAPI Key (Required for Google Lens reverse image search)
+SERPAPI_KEY=your_serpapi_key_here
+
+# Winston AI Token (Optional, for AI detection and plagiarism analysis)
+WINSTON_TOKEN=your_winston_token_here
+
+# Imgur API Key (Optional, needed for OpenRouter image analysis)
+IMGUR_CLIENT_ID=your_imgur_client_id_here
+```
+
+#### **RapidAPI Keys (Optional, for additional web search)**
+
+```env
+# RapidAPI Keys for web search functionality (multiple keys for fallback)
+APP_KEY=your_rapidapi_key_here
+APP_KEY_2=your_second_rapidapi_key_here
+# ... up to APP_KEY_15
+```
+
+**Note:** With 15 RapidAPI keys, you can perform up to 1,500 searches per month.
+
+#### **Authentication Configuration**
+
+```env
+# NextAuth.js Configuration (Required for Google OAuth)
+NEXTAUTH_SECRET=your_nextauth_secret_here
+NEXTAUTH_URL=http://localhost:3000
+
+# Google OAuth Credentials (Required for user authentication)
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+```
+
+#### **Application Configuration**
+
+```env
+# Application URL (Required)
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Convex Backend URL (Optional, for database features)
+NEXT_PUBLIC_CONVEX_URL=your_convex_deployment_url_here
+```
+
+#### **Public API Configuration**
+
+```env
+# API Authentication Setting
+# Set to "false" to disable API key requirement (for testing only)
+# Default: "true" (API key required)
+# WARNING: Only set to false in development/testing environments!
+API_AUTH_REQUIRED=true
+```
+
+### **Getting API Keys**
+
+1. **Tavily API**: Sign up at [tavily.com](https://tavily.com) (Free tier: 1,000 searches/month)
+2. **OpenRouter**: Get your key at [openrouter.ai](https://openrouter.ai)
+3. **Google Gemini**: Get your key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+4. **GROQ**: Sign up at [groq.com](https://groq.com)
+5. **Sightengine**: Register at [sightengine.com](https://sightengine.com)
+6. **SerpAPI**: Get your key at [serpapi.com](https://serpapi.com)
+7. **Winston AI**: Sign up at [winston.ai](https://winston.ai)
+8. **Google OAuth**: Create credentials at [Google Cloud Console](https://console.cloud.google.com)
+
+### **Environment File Best Practices**
+
+- ✅ **Never commit `.env.local`** to version control (it's already in `.gitignore`)
+- ✅ **Use `.env.example`** as a template for other developers
+- ✅ **Keep API keys secure** and rotate them regularly
+- ✅ **Use different keys** for development and production environments
+- ✅ **Start with minimum required keys** and add more as needed
+
+### **Minimum Required Variables**
+
+To get started quickly, you only need these essential variables:
+
+```env
+TAVILY_API_KEY=your_key_here
+OPENROUTER_API_KEY=your_key_here
+GEMINI_API_KEY=your_key_here
+GROQ_API_KEY=your_key_here
+SIGHTENGINE_API_USER=your_user_here
+SIGHTENGINE_API_SECRET=your_secret_here
+SERPAPI_KEY=your_key_here
+NEXTAUTH_SECRET=your_secret_here
+NEXTAUTH_URL=http://localhost:3000
+GOOGLE_CLIENT_ID=your_client_id_here
+GOOGLE_CLIENT_SECRET=your_client_secret_here
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
 
 ---
 

@@ -62,6 +62,8 @@ temp/
 screenshots/
 developer_guide/
 
+# API Keys (never commit this file!)
+lib/_keys.json
 
 .vercel
 

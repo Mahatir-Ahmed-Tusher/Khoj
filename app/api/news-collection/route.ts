@@ -2,34 +2,57 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const NEWS_API_KEY = process.env.NEWS_API_KEY;
-console.log(NEWS_API_KEY);
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
+    const articleId = searchParams.get("id");
     const nextPage = searchParams.get("nextPage") || "";
     const category = searchParams.get("category") || "";
     const fromDate = searchParams.get("from_date") || "";
     const toDate = searchParams.get("to_date") || "";
+    const query = searchParams.get("q") || "";
+    const pageSize = searchParams.get("size") || "12";
 
-    // Build API URL - use country=bd for Bangladesh news
-    let apiUrl = `https://newsdata.io/api/1/news?apikey=${NEWS_API_KEY}&country=bd&size=10`;
-
-    // Use nextPage token for pagination instead of page number
-    if (nextPage) {
-      apiUrl += `&page=${nextPage}`;
+    if (!NEWS_API_KEY) {
+      console.error("NEWS_API_KEY is not configured");
+      return NextResponse.json(
+        {
+          error:
+            "News service is not configured. Please set NEWS_API_KEY in the environment.",
+        },
+        { status: 500 }
+      );
     }
 
-    if (category) {
-      apiUrl += `&category=${category}`;
-    }
+    let apiUrl: string;
 
-    if (fromDate) {
-      apiUrl += `&from_date=${fromDate}`;
-    }
+    if (articleId) {
+      apiUrl = `https://newsdata.io/api/1/news?apikey=${NEWS_API_KEY}&id=${articleId}`;
+    } else {
+      // Build API URL - use country=bd for Bangladesh news
+      apiUrl = `https://newsdata.io/api/1/news?apikey=${NEWS_API_KEY}&country=bd&size=${pageSize}`;
 
-    if (toDate) {
-      apiUrl += `&to_date=${toDate}`;
+      // Use nextPage token for pagination instead of page number
+      if (nextPage) {
+        apiUrl += `&page=${nextPage}`;
+      }
+
+      if (category) {
+        apiUrl += `&category=${category}`;
+      }
+
+      if (fromDate) {
+        apiUrl += `&from_date=${fromDate}`;
+      }
+
+      if (toDate) {
+        apiUrl += `&to_date=${toDate}`;
+      }
+
+      if (query) {
+        apiUrl += `&q=${encodeURIComponent(query)}`;
+      }
     }
 
     const response = await fetch(apiUrl);

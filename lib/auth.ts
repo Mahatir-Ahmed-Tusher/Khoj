@@ -22,8 +22,8 @@ declare module 'next-auth/jwt' {
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     })
   ],
   callbacks: {
@@ -57,4 +57,9 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
+  // Ensure the base URL is set correctly
+  ...(process.env.NEXTAUTH_URL && { 
+    url: process.env.NEXTAUTH_URL 
+  }),
 }

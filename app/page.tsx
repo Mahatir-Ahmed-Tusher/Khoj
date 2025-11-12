@@ -13,10 +13,7 @@ import {
   isNewSession,
   hasSeenTour,
   markTourAsSeen,
-  shouldShowIntroImage,
-  markIntroImageShown,
 } from "@/lib/visit-tracker";
-// import IntroImagePopup from "@/components/IntroImagePopup";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import {
   detectInputType,
@@ -25,7 +22,7 @@ import {
   normalizeVerdict,
 } from "@/lib/utils";
 import ImageOptionsModal from "@/components/ImageOptionsModal";
-import FloatingBall from "@/components/FloatingBall";
+// import FloatingBall from "@/components/FloatingBall"; // Disabled - Recent News FAB
 import Toaster from "@/components/Toaster";
 
 // Blog data
@@ -263,7 +260,6 @@ export default function HomePage() {
   const [filter, setFilter] = useState("all");
   const [filteredArticles, setFilteredArticles] = useState(allFactChecks);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [showIntroImage, setShowIntroImage] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isNewsCheckActive, setIsNewsCheckActive] = useState(false);
   const [isMythbustingActive, setIsMythbustingActive] = useState(false);
@@ -280,14 +276,14 @@ export default function HomePage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  // Hero GIF popup state
-  const [showHeroGif, setShowHeroGif] = useState(false);
-  const [gifCountdown, setGifCountdown] = useState(5);
-  const [gifActive, setGifActive] = useState(false);
-  const countdownIntervalRef = useRef<number | undefined>(undefined);
-  const hideTimeoutRef = useRef<number | undefined>(undefined);
-  const hasStartedOnceRef = useRef(false);
-  const popupStartMsRef = useRef<number | undefined>(undefined);
+  // Hero GIF popup state - DISABLED
+  // const [showHeroGif, setShowHeroGif] = useState(false);
+  // const [gifCountdown, setGifCountdown] = useState(5);
+  // const [gifActive, setGifActive] = useState(false);
+  // const countdownIntervalRef = useRef<number | undefined>(undefined);
+  // const hideTimeoutRef = useRef<number | undefined>(undefined);
+  // const hasStartedOnceRef = useRef(false);
+  // const popupStartMsRef = useRef<number | undefined>(undefined);
 
   // Track visit and check if first visit
   useEffect(() => {
@@ -306,15 +302,6 @@ export default function HomePage() {
 
     checkMobile();
     window.addEventListener("resize", checkMobile);
-
-    // Check if we should show intro image (first visit or every 5 minutes)
-    if (shouldShowIntroImage()) {
-      // Show intro image after a short delay
-      setTimeout(() => {
-        setShowIntroImage(true);
-        markIntroImageShown();
-      }, 1000);
-    }
 
     return () => window.removeEventListener("resize", checkMobile);
   }, [isMobile]);
@@ -376,58 +363,58 @@ export default function HomePage() {
     };
   }, [isMobile, heroImageIndex]);
 
-  // Timed Hero GIF popup (desktop only): first visit, then every 2.5 minutes; show exactly 5s
-  useEffect(() => {
-    const startPopupCycle = () => {
-      if (window.innerWidth < 768) return; // do not show on mobile
-      if (gifActive) return; // avoid overlapping
-      // Clear any previous timers just in case
-      if (countdownIntervalRef.current)
-        window.clearInterval(countdownIntervalRef.current);
-      if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
-      setGifActive(true);
-      setGifCountdown(5);
-      setShowHeroGif(true);
-      popupStartMsRef.current = Date.now();
+  // Timed Hero GIF popup - DISABLED
+  // useEffect(() => {
+  //   const startPopupCycle = () => {
+  //     if (window.innerWidth < 768) return; // do not show on mobile
+  //     if (gifActive) return; // avoid overlapping
+  //     // Clear any previous timers just in case
+  //     if (countdownIntervalRef.current)
+  //       window.clearInterval(countdownIntervalRef.current);
+  //     if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
+  //     setGifActive(true);
+  //     setGifCountdown(5);
+  //     setShowHeroGif(true);
+  //     popupStartMsRef.current = Date.now();
 
-      // (No on-screen timer) Keep internal countdown if needed in future
-      if (countdownIntervalRef.current)
-        window.clearInterval(countdownIntervalRef.current);
+  //     // (No on-screen timer) Keep internal countdown if needed in future
+  //     if (countdownIntervalRef.current)
+  //       window.clearInterval(countdownIntervalRef.current);
 
-      // Hide after exactly 5s
-      hideTimeoutRef.current = window.setTimeout(() => {
-        setShowHeroGif(false);
-        setGifActive(false);
-        setGifCountdown(5);
-        if (countdownIntervalRef.current)
-          window.clearInterval(countdownIntervalRef.current);
-        popupStartMsRef.current = undefined;
-      }, 5000);
-      // Extra safety: force hide a bit later in case browser throttles timers
-      window.setTimeout(() => {
-        setShowHeroGif(false);
-        setGifActive(false);
-      }, 6000);
-    };
+  //     // Hide after exactly 5s
+  //     hideTimeoutRef.current = window.setTimeout(() => {
+  //       setShowHeroGif(false);
+  //       setGifActive(false);
+  //       setGifCountdown(5);
+  //       if (countdownIntervalRef.current)
+  //         window.clearInterval(countdownIntervalRef.current);
+  //       popupStartMsRef.current = undefined;
+  //     }, 5000);
+  //     // Extra safety: force hide a bit later in case browser throttles timers
+  //     window.setTimeout(() => {
+  //       setShowHeroGif(false);
+  //       setGifActive(false);
+  //     }, 6000);
+  //   };
 
-    // Show once on mount for desktop only
-    if (!hasStartedOnceRef.current && window.innerWidth >= 768) {
-      hasStartedOnceRef.current = true;
-      startPopupCycle();
-    }
+  //   // Show once on mount for desktop only
+  //   if (!hasStartedOnceRef.current && window.innerWidth >= 768) {
+  //     hasStartedOnceRef.current = true;
+  //     startPopupCycle();
+  //   }
 
-    // Reappear every 2.5 minutes (desktop only)
-    const reappearInterval = window.setInterval(() => {
-      if (window.innerWidth >= 768) startPopupCycle();
-    }, 150000);
+  //   // Reappear every 2.5 minutes (desktop only)
+  //   const reappearInterval = window.setInterval(() => {
+  //     if (window.innerWidth >= 768) startPopupCycle();
+  //   }, 150000);
 
-    return () => {
-      if (reappearInterval) window.clearInterval(reappearInterval);
-      if (countdownIntervalRef.current)
-        window.clearInterval(countdownIntervalRef.current);
-      if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
-    };
-  }, [gifActive]);
+  //   return () => {
+  //     if (reappearInterval) window.clearInterval(reappearInterval);
+  //     if (countdownIntervalRef.current)
+  //       window.clearInterval(countdownIntervalRef.current);
+  //     if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
+  //   };
+  // }, [gifActive]);
 
   // Track scroll position
   useEffect(() => {
@@ -441,20 +428,6 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Check for intro image every 5 minutes
-  useEffect(() => {
-    const checkInterval = setInterval(
-      () => {
-        if (shouldShowIntroImage() && !showIntroImage) {
-          setShowIntroImage(true);
-          markIntroImageShown();
-        }
-      },
-      5 * 60 * 1000
-    ); // Check every 5 minutes
-
-    return () => clearInterval(checkInterval);
-  }, [showIntroImage]);
 
   // Auto-slide carousel - optimized with useCallback
   const nextSlide = useCallback(() => {
@@ -845,14 +818,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Intro Image Popup - Shows on first visit and every 5 minutes */}
-      {/* <IntroImagePopup
-        isOpen={showIntroImage}
-        onClose={() => {
-          setShowIntroImage(false);
-        }}
-      /> */}
-
       {/* Image upload progress overlay */}
       {isUploadingImage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -982,11 +947,11 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        {/* Hero GIF Popup - Bottom Left, no container/border */}
+        {/* Hero GIF Popup - DISABLED */}
+        {/* 
         {showHeroGif && !isMobile && (
           <div className="pointer-events-auto absolute left-3 bottom-24 md:left-6 md:bottom-6 z-10">
             <div className="relative">
-              {/* Close button with countdown */}
               <button
                 aria-label="Close"
                 onClick={() => {
@@ -1002,7 +967,6 @@ export default function HomePage() {
               >
                 ×
               </button>
-              {/* GIF image - larger on desktop */}
               <img
                 src="/Loading%20Screens/pop-up.gif"
                 alt="Promo"
@@ -1012,6 +976,7 @@ export default function HomePage() {
             </div>
           </div>
         )}
+        */}
         {/* Social Icons - Bottom Right of Hero (not fixed) */}
         <div className="pointer-events-auto absolute right-3 bottom-3 md:right-6 md:bottom-6 flex items-center gap-2 md:gap-3 z-10">
           <a
@@ -1586,7 +1551,7 @@ export default function HomePage() {
             <ChevronUp className="h-6 w-6" />
           )}
         </button>
-        <FloatingBall />
+        {/* <FloatingBall /> Disabled - Recent News FAB */}
       </div>
 
       {/* Image options modal - shown after successful upload */}

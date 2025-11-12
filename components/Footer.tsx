@@ -121,6 +121,11 @@ export default function Footer() {
                   লেখা পাঠানোর নিয়ম
                 </a>
               </li>
+              <li>
+                <a href="/api-docs" className="text-gray-300 hover:text-white transition-colors font-tiro-bangla">
+                  API Documentation
+                </a>
+              </li>
             </ul>
           </div>
 

@@ -143,27 +143,10 @@ class VisitTracker {
   }
 
   // Check if we should show intro image (every 5 minutes)
+  // DISABLED: Intro popup is completely disabled
   shouldShowIntroImage(): boolean {
-    if (typeof window === 'undefined') return false;
-    
-    const visitInfo = this.getVisitInfo();
-    
-    // Always show on first visit
-    if (visitInfo.isFirstVisit) {
-      return true;
-    }
-    
-    // Check if 5 minutes have passed since last shown
-    if (visitInfo.lastIntroImageShown) {
-      const lastShown = new Date(visitInfo.lastIntroImageShown).getTime();
-      const now = new Date().getTime();
-      const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
-      
-      return (now - lastShown) >= fiveMinutes;
-    }
-    
-    // If never shown before (but not first visit), show it
-    return true;
+    // Always return false - intro popup is disabled
+    return false;
   }
 
   // Mark intro image as shown
